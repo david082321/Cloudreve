@@ -9,15 +9,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// ShareBatchService 分享批量操作服务
+// ShareBatchService 分享批次操作服務
 type ShareBatchService struct {
 	ID []uint `json:"id" binding:"min=1"`
 }
 
-// Delete 删除文件
+// Delete 刪除文件
 func (service *ShareBatchService) Delete(c *gin.Context) serializer.Response {
 	if err := model.DB.Where("id in (?)", service.ID).Delete(&model.Share{}).Error; err != nil {
-		return serializer.DBErr("无法删除分享", err)
+		return serializer.DBErr("無法刪除分享", err)
 	}
 	return serializer.Response{}
 }
@@ -45,13 +45,13 @@ func (service *AdminListService) Shares() serializer.Response {
 		tx = tx.Where(search)
 	}
 
-	// 计算总数用于分页
+	// 計算總數用於分頁
 	tx.Count(&total)
 
-	// 查询记录
+	// 查詢記錄
 	tx.Limit(service.PageSize).Offset((service.Page - 1) * service.PageSize).Find(&res)
 
-	// 查询对应用户，同时计算HashID
+	// 查詢對應使用者，同時計算HashID
 	users := make(map[uint]model.User)
 	hashIDs := make(map[uint]string, len(res))
 	for _, file := range res {

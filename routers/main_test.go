@@ -14,9 +14,9 @@ var mock sqlmock.Sqlmock
 var memDB *gorm.DB
 var mockDB *gorm.DB
 
-// TestMain 初始化数据库Mock
+// TestMain 初始化資料庫Mock
 func TestMain(m *testing.M) {
-	// 设置gin为测试模式
+	// 設定gin為測試模式
 	gin.SetMode(gin.TestMode)
 
 	// 初始化sqlmock
@@ -27,7 +27,7 @@ func TestMain(m *testing.M) {
 		panic("An error was not expected when opening a stub database connection")
 	}
 
-	// 初始话内存数据库
+	// 初始話記憶體資料庫
 	model.Init()
 	memDB = model.DB
 

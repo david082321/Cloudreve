@@ -16,9 +16,9 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-// Policy 存储策略
+// Policy 儲存策略
 type Policy struct {
-	// 表字段
+	// 表欄位
 	gorm.Model
 	Name               string
 	Type               string
@@ -35,15 +35,15 @@ type Policy struct {
 	IsOriginLinkEnable bool
 	Options            string `gorm:"type:text"`
 
-	// 数据库忽略字段
+	// 資料庫忽略欄位
 	OptionsSerialized PolicyOption `gorm:"-"`
 }
 
-// PolicyOption 非公有的存储策略属性
+// PolicyOption 非公有的儲存策略屬性
 type PolicyOption struct {
-	// Upyun访问Token
+	// Upyun訪問Token
 	Token string `json:"token"`
-	// 允许的文件扩展名
+	// 允許的文件副檔名
 	FileType []string `json:"file_type"`
 	// MimeType
 	MimeType string `json:"mimetype"`
@@ -51,11 +51,11 @@ type PolicyOption struct {
 	OdRedirect string `json:"od_redirect,omitempty"`
 	// OdProxy Onedrive 反代地址
 	OdProxy string `json:"od_proxy,omitempty"`
-	// OdDriver OneDrive 驱动器定位符
+	// OdDriver OneDrive 驅動器定位符
 	OdDriver string `json:"od_driver,omitempty"`
-	// Region 区域代码
+	// Region 區域代碼
 	Region string `json:"region,omitempty"`
-	// ServerSideEndpoint 服务端请求使用的 Endpoint，为空时使用 Policy.Server 字段
+	// ServerSideEndpoint 服務端請求使用的 Endpoint，為空時使用 Policy.Server 欄位
 	ServerSideEndpoint string `json:"server_side_endpoint,omitempty"`
 }
 
@@ -71,13 +71,13 @@ var thumbSuffix = map[string][]string{
 }
 
 func init() {
-	// 注册缓存用到的复杂结构
+	// 註冊快取用到的複雜結構
 	gob.Register(Policy{})
 }
 
-// GetPolicyByID 用ID获取存储策略
+// GetPolicyByID 用ID獲取儲存策略
 func GetPolicyByID(ID interface{}) (Policy, error) {
-	// 尝试读取缓存
+	// 嘗試讀取快取
 	cacheKey := "policy_" + strconv.Itoa(int(ID.(uint)))
 	if policy, ok := cache.Get(cacheKey); ok {
 		return policy.(Policy), nil
@@ -86,7 +86,7 @@ func GetPolicyByID(ID interface{}) (Policy, error) {
 	var policy Policy
 	result := DB.First(&policy, ID)
 
-	// 写入缓存
+	// 寫入快取
 	if result.Error == nil {
 		_ = cache.Set(cacheKey, policy, -1)
 	}
@@ -94,9 +94,9 @@ func GetPolicyByID(ID interface{}) (Policy, error) {
 	return policy, result.Error
 }
 
-// AfterFind 找到存储策略后的钩子
+// AfterFind 找到儲存策略後的鉤子
 func (policy *Policy) AfterFind() (err error) {
-	// 解析存储策略设置到OptionsSerialized
+	// 解析儲存策略設定到OptionsSerialized
 	if policy.Options != "" {
 		err = json.Unmarshal([]byte(policy.Options), &policy.OptionsSerialized)
 	}
@@ -107,20 +107,20 @@ func (policy *Policy) AfterFind() (err error) {
 	return err
 }
 
-// BeforeSave Save策略前的钩子
+// BeforeSave Save策略前的鉤子
 func (policy *Policy) BeforeSave() (err error) {
 	err = policy.SerializeOptions()
 	return err
 }
 
-//SerializeOptions 将序列后的Option写入到数据库字段
+//SerializeOptions 將序列後的Option寫入到資料庫欄位
 func (policy *Policy) SerializeOptions() (err error) {
 	optionsValue, err := json.Marshal(&policy.OptionsSerialized)
 	policy.Options = string(optionsValue)
 	return err
 }
 
-// GeneratePath 生成存储文件的路径
+// GeneratePath 生成儲存文件的路徑
 func (policy *Policy) GeneratePath(uid uint, origin string) string {
 	dirRule := policy.DirNameRule
 	replaceTable := map[string]string{
@@ -143,9 +143,9 @@ func (policy *Policy) GeneratePath(uid uint, origin string) string {
 	return path.Clean(dirRule)
 }
 
-// GenerateFileName 生成存储文件名
+// GenerateFileName 生成儲存檔案名
 func (policy *Policy) GenerateFileName(uid uint, origin string) string {
-	// 未开启自动重命名时，直接返回原始文件名
+	// 未開啟自動重新命名時，直接返回原始檔案名
 	if !policy.AutoRename {
 		return policy.getOriginNameRule(origin)
 	}
@@ -175,32 +175,32 @@ func (policy *Policy) GenerateFileName(uid uint, origin string) string {
 }
 
 func (policy Policy) getOriginNameRule(origin string) string {
-	// 部分存储策略可以使用{origin}代表原始文件名
+	// 部分儲存策略可以使用{origin}代表原始檔案名
 	if origin == "" {
-		// 如果上游未传回原始文件名，则使用占位符，让云存储端替换
+		// 如果上游未傳回原始檔案名，則使用占位符，讓雲端儲存端取代
 		switch policy.Type {
 		case "qiniu":
-			// 七牛会将$(fname)自动替换为原始文件名
+			// 七牛會將$(fname)自動取代為原始檔案名
 			return "$(fname)"
 		case "local", "remote":
 			return origin
 		case "oss", "cos":
-			// OSS会将${filename}自动替换为原始文件名
+			// OSS會將${filename}自動取代為原始檔案名
 			return "${filename}"
 		case "upyun":
-			// Upyun会将{filename}{.suffix}自动替换为原始文件名
+			// Upyun會將{filename}{.suffix}自動取代為原始檔案名
 			return "{filename}{.suffix}"
 		}
 	}
 	return origin
 }
 
-// IsDirectlyPreview 返回此策略下文件是否可以直接预览（不需要重定向）
+// IsDirectlyPreview 返回此策略下文件是否可以直接預覽（不需要重定向）
 func (policy *Policy) IsDirectlyPreview() bool {
 	return policy.Type == "local"
 }
 
-// IsThumbExist 给定文件名，返回此存储策略下是否可能存在缩略图
+// IsThumbExist 給定檔案名，返回此儲存策略下是否可能存在縮圖
 func (policy *Policy) IsThumbExist(name string) bool {
 	if list, ok := thumbSuffix[policy.Type]; ok {
 		if len(list) == 1 && list[0] == "*" {
@@ -211,7 +211,7 @@ func (policy *Policy) IsThumbExist(name string) bool {
 	return false
 }
 
-// IsTransitUpload 返回此策略上传给定size文件时是否需要服务端中转
+// IsTransitUpload 返回此策略上傳給定size文件時是否需要服務端中轉
 func (policy *Policy) IsTransitUpload(size uint64) bool {
 	if policy.Type == "local" {
 		return true
@@ -222,22 +222,22 @@ func (policy *Policy) IsTransitUpload(size uint64) bool {
 	return false
 }
 
-// IsPathGenerateNeeded 返回此策略是否需要在生成上传凭证时生成存储路径
+// IsPathGenerateNeeded 返回此策略是否需要在生成上傳憑證時生成儲存路徑
 func (policy *Policy) IsPathGenerateNeeded() bool {
 	return policy.Type != "remote"
 }
 
-// IsThumbGenerateNeeded 返回此策略是否需要在上传后生成缩略图
+// IsThumbGenerateNeeded 返回此策略是否需要在上傳後生成縮圖
 func (policy *Policy) IsThumbGenerateNeeded() bool {
 	return policy.Type == "local"
 }
 
-// CanStructureBeListed 返回存储策略是否能被前台列物理目录
+// CanStructureBeListed 返回儲存策略是否能被前台列物理目錄
 func (policy *Policy) CanStructureBeListed() bool {
 	return policy.Type != "local" && policy.Type != "remote"
 }
 
-// GetUploadURL 获取文件上传服务API地址
+// GetUploadURL 獲取文件上傳服務API地址
 func (policy *Policy) GetUploadURL() string {
 	server, err := url.Parse(policy.Server)
 	if err != nil {
@@ -270,14 +270,14 @@ func (policy *Policy) GetUploadURL() string {
 	return server.ResolveReference(controller).String()
 }
 
-// SaveAndClearCache 更新并清理缓存
+// SaveAndClearCache 更新並清理快取
 func (policy *Policy) SaveAndClearCache() error {
 	err := DB.Save(policy).Error
 	policy.ClearCache()
 	return err
 }
 
-// ClearCache 清空policy缓存
+// ClearCache 清空policy快取
 func (policy *Policy) ClearCache() {
 	cache.Deletes([]string{strconv.FormatUint(uint64(policy.ID), 10)}, "policy_")
 }

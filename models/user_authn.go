@@ -12,27 +12,27 @@ import (
 )
 
 /*
-	`webauthn.User` 接口的实现
+	`webauthn.User` 介面的實現
 */
 
-// WebAuthnID 返回用户ID
+// WebAuthnID 返回使用者ID
 func (user User) WebAuthnID() []byte {
 	bs := make([]byte, 8)
 	binary.LittleEndian.PutUint64(bs, uint64(user.ID))
 	return bs
 }
 
-// WebAuthnName 返回用户名
+// WebAuthnName 返回使用者名稱
 func (user User) WebAuthnName() string {
 	return user.Email
 }
 
-// WebAuthnDisplayName 获得用于展示的用户名
+// WebAuthnDisplayName 獲得用於展示的使用者名稱
 func (user User) WebAuthnDisplayName() string {
 	return user.Nick
 }
 
-// WebAuthnIcon 获得用户头像
+// WebAuthnIcon 獲得使用者大頭貼
 func (user User) WebAuthnIcon() string {
 	avatar, _ := url.Parse("/api/v3/user/avatar/" + hashid.HashID(user.ID, hashid.UserID) + "/l")
 	base := GetSiteURL()
@@ -40,7 +40,7 @@ func (user User) WebAuthnIcon() string {
 	return base.ResolveReference(avatar).String()
 }
 
-// WebAuthnCredentials 获得已注册的验证器凭证
+// WebAuthnCredentials 獲得已註冊的驗證器憑證
 func (user User) WebAuthnCredentials() []webauthn.Credential {
 	var res []webauthn.Credential
 	err := json.Unmarshal([]byte(user.Authn), &res)
@@ -50,7 +50,7 @@ func (user User) WebAuthnCredentials() []webauthn.Credential {
 	return res
 }
 
-// RegisterAuthn 添加新的验证器
+// RegisterAuthn 添加新的驗證器
 func (user *User) RegisterAuthn(credential *webauthn.Credential) error {
 	exists := user.WebAuthnCredentials()
 	exists = append(exists, *credential)
@@ -62,7 +62,7 @@ func (user *User) RegisterAuthn(credential *webauthn.Credential) error {
 	return DB.Model(user).Update("authn", string(res)).Error
 }
 
-// RemoveAuthn 删除验证器
+// RemoveAuthn 刪除驗證器
 func (user *User) RemoveAuthn(id string) {
 	exists := user.WebAuthnCredentials()
 	for i := 0; i < len(exists); i++ {

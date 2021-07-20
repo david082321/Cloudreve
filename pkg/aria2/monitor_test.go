@@ -72,7 +72,7 @@ func TestMonitor_Update(t *testing.T) {
 		Interval: time.Duration(1) * time.Second,
 	}
 
-	// 无法获取状态
+	// 無法獲取狀態
 	{
 		MAX_RETRY = 1
 		testInstance := new(InstanceMock)
@@ -86,7 +86,7 @@ func TestMonitor_Update(t *testing.T) {
 		asserts.False(util.Exists("TestMonitor_Update"))
 	}
 
-	// 磁力链下载重定向
+	// 磁力鏈下載重定向
 	{
 		testInstance := new(InstanceMock)
 		testInstance.On("Status", testMock.Anything).Return(rpc.StatusInfo{
@@ -103,7 +103,7 @@ func TestMonitor_Update(t *testing.T) {
 		asserts.EqualValues("1", monitor.Task.GID)
 	}
 
-	// 无法更新任务信息
+	// 無法更新任務訊息
 	{
 		testInstance := new(InstanceMock)
 		testInstance.On("Status", testMock.Anything).Return(rpc.StatusInfo{}, nil)
@@ -117,7 +117,7 @@ func TestMonitor_Update(t *testing.T) {
 		testInstance.AssertExpectations(t)
 	}
 
-	// 返回未知状态
+	// 返回未知狀態
 	{
 		testInstance := new(InstanceMock)
 		testInstance.On("Status", testMock.Anything).Return(rpc.StatusInfo{Status: "?"}, nil)
@@ -130,7 +130,7 @@ func TestMonitor_Update(t *testing.T) {
 		testInstance.AssertExpectations(t)
 	}
 
-	// 返回被取消状态
+	// 返回被取消狀態
 	{
 		testInstance := new(InstanceMock)
 		testInstance.On("Status", testMock.Anything).Return(rpc.StatusInfo{Status: "removed"}, nil)
@@ -146,7 +146,7 @@ func TestMonitor_Update(t *testing.T) {
 		testInstance.AssertExpectations(t)
 	}
 
-	// 返回活跃状态
+	// 返回活躍狀態
 	{
 		testInstance := new(InstanceMock)
 		testInstance.On("Status", testMock.Anything).Return(rpc.StatusInfo{Status: "active"}, nil)
@@ -159,7 +159,7 @@ func TestMonitor_Update(t *testing.T) {
 		testInstance.AssertExpectations(t)
 	}
 
-	// 返回错误状态
+	// 返回錯誤狀態
 	{
 		testInstance := new(InstanceMock)
 		testInstance.On("Status", testMock.Anything).Return(rpc.StatusInfo{Status: "error"}, nil)
@@ -196,7 +196,7 @@ func TestMonitor_UpdateTaskInfo(t *testing.T) {
 		},
 	}
 
-	// 失败
+	// 失敗
 	{
 		mock.ExpectBegin()
 		mock.ExpectExec("UPDATE(.+)").WillReturnError(errors.New("error"))
@@ -206,7 +206,7 @@ func TestMonitor_UpdateTaskInfo(t *testing.T) {
 		asserts.Error(err)
 	}
 
-	// 更新成功，无需校验
+	// 更新成功，無需校驗
 	{
 		mock.ExpectBegin()
 		mock.ExpectExec("UPDATE(.+)").WillReturnResult(sqlmock.NewResult(1, 1))
@@ -216,7 +216,7 @@ func TestMonitor_UpdateTaskInfo(t *testing.T) {
 		asserts.NoError(err)
 	}
 
-	// 更新成功，大小改变，需要校验，校验失败
+	// 更新成功，大小改變，需要校驗，校驗失敗
 	{
 		testInstance := new(InstanceMock)
 		testInstance.On("Cancel", testMock.Anything).Return(nil)
@@ -241,7 +241,7 @@ func TestMonitor_ValidateFile(t *testing.T) {
 		},
 	}
 
-	// 无法创建文件系统
+	// 無法建立文件系統
 	{
 		monitor.Task.User = &model.User{
 			Policy: model.Policy{
@@ -251,7 +251,7 @@ func TestMonitor_ValidateFile(t *testing.T) {
 		asserts.Error(monitor.ValidateFile())
 	}
 
-	// 文件大小超出容量配额
+	// 檔案大小超出容量配額
 	{
 		cache.Set("pack_size_0", uint64(0), 0)
 		monitor.Task.TotalSize = 11
@@ -266,7 +266,7 @@ func TestMonitor_ValidateFile(t *testing.T) {
 		asserts.Equal(filesystem.ErrInsufficientCapacity, monitor.ValidateFile())
 	}
 
-	// 单文件大小超出容量配额
+	// 單檔案大小超出容量配額
 	{
 		cache.Set("pack_size_0", uint64(0), 0)
 		monitor.Task.TotalSize = 10

@@ -23,7 +23,7 @@ func TestSignURI(t *testing.T) {
 		asserts.NotEmpty(queries.Get("sign"))
 	}
 
-	// URI解码失败
+	// URI解碼失敗
 	{
 		sign, err := SignURI(General, "://dg.;'f]gh./'", 0)
 		asserts.Error(err)
@@ -42,7 +42,7 @@ func TestCheckURI(t *testing.T) {
 		asserts.NoError(CheckURI(General, sign))
 	}
 
-	// 过期
+	// 過期
 	{
 		sign, err := SignURI(General, "/api/ok?if=sdf&fd=go", -1)
 		asserts.NoError(err)
@@ -54,7 +54,7 @@ func TestSignRequest(t *testing.T) {
 	asserts := assert.New(t)
 	General = HMACAuth{SecretKey: []byte(util.RandStringRunes(256))}
 
-	// 非上传请求
+	// 非上傳請求
 	{
 		req, err := http.NewRequest("POST", "http://127.0.0.1/api/v3/slave/upload", strings.NewReader("I am body."))
 		asserts.NoError(err)
@@ -62,7 +62,7 @@ func TestSignRequest(t *testing.T) {
 		asserts.NotEmpty(req.Header["Authorization"])
 	}
 
-	// 上传请求
+	// 上傳請求
 	{
 		req, err := http.NewRequest(
 			"POST",
@@ -80,7 +80,7 @@ func TestCheckRequest(t *testing.T) {
 	asserts := assert.New(t)
 	General = HMACAuth{SecretKey: []byte(util.RandStringRunes(256))}
 
-	// 非上传请求 验证成功
+	// 非上傳請求 驗證成功
 	{
 		req, err := http.NewRequest(
 			"POST",
@@ -93,7 +93,7 @@ func TestCheckRequest(t *testing.T) {
 		asserts.NoError(err)
 	}
 
-	// 上传请求 验证成功
+	// 上傳請求 驗證成功
 	{
 		req, err := http.NewRequest(
 			"POST",
@@ -107,7 +107,7 @@ func TestCheckRequest(t *testing.T) {
 		asserts.NoError(err)
 	}
 
-	// 非上传请求 失败
+	// 非上傳請求 失敗
 	{
 		req, err := http.NewRequest(
 			"POST",

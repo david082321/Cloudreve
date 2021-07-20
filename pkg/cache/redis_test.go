@@ -39,7 +39,7 @@ func TestRedisStore_Set(t *testing.T) {
 	}
 	store := &RedisStore{pool: pool}
 
-	// 正常情况
+	// 正常情況
 	{
 		cmd := conn.Command("SET", "test", redigomock.NewAnyData()).ExpectStringSlice("OK")
 		err := store.Set("test", "test val", -1)
@@ -50,8 +50,8 @@ func TestRedisStore_Set(t *testing.T) {
 		}
 	}
 
-	// 带有TTL
-	// 正常情况
+	// 帶有TTL
+	// 正常情況
 	{
 		cmd := conn.Command("SETEX", "test", 10, redigomock.NewAnyData()).ExpectStringSlice("OK")
 		err := store.Set("test", "test val", 10)
@@ -62,7 +62,7 @@ func TestRedisStore_Set(t *testing.T) {
 		}
 	}
 
-	// 序列化出错
+	// 序列化出錯
 	{
 		value := struct {
 			Key string
@@ -73,7 +73,7 @@ func TestRedisStore_Set(t *testing.T) {
 		asserts.Error(err)
 	}
 
-	// 命令执行失败
+	// 指令執行失敗
 	{
 		conn.Clear()
 		cmd := conn.Command("SET", "test", redigomock.NewAnyData()).ExpectError(errors.New("error"))
@@ -84,7 +84,7 @@ func TestRedisStore_Set(t *testing.T) {
 			return
 		}
 	}
-	// 获取连接失败
+	// 獲取連線失敗
 	{
 		store.pool = &redis.Pool{
 			Dial:    func() (redis.Conn, error) { return nil, errors.New("error") },
@@ -105,7 +105,7 @@ func TestRedisStore_Get(t *testing.T) {
 	}
 	store := &RedisStore{pool: pool}
 
-	// 正常情况
+	// 正常情況
 	{
 		expectVal, _ := serializer("test val")
 		cmd := conn.Command("GET", "test").Expect(expectVal)
@@ -130,7 +130,7 @@ func TestRedisStore_Get(t *testing.T) {
 		asserts.False(ok)
 		asserts.Nil(val)
 	}
-	// 解码错误
+	// 解碼錯誤
 	{
 		conn.Clear()
 		cmd := conn.Command("GET", "test").Expect([]byte{0x20})
@@ -142,7 +142,7 @@ func TestRedisStore_Get(t *testing.T) {
 		asserts.False(ok)
 		asserts.Nil(val)
 	}
-	// 获取连接失败
+	// 獲取連線失敗
 	{
 		store.pool = &redis.Pool{
 			Dial:    func() (redis.Conn, error) { return nil, errors.New("error") },
@@ -181,7 +181,7 @@ func TestRedisStore_Gets(t *testing.T) {
 		asserts.Equal("2", res["2"].(string))
 	}
 
-	// 命中一个
+	// 命中一個
 	{
 		conn.Clear()
 		value2, _ := serializer("2")
@@ -198,7 +198,7 @@ func TestRedisStore_Gets(t *testing.T) {
 		asserts.Equal("2", res["2"].(string))
 	}
 
-	// 命令出错
+	// 指令出錯
 	{
 		conn.Clear()
 		cmd := conn.Command("MGET", "test_1", "test_2").ExpectError(errors.New("error"))
@@ -211,7 +211,7 @@ func TestRedisStore_Gets(t *testing.T) {
 		asserts.Len(res, 0)
 	}
 
-	// 连接出错
+	// 連接出錯
 	{
 		conn.Clear()
 		store.pool = &redis.Pool{
@@ -244,7 +244,7 @@ func TestRedisStore_Sets(t *testing.T) {
 		}
 	}
 
-	// 序列化失败
+	// 序列化失敗
 	{
 		conn.Clear()
 		value := struct {
@@ -256,7 +256,7 @@ func TestRedisStore_Sets(t *testing.T) {
 		asserts.Error(err)
 	}
 
-	// 执行失败
+	// 執行失敗
 	{
 		cmd := conn.Command("MSET", redigomock.NewAnyData(), redigomock.NewAnyData(), redigomock.NewAnyData(), redigomock.NewAnyData()).ExpectError(errors.New("error"))
 		err := store.Sets(map[string]interface{}{"1": "1", "2": "2"}, "test_")
@@ -267,7 +267,7 @@ func TestRedisStore_Sets(t *testing.T) {
 		}
 	}
 
-	// 连接失败
+	// 連線失敗
 	{
 		conn.Clear()
 		store.pool = &redis.Pool{
@@ -299,7 +299,7 @@ func TestRedisStore_Delete(t *testing.T) {
 		}
 	}
 
-	// 命令执行失败
+	// 指令執行失敗
 	{
 		conn.Clear()
 		cmd := conn.Command("DEL", redigomock.NewAnyData(), redigomock.NewAnyData(), redigomock.NewAnyData(), redigomock.NewAnyData()).ExpectError(errors.New("error"))
@@ -311,7 +311,7 @@ func TestRedisStore_Delete(t *testing.T) {
 		}
 	}
 
-	// 连接失败
+	// 連線失敗
 	{
 		conn.Clear()
 		store.pool = &redis.Pool{

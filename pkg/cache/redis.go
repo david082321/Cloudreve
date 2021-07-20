@@ -10,7 +10,7 @@ import (
 	"github.com/gomodule/redigo/redis"
 )
 
-// RedisStore redis存储驱动
+// RedisStore redis儲存驅動
 type RedisStore struct {
 	pool *redis.Pool
 }
@@ -43,7 +43,7 @@ func deserializer(value []byte) (interface{}, error) {
 	return res.Value, nil
 }
 
-// NewRedisStore 创建新的redis存储
+// NewRedisStore 建立新的redis儲存
 func NewRedisStore(size int, network, address, password, database string) *RedisStore {
 	return &RedisStore{
 		pool: &redis.Pool{
@@ -66,7 +66,7 @@ func NewRedisStore(size int, network, address, password, database string) *Redis
 					redis.DialPassword(password),
 				)
 				if err != nil {
-					util.Log().Warning("无法创建Redis连接：%s", err)
+					util.Log().Warning("無法建立Redis連接：%s", err)
 					return nil, err
 				}
 				return c, nil
@@ -75,7 +75,7 @@ func NewRedisStore(size int, network, address, password, database string) *Redis
 	}
 }
 
-// Set 存储值
+// Set 儲存值
 func (store *RedisStore) Set(key string, value interface{}, ttl int) error {
 	rc := store.pool.Get()
 	defer rc.Close()
@@ -124,7 +124,7 @@ func (store *RedisStore) Get(key string) (interface{}, bool) {
 
 }
 
-// Gets 批量取值
+// Gets 批次取值
 func (store *RedisStore) Gets(keys []string, prefix string) (map[string]interface{}, []string) {
 	rc := store.pool.Get()
 	defer rc.Close()
@@ -153,11 +153,11 @@ func (store *RedisStore) Gets(keys []string, prefix string) (map[string]interfac
 			res[keys[key]] = decoded
 		}
 	}
-	// 解码所得值
+	// 解碼所得值
 	return res, missed
 }
 
-// Sets 批量设置值
+// Sets 批次設定值
 func (store *RedisStore) Sets(values map[string]interface{}, prefix string) error {
 	rc := store.pool.Get()
 	defer rc.Close()
@@ -166,7 +166,7 @@ func (store *RedisStore) Sets(values map[string]interface{}, prefix string) erro
 	}
 	var setValues = make(map[string]interface{})
 
-	// 编码待设置值
+	// 編碼待設定值
 	for key, value := range values {
 		serialized, err := serializer(value)
 		if err != nil {
@@ -183,7 +183,7 @@ func (store *RedisStore) Sets(values map[string]interface{}, prefix string) erro
 
 }
 
-// Delete 批量删除给定的键
+// Delete 批次刪除給定的鍵
 func (store *RedisStore) Delete(keys []string, prefix string) error {
 	rc := store.pool.Get()
 	defer rc.Close()
@@ -191,7 +191,7 @@ func (store *RedisStore) Delete(keys []string, prefix string) error {
 		return rc.Err()
 	}
 
-	// 处理前缀
+	// 處理前綴
 	for i := 0; i < len(keys); i++ {
 		keys[i] = prefix + keys[i]
 	}
@@ -203,7 +203,7 @@ func (store *RedisStore) Delete(keys []string, prefix string) error {
 	return nil
 }
 
-// DeleteAll 批量所有键
+// DeleteAll 批次所有鍵
 func (store *RedisStore) DeleteAll() error {
 	rc := store.pool.Get()
 	defer rc.Close()

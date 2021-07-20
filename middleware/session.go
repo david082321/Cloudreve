@@ -10,20 +10,20 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Store session存储
+// Store session儲存
 var Store memstore.Store
 
 // Session 初始化session
 func Session(secret string) gin.HandlerFunc {
-	// Redis设置不为空，且非测试模式时使用Redis
+	// Redis設定不為空，且非測試模式時使用Redis
 	if conf.RedisConfig.Server != "" && gin.Mode() != gin.TestMode {
 		var err error
 		Store, err = redis.NewStoreWithDB(10, conf.RedisConfig.Network, conf.RedisConfig.Server, conf.RedisConfig.Password, conf.RedisConfig.DB, []byte(secret))
 		if err != nil {
-			util.Log().Panic("无法连接到 Redis：%s", err)
+			util.Log().Panic("無法連接到 Redis：%s", err)
 		}
 
-		util.Log().Info("已连接到 Redis 服务器：%s", conf.RedisConfig.Server)
+		util.Log().Info("已連接到 Redis 伺服器：%s", conf.RedisConfig.Server)
 	} else {
 		Store = memstore.NewStore([]byte(secret))
 	}
@@ -34,7 +34,7 @@ func Session(secret string) gin.HandlerFunc {
 	return sessions.Sessions("cloudreve-session", Store)
 }
 
-// CSRFInit 初始化CSRF标记
+// CSRFInit 初始化CSRF標記
 func CSRFInit() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		util.SetSession(c, map[string]interface{}{"CSRF": true})
@@ -42,7 +42,7 @@ func CSRFInit() gin.HandlerFunc {
 	}
 }
 
-// CSRFCheck 检查CSRF标记
+// CSRFCheck 檢查CSRF標記
 func CSRFCheck() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if check, ok := util.GetSession(c, "CSRF").(bool); ok && check {
@@ -50,7 +50,7 @@ func CSRFCheck() gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(200, serializer.Err(serializer.CodeNoPermissionErr, "来源非法", nil))
+		c.JSON(200, serializer.Err(serializer.CodeNoPermissionErr, "來源非法", nil))
 		c.Abort()
 	}
 }

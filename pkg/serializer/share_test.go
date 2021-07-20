@@ -34,7 +34,7 @@ func TestBuildShareList(t *testing.T) {
 func TestBuildShareResponse(t *testing.T) {
 	asserts := assert.New(t)
 
-	// 未解锁
+	// 未解鎖
 	{
 		share := &model.Share{
 			User:      model.User{Model: gorm.Model{ID: 1}},
@@ -46,7 +46,7 @@ func TestBuildShareResponse(t *testing.T) {
 		asserts.NotNil(res.Creator)
 	}
 
-	// 已解锁，非目录
+	// 已解鎖，非目錄
 	{
 		expires := time.Now().Add(time.Duration(10) * time.Second)
 		share := &model.Share{
@@ -64,7 +64,7 @@ func TestBuildShareResponse(t *testing.T) {
 		asserts.NotNil(res.Creator)
 	}
 
-	// 已解锁，是目录
+	// 已解鎖，是目錄
 	{
 		expires := time.Now().Add(time.Duration(10) * time.Second)
 		share := &model.Share{

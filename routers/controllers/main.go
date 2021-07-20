@@ -9,36 +9,36 @@ import (
 	"gopkg.in/go-playground/validator.v9"
 )
 
-// ParamErrorMsg 根据Validator返回的错误信息给出错误提示
+// ParamErrorMsg 根據Validator返回的錯誤訊息給出錯誤提示
 func ParamErrorMsg(filed string, tag string) string {
-	// 未通过验证的表单域与中文对应
+	// 未通過驗證的表單域與中文對應
 	fieldMap := map[string]string{
-		"UserName": "邮箱",
-		"Password": "密码",
-		"Path":     "路径",
-		"SourceID": "原始资源",
-		"URL":      "链接",
-		"Nick":     "昵称",
+		"UserName": "信箱",
+		"Password": "密碼",
+		"Path":     "路徑",
+		"SourceID": "原始資源",
+		"URL":      "連結",
+		"Nick":     "暱稱",
 	}
-	// 未通过的规则与中文对应
+	// 未透過的規則與中文對應
 	tagMap := map[string]string{
-		"required": "不能为空",
+		"required": "不能為空",
 		"min":      "太短",
-		"max":      "太长",
-		"email":    "格式不正确",
+		"max":      "太長",
+		"email":    "格式不正確",
 	}
 	fieldVal, findField := fieldMap[filed]
 	tagVal, findTag := tagMap[tag]
 	if findField && findTag {
-		// 返回拼接出来的错误信息
+		// 返回拼接出來的錯誤訊息
 		return fieldVal + tagVal
 	}
 	return ""
 }
 
-// ErrorResponse 返回错误消息
+// ErrorResponse 返回錯誤消息
 func ErrorResponse(err error) serializer.Response {
-	// 处理 Validator 产生的错误
+	// 處理 Validator 產生的錯誤
 	if ve, ok := err.(validator.ValidationErrors); ok {
 		for _, e := range ve {
 			return serializer.ParamErr(
@@ -49,13 +49,13 @@ func ErrorResponse(err error) serializer.Response {
 	}
 
 	if _, ok := err.(*json.UnmarshalTypeError); ok {
-		return serializer.ParamErr("JSON类型不匹配", err)
+		return serializer.ParamErr("JSON類型不匹配", err)
 	}
 
-	return serializer.ParamErr("参数错误", err)
+	return serializer.ParamErr("參數錯誤", err)
 }
 
-// CurrentUser 获取当前用户
+// CurrentUser 獲取目前使用者
 func CurrentUser(c *gin.Context) *model.User {
 	if user, _ := c.Get("user"); user != nil {
 		if u, ok := user.(*model.User); ok {

@@ -8,17 +8,17 @@ import (
 )
 
 var (
-	// ErrAuthEndpoint 无法解析授权端点地址
-	ErrAuthEndpoint = errors.New("无法解析授权端点地址")
-	// ErrInvalidRefreshToken 上传策略无有效的RefreshToken
-	ErrInvalidRefreshToken = errors.New("上传策略无有效的RefreshToken")
-	// ErrDeleteFile 无法删除文件
-	ErrDeleteFile = errors.New("无法删除文件")
-	// ErrClientCanceled 客户端取消操作
-	ErrClientCanceled = errors.New("客户端取消操作")
+	// ErrAuthEndpoint 無法解析授權端點地址
+	ErrAuthEndpoint = errors.New("無法解析授權端點地址")
+	// ErrInvalidRefreshToken 上傳策略無有效的RefreshToken
+	ErrInvalidRefreshToken = errors.New("上傳策略無有效的RefreshToken")
+	// ErrDeleteFile 無法刪除文件
+	ErrDeleteFile = errors.New("無法刪除文件")
+	// ErrClientCanceled 用戶端取消操作
+	ErrClientCanceled = errors.New("用戶端取消操作")
 )
 
-// Client OneDrive客户端
+// Client OneDrive用戶端
 type Client struct {
 	Endpoints  *Endpoints
 	Policy     *model.Policy
@@ -31,16 +31,16 @@ type Client struct {
 	Request request.Client
 }
 
-// Endpoints OneDrive客户端相关设置
+// Endpoints OneDrive用戶端相關設定
 type Endpoints struct {
-	OAuthURL       string // OAuth认证的基URL
+	OAuthURL       string // OAuth認證的基URL
 	OAuthEndpoints *oauthEndpoint
-	EndpointURL    string // 接口请求的基URL
-	isInChina      bool   // 是否为世纪互联
-	DriverResource string // 要使用的驱动器
+	EndpointURL    string // 介面請求的基URL
+	isInChina      bool   // 是否為世紀互聯
+	DriverResource string // 要使用的驅動器
 }
 
-// NewClient 根据存储策略获取新的client
+// NewClient 根據儲存策略獲取新的client
 func NewClient(policy *model.Policy) (*Client, error) {
 	client := &Client{
 		Endpoints: &Endpoints{

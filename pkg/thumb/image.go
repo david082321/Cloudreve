@@ -17,19 +17,19 @@ import (
 	"github.com/nfnt/resize"
 )
 
-// Thumb 缩略图
+// Thumb 縮圖
 type Thumb struct {
 	src image.Image
 	ext string
 }
 
-// NewThumbFromFile 从文件数据获取新的Thumb对象，
-// 尝试通过文件名name解码图像
+// NewThumbFromFile 從文件資料獲取新的Thumb物件，
+// 嘗試通過檔案名name解碼圖像
 func NewThumbFromFile(file io.Reader, name string) (*Thumb, error) {
 	ext := strings.ToLower(filepath.Ext(name))
-	// 无扩展名时
+	// 無副檔名時
 	if len(ext) == 0 {
-		return nil, errors.New("未知的图像类型")
+		return nil, errors.New("未知的圖像類型")
 	}
 
 	var err error
@@ -44,7 +44,7 @@ func NewThumbFromFile(file io.Reader, name string) (*Thumb, error) {
 	case "png":
 		img, err = png.Decode(file)
 	default:
-		return nil, errors.New("未知的图像类型")
+		return nil, errors.New("未知的圖像類型")
 	}
 	if err != nil {
 		return nil, err
@@ -56,18 +56,18 @@ func NewThumbFromFile(file io.Reader, name string) (*Thumb, error) {
 	}, nil
 }
 
-// GetThumb 生成给定最大尺寸的缩略图
+// GetThumb 生成給定最大尺寸的縮圖
 func (image *Thumb) GetThumb(width, height uint) {
 	image.src = resize.Thumbnail(width, height, image.src, resize.Lanczos3)
 }
 
-// GetSize 获取图像尺寸
+// GetSize 獲取圖像尺寸
 func (image *Thumb) GetSize() (int, int) {
 	b := image.src.Bounds()
 	return b.Max.X, b.Max.Y
 }
 
-// Save 保存图像到给定路径
+// Save 儲存圖像到給定路徑
 func (image *Thumb) Save(path string) (err error) {
 	out, err := util.CreatNestedFile(path)
 
@@ -81,15 +81,15 @@ func (image *Thumb) Save(path string) (err error) {
 
 }
 
-// CreateAvatar 创建头像
+// CreateAvatar 建立大頭貼
 func (image *Thumb) CreateAvatar(uid uint) error {
-	// 读取头像相关设定
+	// 讀取大頭貼相關設定
 	savePath := util.RelativePath(model.GetSettingByName("avatar_path"))
 	s := model.GetIntSetting("avatar_size_s", 50)
 	m := model.GetIntSetting("avatar_size_m", 130)
 	l := model.GetIntSetting("avatar_size_l", 200)
 
-	// 生成头像缩略图
+	// 生成大頭貼縮圖
 	src := image.src
 	for k, size := range []int{s, m, l} {
 		image.src = resize.Resize(uint(size), uint(size), src, resize.Lanczos3)

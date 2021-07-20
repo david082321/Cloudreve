@@ -5,24 +5,24 @@ import (
 	"strings"
 )
 
-// Driver 邮件发送驱动
+// Driver 郵件發送驅動
 type Driver interface {
-	// Close 关闭驱动
+	// Close 關閉驅動
 	Close()
-	// Send 发送邮件
+	// Send 發送郵件
 	Send(to, title, body string) error
 }
 
 var (
-	// ErrChanNotOpen 邮件队列未开启
-	ErrChanNotOpen = errors.New("邮件队列未开启")
-	// ErrNoActiveDriver 无可用邮件发送服务
-	ErrNoActiveDriver = errors.New("无可用邮件发送服务")
+	// ErrChanNotOpen 郵件佇列未開啟
+	ErrChanNotOpen = errors.New("郵件佇列未開啟")
+	// ErrNoActiveDriver 無可用郵件發送服務
+	ErrNoActiveDriver = errors.New("無可用郵件發送服務")
 )
 
-// Send 发送邮件
+// Send 發送郵件
 func Send(to, title, body string) error {
-	// 忽略通过QQ登录的邮箱
+	// 忽略透過QQ登入的信箱
 	if strings.HasSuffix(to, "@login.qq.com") {
 		return nil
 	}

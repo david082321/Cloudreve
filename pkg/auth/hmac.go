@@ -10,13 +10,13 @@ import (
 	"time"
 )
 
-// HMACAuth HMAC算法鉴权
+// HMACAuth HMAC演算法鑒權
 type HMACAuth struct {
 	SecretKey []byte
 }
 
-// Sign 对给定Body生成expires后失效的签名，expires为过期时间戳，
-// 填写为0表示不限制有效期
+// Sign 對給定Body生成expires後失效的簽名，expires為過期時間戳，
+// 填寫為0表示不限制有效期
 func (auth HMACAuth) Sign(body string, expires int64) string {
 	h := hmac.New(sha256.New, auth.SecretKey)
 	expireTimeStamp := strconv.FormatInt(expires, 10)
@@ -28,25 +28,25 @@ func (auth HMACAuth) Sign(body string, expires int64) string {
 	return base64.URLEncoding.EncodeToString(h.Sum(nil)) + ":" + expireTimeStamp
 }
 
-// Check 对给定Body和Sign进行鉴权，包括对expires的检查
+// Check 對給定Body和Sign進行鑒權，包括對expires的檢查
 func (auth HMACAuth) Check(body string, sign string) error {
 	signSlice := strings.Split(sign, ":")
-	// 如果未携带expires字段
+	// 如果未攜帶expires欄位
 	if signSlice[len(signSlice)-1] == "" {
 		return ErrAuthFailed
 	}
 
-	// 验证是否过期
+	// 驗證是否過期
 	expires, err := strconv.ParseInt(signSlice[len(signSlice)-1], 10, 64)
 	if err != nil {
 		return ErrAuthFailed.WithError(err)
 	}
-	// 如果签名过期
+	// 如果簽名過期
 	if expires < time.Now().Unix() && expires != 0 {
 		return ErrExpired
 	}
 
-	// 验证签名
+	// 驗證簽名
 	if auth.Sign(body, expires) != sign {
 		return ErrAuthFailed
 	}

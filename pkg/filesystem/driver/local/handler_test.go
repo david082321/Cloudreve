@@ -160,7 +160,7 @@ func TestHandler_Source(t *testing.T) {
 		asserts.Contains(sourceURL, "https://cloudreve.org")
 	}
 
-	// 无法获取上下文
+	// 無法獲取上下文
 	{
 		baseURL, err := url.Parse("https://cloudreve.org")
 		asserts.NoError(err)
@@ -169,7 +169,7 @@ func TestHandler_Source(t *testing.T) {
 		asserts.Empty(sourceURL)
 	}
 
-	// 设定了CDN
+	// 設定了CDN
 	{
 		handler.Policy.BaseURL = "https://cqu.edu.cn"
 		file := model.File{
@@ -188,7 +188,7 @@ func TestHandler_Source(t *testing.T) {
 		asserts.Contains(sourceURL, "https://cqu.edu.cn")
 	}
 
-	// 设定了CDN，解析失败
+	// 設定了CDN，解析失敗
 	{
 		handler.Policy.BaseURL = string(0x7f)
 		file := model.File{
@@ -229,7 +229,7 @@ func TestHandler_GetDownloadURL(t *testing.T) {
 		asserts.Contains(downloadURL, "https://cloudreve.org")
 	}
 
-	// 无法获取上下文
+	// 無法獲取上下文
 	{
 		baseURL, err := url.Parse("https://cloudreve.org")
 		asserts.NoError(err)
@@ -252,7 +252,7 @@ func TestDriver_List(t *testing.T) {
 	handler := Driver{}
 	ctx := context.Background()
 
-	// 创建测试目录结构
+	// 建立測試目錄結構
 	for _, path := range []string{
 		"test/TestDriver_List/parent.txt",
 		"test/TestDriver_List/parent_folder2/sub2.txt",
@@ -263,14 +263,14 @@ func TestDriver_List(t *testing.T) {
 		f.Close()
 	}
 
-	// 非递归列出
+	// 非遞迴列出
 	{
 		res, err := handler.List(ctx, "test/TestDriver_List", false)
 		asserts.NoError(err)
 		asserts.Len(res, 3)
 	}
 
-	// 递归列出
+	// 遞迴列出
 	{
 		res, err := handler.List(ctx, "test/TestDriver_List", true)
 		asserts.NoError(err)

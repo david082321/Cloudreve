@@ -32,7 +32,7 @@ func TestFrontendFileHandler(t *testing.T) {
 	asserts := assert.New(t)
 	rec := httptest.NewRecorder()
 
-	// 静态资源未加载
+	// 靜態資源未載入
 	{
 		TestFunc := FrontendFileHandler()
 
@@ -58,7 +58,7 @@ func TestFrontendFileHandler(t *testing.T) {
 		asserts.False(c.IsAborted())
 	}
 
-	// index.html 读取失败
+	// index.html 讀取失敗
 	{
 		file, _ := util.CreatNestedFile("tests/index.html")
 		file.Close()
@@ -98,7 +98,7 @@ func TestFrontendFileHandler(t *testing.T) {
 		asserts.True(c.IsAborted())
 	}
 
-	// 成功且命中静态文件
+	// 成功且命中靜態文件
 	{
 		file, _ := util.CreatNestedFile("tests/index.html")
 		defer file.Close()
@@ -121,7 +121,7 @@ func TestFrontendFileHandler(t *testing.T) {
 		testStatic.AssertExpectations(t)
 	}
 
-	// API 相关跳过
+	// API 相關跳過
 	{
 		for _, reqPath := range []string{"/api/user", "/manifest.json", "/dav/path"} {
 			file, _ := util.CreatNestedFile("tests/index.html")

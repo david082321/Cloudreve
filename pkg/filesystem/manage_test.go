@@ -31,7 +31,7 @@ func TestFileSystem_ListPhysical(t *testing.T) {
 	}
 	ctx := context.Background()
 
-	// 未知存储策略
+	// 未知儲存策略
 	{
 		fs.Policy.Type = "unknown"
 		res, err := fs.ListPhysical(ctx, "/")
@@ -40,7 +40,7 @@ func TestFileSystem_ListPhysical(t *testing.T) {
 		fs.Policy.Type = "mock"
 	}
 
-	// 无法列取目录
+	// 無法列取目錄
 	{
 		testHandler := new(FileHeaderMock)
 		testHandler.On("List", testMock.Anything, "/", testMock.Anything).Return([]response.Object{}, errors.New("error"))
@@ -74,8 +74,8 @@ func TestFileSystem_List(t *testing.T) {
 	}}
 	ctx := context.Background()
 
-	// 成功，子目录包含文件和路径，不使用路径处理钩子
-	// 根目录
+	// 成功，子目錄包含文件和路徑，不使用路徑處理鉤子
+	// 根目錄
 	mock.ExpectQuery("SELECT(.+)").
 		WithArgs(1).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "name", "owner_id"}).AddRow(1, "/", 1))
@@ -91,8 +91,8 @@ func TestFileSystem_List(t *testing.T) {
 	asserts.NoError(err)
 	asserts.NoError(mock.ExpectationsWereMet())
 
-	// 成功，子目录包含文件和路径，不使用路径处理钩子，包含分享key
-	// 根目录
+	// 成功，子目錄包含文件和路徑，不使用路徑處理鉤子，包含分享key
+	// 根目錄
 	mock.ExpectQuery("SELECT(.+)").
 		WithArgs(1).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "name", "owner_id"}).AddRow(1, "/", 1))
@@ -110,7 +110,7 @@ func TestFileSystem_List(t *testing.T) {
 	asserts.NoError(err)
 	asserts.NoError(mock.ExpectationsWereMet())
 
-	// 成功，子目录包含文件和路径，使用路径处理钩子
+	// 成功，子目錄包含文件和路徑，使用路徑處理鉤子
 	mock.ExpectQuery("SELECT(.+)").
 		WithArgs(1).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "name", "owner_id"}).AddRow(1, "/", 1))
@@ -131,7 +131,7 @@ func TestFileSystem_List(t *testing.T) {
 		asserts.Contains(value.Path, "prefix/")
 	}
 
-	// 成功，子目录包含路径，使用路径处理钩子
+	// 成功，子目錄包含路徑，使用路徑處理鉤子
 	mock.ExpectQuery("SELECT(.+)").
 		WithArgs(1).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "name", "owner_id"}).AddRow(1, "/", 1))
@@ -152,7 +152,7 @@ func TestFileSystem_List(t *testing.T) {
 		asserts.Contains(value.Path, "prefix/")
 	}
 
-	// 成功，子目录下为空，使用路径处理钩子
+	// 成功，子目錄下為空，使用路徑處理鉤子
 	mock.ExpectQuery("SELECT(.+)").
 		WithArgs(1).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "name", "owner_id"}).AddRow(1, "/", 1))
@@ -170,7 +170,7 @@ func TestFileSystem_List(t *testing.T) {
 	asserts.NoError(err)
 	asserts.NoError(mock.ExpectationsWereMet())
 
-	// 成功，子目录路径不存在
+	// 成功，子目錄路徑不存在
 	mock.ExpectQuery("SELECT(.+)").
 		WithArgs(1).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "name", "owner_id"}).AddRow(1, "/", 1))
@@ -195,12 +195,12 @@ func TestFileSystem_CreateDirectory(t *testing.T) {
 	}}
 	ctx := context.Background()
 
-	// 目录名非法
+	// 目錄名非法
 	_, err := fs.CreateDirectory(ctx, "/ad/a+?")
 	asserts.Equal(ErrIllegalObjectName, err)
 
 	// 存在同名文件
-	// 根目录
+	// 根目錄
 	mock.ExpectQuery("SELECT(.+)").
 		WithArgs(1).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "owner_id"}).AddRow(1, 1))
@@ -214,7 +214,7 @@ func TestFileSystem_CreateDirectory(t *testing.T) {
 	asserts.Equal(ErrFileExisted, err)
 	asserts.NoError(mock.ExpectationsWereMet())
 
-	// 存在同名目录
+	// 存在同名目錄
 	mock.ExpectQuery("SELECT(.+)").
 		WithArgs(1).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "owner_id"}).AddRow(1, 1))
@@ -231,8 +231,8 @@ func TestFileSystem_CreateDirectory(t *testing.T) {
 	asserts.Error(err)
 	asserts.NoError(mock.ExpectationsWereMet())
 
-	// 成功创建
-	// 根目录
+	// 成功建立
+	// 根目錄
 	mock.ExpectQuery("SELECT(.+)").
 		WithArgs(1).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "owner_id"}).AddRow(1, 1))
@@ -249,7 +249,7 @@ func TestFileSystem_CreateDirectory(t *testing.T) {
 	asserts.NoError(err)
 	asserts.NoError(mock.ExpectationsWereMet())
 
-	// 父目录不存在
+	// 父目錄不存在
 	mock.ExpectQuery("SELECT(.+)folders").WillReturnRows(sqlmock.NewRows([]string{"id", "name"}))
 	_, err = fs.CreateDirectory(ctx, "/ad")
 	asserts.Equal(ErrRootProtected, err)
@@ -273,7 +273,7 @@ func TestFileSystem_ListDeleteFiles(t *testing.T) {
 		asserts.NoError(mock.ExpectationsWereMet())
 	}
 
-	// 失败
+	// 失敗
 	{
 		mock.ExpectQuery("SELECT(.+)").WillReturnError(errors.New("error"))
 		err := fs.ListDeleteFiles(context.Background(), []uint{1})
@@ -316,7 +316,7 @@ func TestFileSystem_ListDeleteDirs(t *testing.T) {
 		asserts.NoError(mock.ExpectationsWereMet())
 	}
 
-	// 检索文件发生错误
+	// 檢索文件發生錯誤
 	{
 		mock.ExpectQuery("SELECT(.+)").
 			WillReturnRows(
@@ -333,7 +333,7 @@ func TestFileSystem_ListDeleteDirs(t *testing.T) {
 		asserts.Len(fs.DirTarget, 6)
 		asserts.NoError(mock.ExpectationsWereMet())
 	}
-	// 检索目录发生错误
+	// 檢索目錄發生錯誤
 	{
 		mock.ExpectQuery("SELECT(.+)").
 			WillReturnError(errors.New("error"))
@@ -358,7 +358,7 @@ func TestFileSystem_Delete(t *testing.T) {
 
 	//全部未成功
 	{
-		// 列出要删除的目录
+		// 列出要刪除的目錄
 		mock.ExpectQuery("SELECT(.+)").
 			WillReturnRows(
 				sqlmock.NewRows([]string{"id"}).
@@ -372,20 +372,20 @@ func TestFileSystem_Delete(t *testing.T) {
 				sqlmock.NewRows([]string{"id", "name", "source_name", "policy_id", "size"}).
 					AddRow(4, "1.txt", "1.txt", 2, 1),
 			)
-		// 查询顶级的文件
+		// 查詢頂級的文件
 		mock.ExpectQuery("SELECT(.+)").WillReturnRows(sqlmock.NewRows([]string{"id", "name", "source_name", "policy_id", "size"}).AddRow(1, "1.txt", "1.txt", 603, 2))
 		mock.ExpectQuery("SELECT(.+)files(.+)").
 			WillReturnRows(sqlmock.NewRows([]string{"id", "policy_id", "source_name"}))
-		// 查找软连接
+		// 尋找軟連接
 		mock.ExpectQuery("SELECT(.+)").WillReturnRows(sqlmock.NewRows([]string{"id"}))
-		// 查询上传策略
+		// 查詢上傳策略
 		mock.ExpectQuery("SELECT(.+)").WillReturnRows(sqlmock.NewRows([]string{"id", "type"}).AddRow(603, "local"))
-		// 删除文件记录
+		// 刪除文件記錄
 		mock.ExpectBegin()
 		mock.ExpectExec("DELETE(.+)files").
 			WillReturnResult(sqlmock.NewResult(0, 3))
 		mock.ExpectCommit()
-		// 删除对应分享
+		// 刪除對應分享
 		mock.ExpectBegin()
 		mock.ExpectExec("UPDATE(.+)shares").
 			WillReturnResult(sqlmock.NewResult(0, 3))
@@ -397,7 +397,7 @@ func TestFileSystem_Delete(t *testing.T) {
 		asserts.Equal(uint64(3), fs.User.Storage)
 		asserts.NoError(mock.ExpectationsWereMet())
 	}
-	//全部未成功，强制
+	//全部未成功，強制
 	{
 		fs.CleanTargets()
 		mock.ExpectQuery("SELECT(.+)").
@@ -416,29 +416,29 @@ func TestFileSystem_Delete(t *testing.T) {
 		mock.ExpectQuery("SELECT(.+)").WillReturnRows(sqlmock.NewRows([]string{"id", "name", "source_name", "policy_id", "size"}).AddRow(1, "2.txt", "2.txt", 365, 2))
 		mock.ExpectQuery("SELECT(.+)files(.+)").
 			WillReturnRows(sqlmock.NewRows([]string{"id", "policy_id", "source_name"}))
-		// 查询上传策略
+		// 查詢上傳策略
 		mock.ExpectQuery("SELECT(.+)").WillReturnRows(sqlmock.NewRows([]string{"id", "type"}).AddRow(365, "local"))
-		// 删除文件记录
+		// 刪除文件記錄
 		mock.ExpectBegin()
 		mock.ExpectExec("DELETE(.+)").
 			WillReturnResult(sqlmock.NewResult(0, 3))
 		mock.ExpectCommit()
-		// 删除对应分享
+		// 刪除對應分享
 		mock.ExpectBegin()
 		mock.ExpectExec("UPDATE(.+)shares").
 			WillReturnResult(sqlmock.NewResult(0, 3))
 		mock.ExpectCommit()
-		// 归还容量
+		// 歸還容量
 		mock.ExpectBegin()
 		mock.ExpectExec("UPDATE(.+)").
 			WillReturnResult(sqlmock.NewResult(0, 3))
 		mock.ExpectCommit()
-		// 删除目录
+		// 刪除目錄
 		mock.ExpectBegin()
 		mock.ExpectExec("DELETE(.+)").
 			WillReturnResult(sqlmock.NewResult(0, 3))
 		mock.ExpectCommit()
-		// 删除对应分享
+		// 刪除對應分享
 		mock.ExpectBegin()
 		mock.ExpectExec("UPDATE(.+)shares").
 			WillReturnResult(sqlmock.NewResult(0, 3))
@@ -474,29 +474,29 @@ func TestFileSystem_Delete(t *testing.T) {
 		mock.ExpectQuery("SELECT(.+)").WillReturnRows(sqlmock.NewRows([]string{"id", "name", "source_name", "policy_id", "size"}).AddRow(1, "2.txt", "2.txt", 602, 2))
 		mock.ExpectQuery("SELECT(.+)files(.+)").
 			WillReturnRows(sqlmock.NewRows([]string{"id", "policy_id", "source_name"}))
-		// 查询上传策略
+		// 查詢上傳策略
 		mock.ExpectQuery("SELECT(.+)").WillReturnRows(sqlmock.NewRows([]string{"id", "type"}).AddRow(602, "local"))
-		// 删除文件记录
+		// 刪除文件記錄
 		mock.ExpectBegin()
 		mock.ExpectExec("DELETE(.+)").
 			WillReturnResult(sqlmock.NewResult(0, 3))
 		mock.ExpectCommit()
-		// 删除对应分享
+		// 刪除對應分享
 		mock.ExpectBegin()
 		mock.ExpectExec("UPDATE(.+)shares").
 			WillReturnResult(sqlmock.NewResult(0, 3))
 		mock.ExpectCommit()
-		// 归还容量
+		// 歸還容量
 		mock.ExpectBegin()
 		mock.ExpectExec("UPDATE(.+)").
 			WillReturnResult(sqlmock.NewResult(0, 3))
 		mock.ExpectCommit()
-		// 删除目录
+		// 刪除目錄
 		mock.ExpectBegin()
 		mock.ExpectExec("DELETE(.+)").
 			WillReturnResult(sqlmock.NewResult(0, 3))
 		mock.ExpectCommit()
-		// 删除对应分享
+		// 刪除對應分享
 		mock.ExpectBegin()
 		mock.ExpectExec("UPDATE(.+)shares").
 			WillReturnResult(sqlmock.NewResult(0, 3))
@@ -523,7 +523,7 @@ func TestFileSystem_Copy(t *testing.T) {
 	}}
 	ctx := context.Background()
 
-	// 目录不存在
+	// 目錄不存在
 	{
 		mock.ExpectQuery("SELECT(.+)").WillReturnRows(
 			sqlmock.NewRows([]string{"name"}),
@@ -536,9 +536,9 @@ func TestFileSystem_Copy(t *testing.T) {
 		asserts.NoError(mock.ExpectationsWereMet())
 	}
 
-	// 复制目录出错
+	// 複製目錄出錯
 	{
-		// 根目录
+		// 根目錄
 		mock.ExpectQuery("SELECT(.+)").
 			WithArgs(1).
 			WillReturnRows(sqlmock.NewRows([]string{"id", "owner_id"}).AddRow(1, 1))
@@ -546,7 +546,7 @@ func TestFileSystem_Copy(t *testing.T) {
 		mock.ExpectQuery("SELECT(.+)").
 			WithArgs(1, 1, "dst").
 			WillReturnRows(sqlmock.NewRows([]string{"id", "owner_id"}).AddRow(2, 1))
-		// 根目录
+		// 根目錄
 		mock.ExpectQuery("SELECT(.+)").
 			WithArgs(1).
 			WillReturnRows(sqlmock.NewRows([]string{"id", "owner_id"}).AddRow(1, 1))
@@ -574,7 +574,7 @@ func TestFileSystem_Move(t *testing.T) {
 	}}
 	ctx := context.Background()
 
-	// 目录不存在
+	// 目錄不存在
 	{
 		mock.ExpectQuery("SELECT(.+)").WillReturnRows(
 			sqlmock.NewRows([]string{"name"}),
@@ -584,9 +584,9 @@ func TestFileSystem_Move(t *testing.T) {
 		asserts.NoError(mock.ExpectationsWereMet())
 	}
 
-	// 移动目录出错
+	// 移動目錄出錯
 	{
-		// 根目录
+		// 根目錄
 		mock.ExpectQuery("SELECT(.+)").
 			WithArgs(1).
 			WillReturnRows(sqlmock.NewRows([]string{"id", "owner_id"}).AddRow(1, 1))
@@ -594,7 +594,7 @@ func TestFileSystem_Move(t *testing.T) {
 		mock.ExpectQuery("SELECT(.+)").
 			WithArgs(1, 1, "dst").
 			WillReturnRows(sqlmock.NewRows([]string{"id", "owner_id"}).AddRow(2, 1))
-		// 根目录
+		// 根目錄
 		mock.ExpectQuery("SELECT(.+)").
 			WithArgs(1).
 			WillReturnRows(sqlmock.NewRows([]string{"id", "owner_id"}).AddRow(1, 1))
@@ -617,7 +617,7 @@ func TestFileSystem_Rename(t *testing.T) {
 	}}
 	ctx := context.Background()
 
-	// 重命名文件 成功
+	// 重新命名文件 成功
 	{
 		mock.ExpectQuery("SELECT(.+)files(.+)").
 			WithArgs(10, 1).
@@ -632,7 +632,7 @@ func TestFileSystem_Rename(t *testing.T) {
 		asserts.NoError(err)
 	}
 
-	// 重命名文件 不存在
+	// 重新命名文件 不存在
 	{
 		mock.ExpectQuery("SELECT(.+)files(.+)").
 			WithArgs(10, 1).
@@ -643,7 +643,7 @@ func TestFileSystem_Rename(t *testing.T) {
 		asserts.Equal(ErrPathNotExist, err)
 	}
 
-	// 重命名文件 失败
+	// 重新命名文件 失敗
 	{
 		mock.ExpectQuery("SELECT(.+)files(.+)").
 			WithArgs(10, 1).
@@ -659,7 +659,7 @@ func TestFileSystem_Rename(t *testing.T) {
 		asserts.Equal(ErrFileExisted, err)
 	}
 
-	// 重命名目录 成功
+	// 重新命名目錄 成功
 	{
 		mock.ExpectQuery("SELECT(.+)folders(.+)").
 			WithArgs(10, 1).
@@ -674,7 +674,7 @@ func TestFileSystem_Rename(t *testing.T) {
 		asserts.NoError(err)
 	}
 
-	// 重命名目录 不存在
+	// 重新命名目錄 不存在
 	{
 		mock.ExpectQuery("SELECT(.+)folders(.+)").
 			WithArgs(10, 1).
@@ -685,7 +685,7 @@ func TestFileSystem_Rename(t *testing.T) {
 		asserts.Equal(ErrPathNotExist, err)
 	}
 
-	// 重命名目录 失败
+	// 重新命名目錄 失敗
 	{
 		mock.ExpectQuery("SELECT(.+)folders(.+)").
 			WithArgs(10, 1).
@@ -701,14 +701,14 @@ func TestFileSystem_Rename(t *testing.T) {
 		asserts.Equal(ErrFileExisted, err)
 	}
 
-	// 未选中任何对象
+	// 未選中任何物件
 	{
 		err := fs.Rename(ctx, []uint{}, []uint{}, "new")
 		asserts.Error(err)
 		asserts.Equal(ErrPathNotExist, err)
 	}
 
-	// 新名字是目录，不合法
+	// 新名字是目錄，不合法
 	{
 		err := fs.Rename(ctx, []uint{10}, []uint{}, "ne/w")
 		asserts.Error(err)
@@ -722,7 +722,7 @@ func TestFileSystem_Rename(t *testing.T) {
 		asserts.Equal(ErrIllegalObjectName, err)
 	}
 
-	// 新名字是文件，扩展名不合法
+	// 新名字是文件，副檔名不合法
 	{
 		fs.User.Policy.OptionsSerialized.FileType = []string{"txt"}
 		err := fs.Rename(ctx, []uint{}, []uint{10}, "1.jpg")
@@ -730,7 +730,7 @@ func TestFileSystem_Rename(t *testing.T) {
 		asserts.Equal(ErrIllegalObjectName, err)
 	}
 
-	// 新名字是目录，不应该检测扩展名
+	// 新名字是目錄，不應該檢測副檔名
 	{
 		fs.User.Policy.OptionsSerialized.FileType = []string{"txt"}
 		mock.ExpectQuery("SELECT(.+)folders(.+)").
@@ -752,9 +752,9 @@ func TestFileSystem_SaveTo(t *testing.T) {
 	}}
 	ctx := context.Background()
 
-	// 单文件 失败
+	// 單文件 失敗
 	{
-		// 根目录
+		// 根目錄
 		mock.ExpectQuery("SELECT(.+)").
 			WithArgs(1).
 			WillReturnRows(sqlmock.NewRows([]string{"id", "owner_id"}).AddRow(1, 1))
@@ -764,9 +764,9 @@ func TestFileSystem_SaveTo(t *testing.T) {
 		asserts.NoError(mock.ExpectationsWereMet())
 		asserts.Error(err)
 	}
-	// 目录 成功
+	// 目錄 成功
 	{
-		// 根目录
+		// 根目錄
 		mock.ExpectQuery("SELECT(.+)").
 			WithArgs(1).
 			WillReturnRows(sqlmock.NewRows([]string{"id", "owner_id"}).AddRow(1, 1))
@@ -776,9 +776,9 @@ func TestFileSystem_SaveTo(t *testing.T) {
 		asserts.NoError(mock.ExpectationsWereMet())
 		asserts.Error(err)
 	}
-	// 父目录不存在
+	// 父目錄不存在
 	{
-		// 根目录
+		// 根目錄
 		mock.ExpectQuery("SELECT(.+)").
 			WithArgs(1).
 			WillReturnRows(sqlmock.NewRows([]string{"id", "owner_id"}))

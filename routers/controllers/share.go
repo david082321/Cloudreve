@@ -12,7 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// CreateShare 创建分享
+// CreateShare 建立分享
 func CreateShare(c *gin.Context) {
 	var service share.ShareCreateService
 	if err := c.ShouldBindJSON(&service); err == nil {
@@ -45,7 +45,7 @@ func ListShare(c *gin.Context) {
 	}
 }
 
-// SearchShare 搜索分享
+// SearchShare 搜尋分享
 func SearchShare(c *gin.Context) {
 	var service share.ShareListService
 	if err := c.ShouldBindQuery(&service); err == nil {
@@ -56,7 +56,7 @@ func SearchShare(c *gin.Context) {
 	}
 }
 
-// UpdateShare 更新分享属性
+// UpdateShare 更新分享屬性
 func UpdateShare(c *gin.Context) {
 	var service share.ShareUpdateService
 	if err := c.ShouldBindJSON(&service); err == nil {
@@ -67,7 +67,7 @@ func UpdateShare(c *gin.Context) {
 	}
 }
 
-// DeleteShare 删除分享
+// DeleteShare 刪除分享
 func DeleteShare(c *gin.Context) {
 	var service share.Service
 	if err := c.ShouldBindUri(&service); err == nil {
@@ -78,7 +78,7 @@ func DeleteShare(c *gin.Context) {
 	}
 }
 
-// GetShareDownload 创建分享下载会话
+// GetShareDownload 建立分享下載工作階段
 func GetShareDownload(c *gin.Context) {
 	var service share.Service
 	if err := c.ShouldBindQuery(&service); err == nil {
@@ -89,9 +89,9 @@ func GetShareDownload(c *gin.Context) {
 	}
 }
 
-// PreviewShare 预览分享文件内容
+// PreviewShare 預覽分享文件內容
 func PreviewShare(c *gin.Context) {
-	// 创建上下文
+	// 建立上下文
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -103,7 +103,7 @@ func PreviewShare(c *gin.Context) {
 			c.Redirect(301, res.Data.(string))
 			return
 		}
-		// 是否有错误发生
+		// 是否有錯誤發生
 		if res.Code != 0 {
 			c.JSON(200, res)
 		}
@@ -112,16 +112,16 @@ func PreviewShare(c *gin.Context) {
 	}
 }
 
-// PreviewShareText 预览文本文件
+// PreviewShareText 預覽文字文件
 func PreviewShareText(c *gin.Context) {
-	// 创建上下文
+	// 建立上下文
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	var service share.Service
 	if err := c.ShouldBindQuery(&service); err == nil {
 		res := service.PreviewContent(ctx, c, true)
-		// 是否有错误发生
+		// 是否有錯誤發生
 		if res.Code != 0 {
 			c.JSON(200, res)
 		}
@@ -130,30 +130,30 @@ func PreviewShareText(c *gin.Context) {
 	}
 }
 
-// PreviewShareReadme 预览文本自述文件
+// PreviewShareReadme 預覽文字自述文件
 func PreviewShareReadme(c *gin.Context) {
-	// 创建上下文
+	// 建立上下文
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	var service share.Service
 	if err := c.ShouldBindQuery(&service); err == nil {
-		// 自述文件名限制
+		// 自述檔案名限制
 		allowFileName := []string{"readme.txt", "readme.md"}
 		fileName := strings.ToLower(path.Base(service.Path))
 		if !util.ContainsString(allowFileName, fileName) {
 			c.JSON(200, serializer.ParamErr("非README文件", nil))
 		}
 
-		// 必须是目录分享
+		// 必須是目錄分享
 		if shareCtx, ok := c.Get("share"); ok {
 			if !shareCtx.(*model.Share).IsDir {
-				c.JSON(200, serializer.ParamErr("此分享无自述文件", nil))
+				c.JSON(200, serializer.ParamErr("此分享無自述文件", nil))
 			}
 		}
 
 		res := service.PreviewContent(ctx, c, true)
-		// 是否有错误发生
+		// 是否有錯誤發生
 		if res.Code != 0 {
 			c.JSON(200, res)
 		}
@@ -162,7 +162,7 @@ func PreviewShareReadme(c *gin.Context) {
 	}
 }
 
-// GetShareDocPreview 创建分享Office文档预览地址
+// GetShareDocPreview 建立分享Office文件預覽地址
 func GetShareDocPreview(c *gin.Context) {
 	var service share.Service
 	if err := c.ShouldBindQuery(&service); err == nil {
@@ -173,7 +173,7 @@ func GetShareDocPreview(c *gin.Context) {
 	}
 }
 
-// ListSharedFolder 列出分享的目录下的对象
+// ListSharedFolder 列出分享的目錄下的物件
 func ListSharedFolder(c *gin.Context) {
 	var service share.Service
 	if err := c.ShouldBindUri(&service); err == nil {
@@ -184,7 +184,7 @@ func ListSharedFolder(c *gin.Context) {
 	}
 }
 
-// ArchiveShare 打包要下载的分享
+// ArchiveShare 打包要下載的分享
 func ArchiveShare(c *gin.Context) {
 	var service share.ArchiveService
 	if err := c.ShouldBindJSON(&service); err == nil {
@@ -195,7 +195,7 @@ func ArchiveShare(c *gin.Context) {
 	}
 }
 
-// ShareThumb 获取分享目录下文件的缩略图
+// ShareThumb 獲取分享目錄下文件的縮圖
 func ShareThumb(c *gin.Context) {
 	var service share.Service
 	if err := c.ShouldBindQuery(&service); err == nil {
@@ -208,7 +208,7 @@ func ShareThumb(c *gin.Context) {
 	}
 }
 
-// GetUserShare 查看给定用户的分享
+// GetUserShare 查看給定使用者的分享
 func GetUserShare(c *gin.Context) {
 	var service share.ShareUserGetService
 	if err := c.ShouldBindQuery(&service); err == nil {

@@ -14,17 +14,17 @@ import (
 func TestGetUserByID(t *testing.T) {
 	asserts := assert.New(t)
 	cache.Deletes([]string{"1"}, "policy_")
-	//找到用户时
+	//找到使用者時
 	userRows := sqlmock.NewRows([]string{"id", "deleted_at", "email", "options", "group_id"}).
 		AddRow(1, nil, "admin@cloudreve.org", "{}", 1)
 	mock.ExpectQuery("^SELECT (.+)").WillReturnRows(userRows)
 
 	groupRows := sqlmock.NewRows([]string{"id", "name", "policies"}).
-		AddRow(1, "管理员", "[1]")
+		AddRow(1, "管理員", "[1]")
 	mock.ExpectQuery("^SELECT (.+)").WillReturnRows(groupRows)
 
 	policyRows := sqlmock.NewRows([]string{"id", "name"}).
-		AddRow(1, "默认存储策略")
+		AddRow(1, "預設儲存策略")
 	mock.ExpectQuery("^SELECT (.+)").WillReturnRows(policyRows)
 
 	user, err := GetUserByID(1)
@@ -41,7 +41,7 @@ func TestGetUserByID(t *testing.T) {
 			Model: gorm.Model{
 				ID: 1,
 			},
-			Name:       "管理员",
+			Name:       "管理員",
 			Policies:   "[1]",
 			PolicyList: []uint{1},
 		},
@@ -52,11 +52,11 @@ func TestGetUserByID(t *testing.T) {
 			OptionsSerialized: PolicyOption{
 				FileType: []string{},
 			},
-			Name: "默认存储策略",
+			Name: "預設儲存策略",
 		},
 	}, user)
 
-	//未找到用户时
+	//未找到使用者時
 	mock.ExpectQuery("^SELECT (.+)").WillReturnError(errors.New("not found"))
 	user, err = GetUserByID(1)
 	asserts.Error(err)
@@ -66,17 +66,17 @@ func TestGetUserByID(t *testing.T) {
 func TestGetActiveUserByID(t *testing.T) {
 	asserts := assert.New(t)
 	cache.Deletes([]string{"1"}, "policy_")
-	//找到用户时
+	//找到使用者時
 	userRows := sqlmock.NewRows([]string{"id", "deleted_at", "email", "options", "group_id"}).
 		AddRow(1, nil, "admin@cloudreve.org", "{}", 1)
 	mock.ExpectQuery("^SELECT (.+)").WillReturnRows(userRows)
 
 	groupRows := sqlmock.NewRows([]string{"id", "name", "policies"}).
-		AddRow(1, "管理员", "[1]")
+		AddRow(1, "管理員", "[1]")
 	mock.ExpectQuery("^SELECT (.+)").WillReturnRows(groupRows)
 
 	policyRows := sqlmock.NewRows([]string{"id", "name"}).
-		AddRow(1, "默认存储策略")
+		AddRow(1, "預設儲存策略")
 	mock.ExpectQuery("^SELECT (.+)").WillReturnRows(policyRows)
 
 	user, err := GetActiveUserByID(1)
@@ -93,7 +93,7 @@ func TestGetActiveUserByID(t *testing.T) {
 			Model: gorm.Model{
 				ID: 1,
 			},
-			Name:       "管理员",
+			Name:       "管理員",
 			Policies:   "[1]",
 			PolicyList: []uint{1},
 		},
@@ -104,11 +104,11 @@ func TestGetActiveUserByID(t *testing.T) {
 			OptionsSerialized: PolicyOption{
 				FileType: []string{},
 			},
-			Name: "默认存储策略",
+			Name: "預設儲存策略",
 		},
 	}, user)
 
-	//未找到用户时
+	//未找到使用者時
 	mock.ExpectQuery("^SELECT (.+)").WillReturnError(errors.New("not found"))
 	user, err = GetActiveUserByID(1)
 	asserts.Error(err)
@@ -129,37 +129,37 @@ func TestUser_CheckPassword(t *testing.T) {
 	err := user.SetPassword("Cause Sega does what nintendon't")
 	asserts.NoError(err)
 
-	//密码正确
+	//密碼正確
 	res, err := user.CheckPassword("Cause Sega does what nintendon't")
 	asserts.NoError(err)
 	asserts.True(res)
 
-	//密码错误
+	//密碼錯誤
 	res, err = user.CheckPassword("Cause Sega does what Nintendon't")
 	asserts.NoError(err)
 	asserts.False(res)
 
-	//密码字段为空
+	//密碼欄位為空
 	user = User{}
 	res, err = user.CheckPassword("Cause Sega does what nintendon't")
 	asserts.Error(err)
 	asserts.False(res)
 
-	// 未知密码类型
+	// 未知密碼類型
 	user = User{}
 	user.Password = "1:2:3"
 	res, err = user.CheckPassword("Cause Sega does what nintendon't")
 	asserts.Error(err)
 	asserts.False(res)
 
-	// V2密码，错误
+	// V2密碼，錯誤
 	user = User{}
 	user.Password = "md5:2:3"
 	res, err = user.CheckPassword("Cause Sega does what nintendon't")
 	asserts.NoError(err)
 	asserts.False(res)
 
-	// V2密码，正确
+	// V2密碼，正確
 	user = User{}
 	user.Password = "md5:d8446059f8846a2c111a7f53515665fb:sdshare"
 	res, err = user.CheckPassword("admin")
@@ -180,7 +180,7 @@ func TestUser_AfterFind(t *testing.T) {
 	cache.Deletes([]string{"1"}, "policy_")
 
 	policyRows := sqlmock.NewRows([]string{"id", "name"}).
-		AddRow(1, "默认存储策略")
+		AddRow(1, "預設儲存策略")
 	mock.ExpectQuery("^SELECT (.+)").WillReturnRows(policyRows)
 
 	newUser := NewUser()
@@ -192,7 +192,7 @@ func TestUser_AfterFind(t *testing.T) {
 	asserts.NoError(err)
 	asserts.NoError(mock.ExpectationsWereMet())
 	asserts.Equal(expected, newUser.OptionsSerialized)
-	asserts.Equal("默认存储策略", newUser.Policy.Name)
+	asserts.Equal("預設儲存策略", newUser.Policy.Name)
 }
 
 func TestUser_BeforeSave(t *testing.T) {
@@ -255,11 +255,11 @@ func TestUser_DeductionCapacity(t *testing.T) {
 		AddRow(1, nil, 0, "{}", 1)
 	mock.ExpectQuery("^SELECT (.+)").WillReturnRows(userRows)
 	groupRows := sqlmock.NewRows([]string{"id", "name", "policies"}).
-		AddRow(1, "管理员", "[1]")
+		AddRow(1, "管理員", "[1]")
 	mock.ExpectQuery("^SELECT (.+)").WillReturnRows(groupRows)
 
 	policyRows := sqlmock.NewRows([]string{"id", "name"}).
-		AddRow(1, "默认存储策略")
+		AddRow(1, "預設儲存策略")
 	mock.ExpectQuery("^SELECT (.+)").WillReturnRows(policyRows)
 
 	newUser, err := GetUserByID(1)
@@ -290,7 +290,7 @@ func TestUser_DeductionCapacity(t *testing.T) {
 func TestUser_DeductionStorage(t *testing.T) {
 	asserts := assert.New(t)
 
-	// 减少零
+	// 減少零
 	{
 		user := User{Storage: 1}
 		asserts.True(user.DeductionStorage(0))
@@ -311,7 +311,7 @@ func TestUser_DeductionStorage(t *testing.T) {
 		asserts.Equal(uint64(5), user.Storage)
 	}
 
-	// 减少的超出可用的
+	// 減少的超出可用的
 	{
 		user := User{
 			Model:   gorm.Model{ID: 1},
@@ -337,7 +337,7 @@ func TestUser_IncreaseStorageWithoutCheck(t *testing.T) {
 		asserts.Equal(uint64(0), user.Storage)
 	}
 
-	// 减少零
+	// 減少零
 	{
 		user := User{
 			Model: gorm.Model{ID: 1},
@@ -387,16 +387,16 @@ func TestUser_Root(t *testing.T) {
 	asserts := assert.New(t)
 	user := User{Model: gorm.Model{ID: 1}}
 
-	// 根目录存在
+	// 根目錄存在
 	{
-		mock.ExpectQuery("SELECT(.+)").WithArgs(1).WillReturnRows(sqlmock.NewRows([]string{"id", "name"}).AddRow(1, "根目录"))
+		mock.ExpectQuery("SELECT(.+)").WithArgs(1).WillReturnRows(sqlmock.NewRows([]string{"id", "name"}).AddRow(1, "根目錄"))
 		root, err := user.Root()
 		asserts.NoError(mock.ExpectationsWereMet())
 		asserts.NoError(err)
-		asserts.Equal("根目录", root.Name)
+		asserts.Equal("根目錄", root.Name)
 	}
 
-	// 根目录不存在
+	// 根目錄不存在
 	{
 		mock.ExpectQuery("SELECT(.+)").WithArgs(1).WillReturnRows(sqlmock.NewRows([]string{"id", "name"}))
 		_, err := user.Root()

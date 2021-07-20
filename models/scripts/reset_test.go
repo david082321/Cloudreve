@@ -12,7 +12,7 @@ func TestResetAdminPassword_Run(t *testing.T) {
 	asserts := assert.New(t)
 	script := ResetAdminPassword(0)
 
-	// 初始用户不存在
+	// 初始使用者不存在
 	{
 		mock.ExpectQuery("SELECT(.+)users(.+)").
 			WillReturnRows(sqlmock.NewRows([]string{"id", "email", "storage"}))
@@ -22,7 +22,7 @@ func TestResetAdminPassword_Run(t *testing.T) {
 		asserts.NoError(mock.ExpectationsWereMet())
 	}
 
-	// 密码更新失败
+	// 密碼更新失敗
 	{
 		mock.ExpectQuery("SELECT(.+)users(.+)").
 			WillReturnRows(sqlmock.NewRows([]string{"id", "email", "storage"}).AddRow(1, "a@a.com", 10))

@@ -5,40 +5,40 @@ type key int
 const (
 	// GinCtx Gin的上下文
 	GinCtx key = iota
-	// SavePathCtx 文件物理路径
+	// SavePathCtx 文件物理路徑
 	SavePathCtx
-	// FileHeaderCtx 上传的文件
+	// FileHeaderCtx 上傳的文件
 	FileHeaderCtx
-	// PathCtx 文件或目录的虚拟路径
+	// PathCtx 文件或目錄的虛擬路徑
 	PathCtx
-	// FileModelCtx 文件数据库模型
+	// FileModelCtx 文件資料庫模型
 	FileModelCtx
-	// FolderModelCtx 目录数据库模型
+	// FolderModelCtx 目錄資料庫模型
 	FolderModelCtx
-	// HTTPCtx HTTP请求的上下文
+	// HTTPCtx HTTP請求的上下文
 	HTTPCtx
-	// UploadPolicyCtx 上传策略，一般为slave模式下使用
+	// UploadPolicyCtx 上傳策略，一般為slave模式下使用
 	UploadPolicyCtx
-	// UserCtx 用户
+	// UserCtx 使用者
 	UserCtx
-	// ThumbSizeCtx 缩略图尺寸
+	// ThumbSizeCtx 縮圖尺寸
 	ThumbSizeCtx
-	// FileSizeCtx 文件大小
+	// FileSizeCtx 檔案大小
 	FileSizeCtx
 	// ShareKeyCtx 分享文件的 HashID
 	ShareKeyCtx
-	// LimitParentCtx 限制父目录
+	// LimitParentCtx 限制父目錄
 	LimitParentCtx
-	// IgnoreDirectoryConflictCtx 忽略目录重名冲突
+	// IgnoreDirectoryConflictCtx 忽略目錄重名衝突
 	IgnoreDirectoryConflictCtx
-	// RetryCtx 失败重试次数
+	// RetryCtx 失敗重試次數
 	RetryCtx
-	// ForceUsePublicEndpointCtx 强制使用公网 Endpoint
+	// ForceUsePublicEndpointCtx 強制使用公網 Endpoint
 	ForceUsePublicEndpointCtx
 	// CancelFuncCtx Context 取消函數
 	CancelFuncCtx
-	// ValidateCapacityOnceCtx 限定归还容量的操作只執行一次
+	// ValidateCapacityOnceCtx 限定歸還容量的操作只執行一次
 	ValidateCapacityOnceCtx
-	// 禁止上传时同名覆盖操作
+	// 禁止上傳時同名覆蓋操作
 	DisableOverwrite
 )

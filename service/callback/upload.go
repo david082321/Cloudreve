@@ -16,22 +16,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// CallbackProcessService 上传请求回调正文接口
+// CallbackProcessService 上傳請求回調正文介面
 type CallbackProcessService interface {
 	GetBody(*serializer.UploadSession) serializer.UploadCallback
 }
 
-// RemoteUploadCallbackService 远程存储上传回调请求服务
+// RemoteUploadCallbackService 遠端儲存上傳回調請求服務
 type RemoteUploadCallbackService struct {
 	Data serializer.UploadCallback `json:"data" binding:"required"`
 }
 
-// GetBody 返回回调正文
+// GetBody 返回回調正文
 func (service RemoteUploadCallbackService) GetBody(session *serializer.UploadSession) serializer.UploadCallback {
 	return service.Data
 }
 
-// UploadCallbackService OOS/七牛云存储上传回调请求服务
+// UploadCallbackService OOS/七牛雲端儲存上傳回調請求服務
 type UploadCallbackService struct {
 	Name       string `json:"name"`
 	SourceName string `json:"source_name"`
@@ -39,7 +39,7 @@ type UploadCallbackService struct {
 	Size       uint64 `json:"size"`
 }
 
-// UpyunCallbackService 又拍云上传回调请求服务
+// UpyunCallbackService 又拍雲上傳回調請求服務
 type UpyunCallbackService struct {
 	Code       int    `form:"code" binding:"required"`
 	Message    string `form:"message" binding:"required"`
@@ -49,26 +49,26 @@ type UpyunCallbackService struct {
 	Size       uint64 `form:"file_size"`
 }
 
-// OneDriveCallback OneDrive 客户端回调正文
+// OneDriveCallback OneDrive 用戶端回調正文
 type OneDriveCallback struct {
 	ID   string `json:"id" binding:"required"`
 	Meta *onedrive.FileInfo
 }
 
-// COSCallback COS 客户端回调正文
+// COSCallback COS 用戶端回調正文
 type COSCallback struct {
 	Bucket string `form:"bucket"`
 	Etag   string `form:"etag"`
 }
 
-// S3Callback S3 客户端回调正文
+// S3Callback S3 用戶端回調正文
 type S3Callback struct {
 	Bucket string `form:"bucket"`
 	Etag   string `form:"etag"`
 	Key    string `form:"key"`
 }
 
-// GetBody 返回回调正文
+// GetBody 返回回調正文
 func (service UpyunCallbackService) GetBody(session *serializer.UploadSession) serializer.UploadCallback {
 	res := serializer.UploadCallback{
 		Name:       session.Name,
@@ -82,7 +82,7 @@ func (service UpyunCallbackService) GetBody(session *serializer.UploadSession) s
 	return res
 }
 
-// GetBody 返回回调正文
+// GetBody 返回回調正文
 func (service UploadCallbackService) GetBody(session *serializer.UploadSession) serializer.UploadCallback {
 	return serializer.UploadCallback{
 		Name:       service.Name,
@@ -92,7 +92,7 @@ func (service UploadCallbackService) GetBody(session *serializer.UploadSession) 
 	}
 }
 
-// GetBody 返回回调正文
+// GetBody 返回回調正文
 func (service OneDriveCallback) GetBody(session *serializer.UploadSession) serializer.UploadCallback {
 	var picInfo = "0,0"
 	if service.Meta.Image.Width != 0 {
@@ -106,7 +106,7 @@ func (service OneDriveCallback) GetBody(session *serializer.UploadSession) seria
 	}
 }
 
-// GetBody 返回回调正文
+// GetBody 返回回調正文
 func (service COSCallback) GetBody(session *serializer.UploadSession) serializer.UploadCallback {
 	return serializer.UploadCallback{
 		Name:       session.Name,
@@ -116,7 +116,7 @@ func (service COSCallback) GetBody(session *serializer.UploadSession) serializer
 	}
 }
 
-// GetBody 返回回调正文
+// GetBody 返回回調正文
 func (service S3Callback) GetBody(session *serializer.UploadSession) serializer.UploadCallback {
 	return serializer.UploadCallback{
 		Name:       session.Name,
@@ -126,31 +126,31 @@ func (service S3Callback) GetBody(session *serializer.UploadSession) serializer.
 	}
 }
 
-// ProcessCallback 处理上传结果回调
+// ProcessCallback 處理上傳結果回調
 func ProcessCallback(service CallbackProcessService, c *gin.Context) serializer.Response {
-	// 创建文件系统
+	// 建立文件系統
 	fs, err := filesystem.NewFileSystemFromCallback(c)
 	if err != nil {
 		return serializer.Err(serializer.CodePolicyNotAllowed, err.Error(), err)
 	}
 	defer fs.Recycle()
 
-	// 获取回调会话
+	// 獲取回調工作階段
 	callbackSessionRaw, _ := c.Get("callbackSession")
 	callbackSession := callbackSessionRaw.(*serializer.UploadSession)
 	callbackBody := service.GetBody(callbackSession)
 
-	// 获取父目录
+	// 獲取父目錄
 	exist, parentFolder := fs.IsPathExist(callbackSession.VirtualPath)
 	if !exist {
 		newFolder, err := fs.CreateDirectory(context.Background(), callbackSession.VirtualPath)
 		if err != nil {
-			return serializer.Err(serializer.CodeParamErr, "指定目录不存在", err)
+			return serializer.Err(serializer.CodeParamErr, "指定目錄不存在", err)
 		}
 		parentFolder = newFolder
 	}
 
-	// 创建文件头
+	// 建立文件頭
 	fileHeader := local.FileStream{
 		Size:        callbackBody.Size,
 		VirtualPath: callbackSession.VirtualPath,
@@ -161,23 +161,23 @@ func ProcessCallback(service CallbackProcessService, c *gin.Context) serializer.
 	ctx := context.WithValue(context.Background(), fsctx.FileHeaderCtx, fileHeader)
 	ctx = context.WithValue(ctx, fsctx.SavePathCtx, callbackBody.SourceName)
 
-	// 添加钩子
+	// 添加鉤子
 	fs.Use("BeforeAddFile", filesystem.HookValidateFile)
 	fs.Use("BeforeAddFile", filesystem.HookValidateCapacity)
 	fs.Use("AfterValidateFailed", filesystem.HookGiveBackCapacity)
 	fs.Use("AfterValidateFailed", filesystem.HookDeleteTempFile)
 	fs.Use("BeforeAddFileFailed", filesystem.HookDeleteTempFile)
 
-	// 向数据库中添加文件
+	// 向資料庫中添加文件
 	file, err := fs.AddFile(ctx, parentFolder)
 	if err != nil {
 		return serializer.Err(serializer.CodeUploadFailed, err.Error(), err)
 	}
 
-	// 如果是图片，则更新图片信息
+	// 如果是圖片，則更新圖片訊息
 	if callbackBody.PicInfo != "" {
 		if err := file.UpdatePicInfo(callbackBody.PicInfo); err != nil {
-			util.Log().Debug("无法更新回调文件的图片信息：%s", err)
+			util.Log().Debug("無法更新回調文件的圖片訊息：%s", err)
 		}
 	}
 
@@ -186,30 +186,30 @@ func ProcessCallback(service CallbackProcessService, c *gin.Context) serializer.
 	}
 }
 
-// PreProcess 对OneDrive客户端回调进行预处理验证
+// PreProcess 對OneDrive用戶端回調進行預處理驗證
 func (service *OneDriveCallback) PreProcess(c *gin.Context) serializer.Response {
-	// 创建文件系统
+	// 建立文件系統
 	fs, err := filesystem.NewFileSystemFromCallback(c)
 	if err != nil {
 		return serializer.Err(serializer.CodePolicyNotAllowed, err.Error(), err)
 	}
 	defer fs.Recycle()
 
-	// 获取回调会话
+	// 獲取回調工作階段
 	callbackSessionRaw, _ := c.Get("callbackSession")
 	callbackSession := callbackSessionRaw.(*serializer.UploadSession)
 
-	// 获取文件信息
+	// 獲取文件訊息
 	info, err := fs.Handler.(onedrive.Driver).Client.Meta(context.Background(), service.ID, "")
 	if err != nil {
-		return serializer.Err(serializer.CodeUploadFailed, "文件元信息查询失败", err)
+		return serializer.Err(serializer.CodeUploadFailed, "文件元訊息查詢失敗", err)
 	}
 
-	// 验证与回调会话中是否一致
+	// 驗證與回調工作階段中是否一致
 	actualPath := strings.TrimPrefix(callbackSession.SavePath, "/")
 	isSizeCheckFailed := callbackSession.Size != info.Size
 
-	// SharePoint 会对 Office 文档增加 meta data 导致文件大小不一致，这里增加 10 KB 宽容
+	// SharePoint 會對 Office 文件增加 meta data 導致檔案大小不一致，這裡增加 10 KB 寬容
 	// See: https://github.com/OneDrive/onedrive-api-docs/issues/935
 	if strings.Contains(fs.Policy.OptionsSerialized.OdDriver, "sharepoint.com") && isSizeCheckFailed && (info.Size > callbackSession.Size) && (info.Size-callbackSession.Size <= 10240) {
 		isSizeCheckFailed = false
@@ -217,61 +217,61 @@ func (service *OneDriveCallback) PreProcess(c *gin.Context) serializer.Response 
 
 	if isSizeCheckFailed || info.GetSourcePath() != actualPath {
 		fs.Handler.(onedrive.Driver).Client.Delete(context.Background(), []string{info.GetSourcePath()})
-		return serializer.Err(serializer.CodeUploadFailed, "文件信息不一致", err)
+		return serializer.Err(serializer.CodeUploadFailed, "文件訊息不一致", err)
 	}
 	service.Meta = info
 	return ProcessCallback(service, c)
 }
 
-// PreProcess 对COS客户端回调进行预处理
+// PreProcess 對COS用戶端回調進行預處理
 func (service *COSCallback) PreProcess(c *gin.Context) serializer.Response {
-	// 创建文件系统
+	// 建立文件系統
 	fs, err := filesystem.NewFileSystemFromCallback(c)
 	if err != nil {
 		return serializer.Err(serializer.CodePolicyNotAllowed, err.Error(), err)
 	}
 	defer fs.Recycle()
 
-	// 获取回调会话
+	// 獲取回調工作階段
 	callbackSessionRaw, _ := c.Get("callbackSession")
 	callbackSession := callbackSessionRaw.(*serializer.UploadSession)
 
-	// 获取文件信息
+	// 獲取文件訊息
 	info, err := fs.Handler.(cos.Driver).Meta(context.Background(), callbackSession.SavePath)
 	if err != nil {
-		return serializer.Err(serializer.CodeUploadFailed, "文件信息不一致", err)
+		return serializer.Err(serializer.CodeUploadFailed, "文件訊息不一致", err)
 	}
 
-	// 验证实际文件信息与回调会话中是否一致
+	// 驗證實際文件訊息與回調工作階段中是否一致
 	if callbackSession.Size != info.Size || callbackSession.Key != info.CallbackKey {
-		return serializer.Err(serializer.CodeUploadFailed, "文件信息不一致", err)
+		return serializer.Err(serializer.CodeUploadFailed, "文件訊息不一致", err)
 	}
 
 	return ProcessCallback(service, c)
 }
 
-// PreProcess 对S3客户端回调进行预处理
+// PreProcess 對S3用戶端回調進行預處理
 func (service *S3Callback) PreProcess(c *gin.Context) serializer.Response {
-	// 创建文件系统
+	// 建立文件系統
 	fs, err := filesystem.NewFileSystemFromCallback(c)
 	if err != nil {
 		return serializer.Err(serializer.CodePolicyNotAllowed, err.Error(), err)
 	}
 	defer fs.Recycle()
 
-	// 获取回调会话
+	// 獲取回調工作階段
 	callbackSessionRaw, _ := c.Get("callbackSession")
 	callbackSession := callbackSessionRaw.(*serializer.UploadSession)
 
-	// 获取文件信息
+	// 獲取文件訊息
 	info, err := fs.Handler.(s3.Driver).Meta(context.Background(), callbackSession.SavePath)
 	if err != nil {
-		return serializer.Err(serializer.CodeUploadFailed, "文件信息不一致", err)
+		return serializer.Err(serializer.CodeUploadFailed, "文件訊息不一致", err)
 	}
 
-	// 验证实际文件信息与回调会话中是否一致
+	// 驗證實際文件訊息與回調工作階段中是否一致
 	if callbackSession.Size != info.Size || service.Etag != info.Etag {
-		return serializer.Err(serializer.CodeUploadFailed, "文件信息不一致", err)
+		return serializer.Err(serializer.CodeUploadFailed, "文件訊息不一致", err)
 	}
 
 	return ProcessCallback(service, c)

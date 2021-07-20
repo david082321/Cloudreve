@@ -23,7 +23,7 @@ import (
 
 var mock sqlmock.Sqlmock
 
-// TestMain 初始化数据库Mock
+// TestMain 初始化資料庫Mock
 func TestMain(m *testing.M) {
 	var db *sql.DB
 	var err error
@@ -39,7 +39,7 @@ func TestMain(m *testing.M) {
 func TestGetOAuthEndpoint(t *testing.T) {
 	asserts := assert.New(t)
 
-	// URL解析失败
+	// URL解析失敗
 	{
 		client := Client{
 			Endpoints: &Endpoints{
@@ -135,7 +135,7 @@ func TestClient_ObtainToken(t *testing.T) {
 	}
 	client.Endpoints.OAuthEndpoints = client.getOAuthEndpoint()
 
-	// 刷新Token 成功
+	// 重新整理Token 成功
 	{
 		clientMock := ClientMock{}
 		clientMock.On(
@@ -160,7 +160,7 @@ func TestClient_ObtainToken(t *testing.T) {
 		asserts.Equal("i am token", res.AccessToken)
 	}
 
-	// 重新获取 无法发送请求
+	// 重新獲取 無法發送請求
 	{
 		clientMock := ClientMock{}
 		clientMock.On(
@@ -180,7 +180,7 @@ func TestClient_ObtainToken(t *testing.T) {
 		asserts.Nil(res)
 	}
 
-	// 刷新Token 无法获取响应正文
+	// 重新整理Token 無法獲取響應正文
 	{
 		clientMock := ClientMock{}
 		clientMock.On(
@@ -205,7 +205,7 @@ func TestClient_ObtainToken(t *testing.T) {
 		asserts.Equal("read error", err.Error())
 	}
 
-	// 刷新Token OneDrive返回错误
+	// 重新整理Token OneDrive返回錯誤
 	{
 		clientMock := ClientMock{}
 		clientMock.On(
@@ -230,7 +230,7 @@ func TestClient_ObtainToken(t *testing.T) {
 		asserts.Equal("", err.Error())
 	}
 
-	// 刷新Token OneDrive未知响应
+	// 重新整理Token OneDrive未知響應
 	{
 		clientMock := ClientMock{}
 		clientMock.On(
@@ -267,7 +267,7 @@ func TestClient_UpdateCredential(t *testing.T) {
 	}
 	client.Endpoints.OAuthEndpoints = client.getOAuthEndpoint()
 
-	// 无有效的RefreshToken
+	// 無有效的RefreshToken
 	{
 		err := client.UpdateCredential(context.Background())
 		asserts.Equal(ErrInvalidRefreshToken, err)
@@ -310,7 +310,7 @@ func TestClient_UpdateCredential(t *testing.T) {
 		asserts.Equal("i am token", cacheCredential.AccessToken)
 	}
 
-	// OneDrive返回错误
+	// OneDrive返回錯誤
 	{
 		cache.Deletes([]string{"TestClient_UpdateCredential"}, "onedrive_")
 		clientMock := ClientMock{}
@@ -336,7 +336,7 @@ func TestClient_UpdateCredential(t *testing.T) {
 		asserts.Error(err)
 	}
 
-	// 从缓存中获取
+	// 從快取中獲取
 	{
 		cache.Set("onedrive_TestClient_UpdateCredential", Credential{
 			ExpiresIn:    time.Now().Add(time.Duration(10) * time.Second).Unix(),
@@ -352,7 +352,7 @@ func TestClient_UpdateCredential(t *testing.T) {
 		asserts.Equal("RefreshToken", client.Credential.RefreshToken)
 	}
 
-	// 无需重新获取
+	// 無需重新獲取
 	{
 		client.Credential = &Credential{
 			RefreshToken: "old_refresh_token",

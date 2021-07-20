@@ -18,7 +18,7 @@ func TestGetPublicKey(t *testing.T) {
 		ResNil  bool
 		Error   bool
 	}{
-		// Header解码失败
+		// Header解碼失敗
 		{
 			Request: http.Request{
 				Header: http.Header{
@@ -28,7 +28,7 @@ func TestGetPublicKey(t *testing.T) {
 			ResNil: true,
 			Error:  true,
 		},
-		// 公钥URL无效
+		// 公鑰URL無效
 		{
 			Request: http.Request{
 				Header: http.Header{
@@ -38,7 +38,7 @@ func TestGetPublicKey(t *testing.T) {
 			ResNil: true,
 			Error:  true,
 		},
-		// 请求失败
+		// 請求失敗
 		{
 			Request: http.Request{
 				Header: http.Header{
@@ -75,7 +75,7 @@ func TestGetPublicKey(t *testing.T) {
 		}
 	}
 
-	// 测试缓存
+	// 測試快取
 	asserts.NoError(cache.Set("oss_public_key", []byte("123"), 0))
 	res, err := GetPublicKey(nil)
 	asserts.NoError(err)
@@ -104,7 +104,7 @@ C0fTXv+nvlmklvkcolvpvXLTjaxUHR3W9LXxQ2EHXAJfCB+6H2YF1k8CAwEAAQ==
 		asserts.NoError(VerifyCallbackSignature(&r))
 	}
 
-	// 签名错误
+	// 簽名錯誤
 	{
 		asserts.NoError(cache.Set("oss_public_key", []byte(testPubKey), 0))
 		r := http.Request{
@@ -118,7 +118,7 @@ C0fTXv+nvlmklvkcolvpvXLTjaxUHR3W9LXxQ2EHXAJfCB+6H2YF1k8CAwEAAQ==
 		asserts.Error(VerifyCallbackSignature(&r))
 	}
 
-	// GetPubKey 失败
+	// GetPubKey 失敗
 	{
 		asserts.NoError(cache.Deletes([]string{"oss_public_key"}, ""))
 		r := http.Request{
@@ -131,11 +131,11 @@ C0fTXv+nvlmklvkcolvpvXLTjaxUHR3W9LXxQ2EHXAJfCB+6H2YF1k8CAwEAAQ==
 		asserts.Error(VerifyCallbackSignature(&r))
 	}
 
-	// getRequestMD5 失败
+	// getRequestMD5 失敗
 	{
 		asserts.NoError(cache.Set("oss_public_key", []byte(testPubKey), 0))
 		r := http.Request{
-			URL: &url.URL{Path: "%测试"},
+			URL: &url.URL{Path: "%測試"},
 			Header: map[string][]string{
 				"Authorization":     {"e5LwzwTkP9AFAItT4YzvdJOHd0Y0wqTMWhsV/h5SG90JYGAmMd+8LQyj96R+9qUfJWjMt6suuUh7LaOryR87Dw=="},
 				"X-Oss-Pub-Key-Url": {"aHR0cHM6Ly9nb3NzcHVibGljLmFsaWNkbi5jb20vY2FsbGJhY2tfcHViX2tleV92MS5wZW0="},
@@ -145,7 +145,7 @@ C0fTXv+nvlmklvkcolvpvXLTjaxUHR3W9LXxQ2EHXAJfCB+6H2YF1k8CAwEAAQ==
 		asserts.Error(VerifyCallbackSignature(&r))
 	}
 
-	// 无 Authorization 头
+	// 無 Authorization 頭
 	{
 		asserts.NoError(cache.Set("oss_public_key", []byte(testPubKey), 0))
 		r := http.Request{
@@ -172,7 +172,7 @@ C0fTXv+nvlmklvkcolvpvXLTjaxUHR3W9LXxQ2EHXAJfCB+6H2YF1k8CAwEAAQ==
 		asserts.Error(VerifyCallbackSignature(&r))
 	}
 
-	// ParsePKIXPublicKey出错
+	// ParsePKIXPublicKey出錯
 	{
 		asserts.NoError(cache.Set("oss_public_key", []byte("-----BEGIN PUBLIC KEY-----\n-----END PUBLIC KEY-----"), 0))
 		r := http.Request{

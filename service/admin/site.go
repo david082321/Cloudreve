@@ -10,46 +10,46 @@ import (
 	"github.com/cloudreve/Cloudreve/v3/pkg/serializer"
 )
 
-// NoParamService 无需参数的服务
+// NoParamService 無需參數的服務
 type NoParamService struct {
 }
 
-// BatchSettingChangeService 设定批量更改服务
+// BatchSettingChangeService 設定批次更改服務
 type BatchSettingChangeService struct {
 	Options []SettingChangeService `json:"options"`
 }
 
-// SettingChangeService  设定更改服务
+// SettingChangeService  設定更改服務
 type SettingChangeService struct {
 	Key   string `json:"key" binding:"required"`
 	Value string `json:"value"`
 }
 
-// BatchSettingGet 设定批量获取服务
+// BatchSettingGet 設定批次獲取服務
 type BatchSettingGet struct {
 	Keys []string `json:"keys"`
 }
 
-// MailTestService 邮件测试服务
+// MailTestService 郵件測試服務
 type MailTestService struct {
 	Email string `json:"to" binding:"email"`
 }
 
-// Send 发送测试邮件
+// Send 發送測試郵件
 func (service *MailTestService) Send() serializer.Response {
-	if err := email.Send(service.Email, "Cloudreve发信测试", "这是一封测试邮件，用于测试 Cloudreve 发信设置。"); err != nil {
-		return serializer.Err(serializer.CodeInternalSetting, "发信失败, "+err.Error(), nil)
+	if err := email.Send(service.Email, "Cloudreve發信測試", "這是一封測試郵件，用於測試 Cloudreve 發信設定。"); err != nil {
+		return serializer.Err(serializer.CodeInternalSetting, "發信失敗, "+err.Error(), nil)
 	}
 	return serializer.Response{}
 }
 
-// Get 获取设定值
+// Get 獲取設定值
 func (service *BatchSettingGet) Get() serializer.Response {
 	options := model.GetSettingByNames(service.Keys...)
 	return serializer.Response{Data: options}
 }
 
-// Change 批量更改站点设定
+// Change 批次更改站點設定
 func (service *BatchSettingChangeService) Change() serializer.Response {
 	cacheClean := make([]string, 0, len(service.Options))
 
@@ -57,7 +57,7 @@ func (service *BatchSettingChangeService) Change() serializer.Response {
 
 		if err := model.DB.Model(&model.Setting{}).Where("name = ?", setting.Key).Update("value", setting.Value).Error; err != nil {
 			cache.Deletes(cacheClean, "setting_")
-			return serializer.DBErr("设置 "+setting.Key+" 更新失败", err)
+			return serializer.DBErr("設定 "+setting.Key+" 更新失敗", err)
 		}
 
 		cacheClean = append(cacheClean, setting.Key)
@@ -68,9 +68,9 @@ func (service *BatchSettingChangeService) Change() serializer.Response {
 	return serializer.Response{}
 }
 
-// Summary 获取站点统计概况
+// Summary 獲取站點統計概況
 func (service *NoParamService) Summary() serializer.Response {
-	// 统计每日概况
+	// 統計每日概況
 	total := 12
 	files := make([]int, total)
 	users := make([]int, total)
@@ -88,7 +88,7 @@ func (service *NoParamService) Summary() serializer.Response {
 		model.DB.Model(&model.Share{}).Where("created_at BETWEEN ? AND ?", start, end).Count(&shares[day])
 	}
 
-	// 统计总数
+	// 統計總數
 	fileTotal := 0
 	userTotal := 0
 	publicShareTotal := 0
@@ -98,7 +98,7 @@ func (service *NoParamService) Summary() serializer.Response {
 	model.DB.Model(&model.Share{}).Where("password = ?", "").Count(&publicShareTotal)
 	model.DB.Model(&model.Share{}).Where("password <> ?", "").Count(&secretShareTotal)
 
-	// 获取版本信息
+	// 獲取版本訊息
 	versions := map[string]string{
 		"backend": conf.BackendVersion,
 		"db":      conf.RequiredDBVersion,

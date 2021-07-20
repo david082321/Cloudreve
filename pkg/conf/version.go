@@ -1,16 +1,16 @@
 package conf
 
-// BackendVersion 当前后端版本号
+// BackendVersion 目前後端版本號
 var BackendVersion = "3.3.2"
 
-// RequiredDBVersion 与当前版本匹配的数据库版本
+// RequiredDBVersion 與目前版本匹配的資料庫版本
 var RequiredDBVersion = "3.3.2"
 
-// RequiredStaticVersion 与当前版本匹配的静态资源版本
+// RequiredStaticVersion 與目前版本匹配的靜態資源版本
 var RequiredStaticVersion = "3.3.2"
 
-// IsPro 是否为Pro版本
+// IsPro 是否為Pro版本
 var IsPro = "false"
 
-// LastCommit 最后commit id
+// LastCommit 最後commit id
 var LastCommit = "a11f819"

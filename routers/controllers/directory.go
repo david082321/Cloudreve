@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// CreateDirectory 创建目录
+// CreateDirectory 建立目錄
 func CreateDirectory(c *gin.Context) {
 	var service explorer.DirectoryService
 	if err := c.ShouldBindJSON(&service); err == nil {
@@ -16,7 +16,7 @@ func CreateDirectory(c *gin.Context) {
 	}
 }
 
-// ListDirectory 列出目录下内容
+// ListDirectory 列出目錄下內容
 func ListDirectory(c *gin.Context) {
 	var service explorer.DirectoryService
 	if err := c.ShouldBindUri(&service); err == nil {

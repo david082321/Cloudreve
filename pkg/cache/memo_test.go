@@ -30,7 +30,7 @@ func TestMemoStore_Get(t *testing.T) {
 	asserts := assert.New(t)
 	store := NewMemoStore()
 
-	// 正常情况
+	// 正常情況
 	{
 		_ = store.Set("string", "string_val", -1)
 		val, ok := store.Get("string")
@@ -45,7 +45,7 @@ func TestMemoStore_Get(t *testing.T) {
 		asserts.False(ok)
 	}
 
-	// 存储struct
+	// 儲存struct
 	{
 		type testStruct struct {
 			key int
@@ -59,7 +59,7 @@ func TestMemoStore_Get(t *testing.T) {
 		asserts.Equal(test, res)
 	}
 
-	// 过期
+	// 過期
 	{
 		_ = store.Set("string", "string_val", 1)
 		time.Sleep(time.Duration(2) * time.Second)

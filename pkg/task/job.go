@@ -5,25 +5,25 @@ import (
 	"github.com/cloudreve/Cloudreve/v3/pkg/util"
 )
 
-// 任务类型
+// 任務類型
 const (
-	// CompressTaskType 压缩任务
+	// CompressTaskType 壓縮任務
 	CompressTaskType = iota
-	// DecompressTaskType 解压缩任务
+	// DecompressTaskType 解壓縮任務
 	DecompressTaskType
-	// TransferTaskType 中转任务
+	// TransferTaskType 中轉任務
 	TransferTaskType
-	// ImportTaskType 导入任务
+	// ImportTaskType 匯入任務
 	ImportTaskType
 )
 
-// 任务状态
+// 任務狀態
 const (
-	// Queued 排队中
+	// Queued 排隊中
 	Queued = iota
-	// Processing 处理中
+	// Processing 處理中
 	Processing
-	// Error 失败
+	// Error 失敗
 	Error
 	// Canceled 取消
 	Canceled
@@ -31,17 +31,17 @@ const (
 	Complete
 )
 
-// 任务进度
+// 任務進度
 const (
 	// PendingProgress 等待中
 	PendingProgress = iota
-	// Compressing 压缩中
+	// Compressing 壓縮中
 	CompressingProgress
-	// Decompressing 解压缩中
+	// Decompressing 解壓縮中
 	DecompressingProgress
-	// Downloading 下载中
+	// Downloading 下載中
 	DownloadingProgress
-	// Transferring 转存中
+	// Transferring 轉存中
 	TransferringProgress
 	// ListingProgress 索引中
 	ListingProgress
@@ -49,25 +49,25 @@ const (
 	InsertingProgress
 )
 
-// Job 任务接口
+// Job 任務介面
 type Job interface {
-	Type() int           // 返回任务类型
-	Creator() uint       // 返回创建者ID
-	Props() string       // 返回序列化后的任务属性
-	Model() *model.Task  // 返回对应的数据库模型
-	SetStatus(int)       // 设定任务状态
-	Do()                 // 开始执行任务
-	SetError(*JobError)  // 设定任务失败信息
-	GetError() *JobError // 获取任务执行结果，返回nil表示成功完成执行
+	Type() int           // 返回任務類型
+	Creator() uint       // 返回建立者ID
+	Props() string       // 返回序列化後的任務屬性
+	Model() *model.Task  // 返回對應的資料庫模型
+	SetStatus(int)       // 設定任務狀態
+	Do()                 // 開始執行任務
+	SetError(*JobError)  // 設定任務失敗訊息
+	GetError() *JobError // 獲取任務執行結果，返回nil表示成功完成執行
 }
 
-// JobError 任务失败信息
+// JobError 任務失敗訊息
 type JobError struct {
 	Msg   string `json:"msg,omitempty"`
 	Error string `json:"error,omitempty"`
 }
 
-// Record 将任务记录到数据库中
+// Record 將任務記錄到資料庫中
 func Record(job Job) (*model.Task, error) {
 	record := model.Task{
 		Status:   Queued,
@@ -81,18 +81,18 @@ func Record(job Job) (*model.Task, error) {
 	return &record, err
 }
 
-// Resume 从数据库中恢复未完成任务
+// Resume 從資料庫中復原未完成任務
 func Resume() {
 	tasks := model.GetTasksByStatus(Queued, Processing)
 	if len(tasks) == 0 {
 		return
 	}
-	util.Log().Info("从数据库中恢复 %d 个未完成任务", len(tasks))
+	util.Log().Info("從資料庫中復原 %d 個未完成任務", len(tasks))
 
 	for i := 0; i < len(tasks); i++ {
 		job, err := GetJobFromModel(&tasks[i])
 		if err != nil {
-			util.Log().Warning("无法恢复任务，%s", err)
+			util.Log().Warning("無法復原任務，%s", err)
 			continue
 		}
 
@@ -100,7 +100,7 @@ func Resume() {
 	}
 }
 
-// GetJobFromModel 从数据库给定模型获取任务
+// GetJobFromModel 從資料庫給定模型獲取任務
 func GetJobFromModel(task *model.Task) (Job, error) {
 	switch task.Type {
 	case CompressTaskType:

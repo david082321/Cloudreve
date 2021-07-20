@@ -23,7 +23,7 @@ import (
 
 var mock sqlmock.Sqlmock
 
-// TestMain 初始化数据库Mock
+// TestMain 初始化資料庫Mock
 func TestMain(m *testing.M) {
 	var db *sql.DB
 	var err error
@@ -42,14 +42,14 @@ func TestCurrentUser(t *testing.T) {
 	c, _ := gin.CreateTestContext(rec)
 	c.Request, _ = http.NewRequest("GET", "/test", nil)
 
-	//session为空
+	//session為空
 	sessionFunc := Session("233")
 	sessionFunc(c)
 	CurrentUser()(c)
 	user, _ := c.Get("user")
 	asserts.Nil(user)
 
-	//session正确
+	//session正確
 	c, _ = gin.CreateTestContext(rec)
 	c.Request, _ = http.NewRequest("GET", "/test", nil)
 	sessionFunc(c)
@@ -70,11 +70,11 @@ func TestAuthRequired(t *testing.T) {
 	c.Request, _ = http.NewRequest("GET", "/test", nil)
 	AuthRequiredFunc := AuthRequired()
 
-	// 未登录
+	// 未登入
 	AuthRequiredFunc(c)
 	asserts.NotNil(c)
 
-	// 类型错误
+	// 類型錯誤
 	c.Set("user", 123)
 	AuthRequiredFunc(c)
 	asserts.NotNil(c)
@@ -93,7 +93,7 @@ func TestSignRequired(t *testing.T) {
 	c.Request, _ = http.NewRequest("GET", "/test", nil)
 	SignRequiredFunc := SignRequired()
 
-	// 鉴权失败
+	// 鑒權失敗
 	SignRequiredFunc(c)
 	asserts.NotNil(c)
 
@@ -107,14 +107,14 @@ func TestWebDAVAuth(t *testing.T) {
 	rec := httptest.NewRecorder()
 	AuthFunc := WebDAVAuth()
 
-	// options请求跳过验证
+	// options請求跳過驗證
 	{
 		c, _ := gin.CreateTestContext(rec)
 		c.Request, _ = http.NewRequest("OPTIONS", "/test", nil)
 		AuthFunc(c)
 	}
 
-	// 请求HTTP Basic Auth
+	// 請求HTTP Basic Auth
 	{
 		c, _ := gin.CreateTestContext(rec)
 		c.Request, _ = http.NewRequest("POST", "/test", nil)
@@ -122,7 +122,7 @@ func TestWebDAVAuth(t *testing.T) {
 		asserts.NotEmpty(c.Writer.Header()["WWW-Authenticate"])
 	}
 
-	// 用户名不存在
+	// 使用者名稱不存在
 	{
 		c, _ := gin.CreateTestContext(rec)
 		c.Request, _ = http.NewRequest("POST", "/test", nil)
@@ -138,7 +138,7 @@ func TestWebDAVAuth(t *testing.T) {
 		asserts.Equal(c.Writer.Status(), http.StatusUnauthorized)
 	}
 
-	// 密码错误
+	// 密碼錯誤
 	{
 		c, _ := gin.CreateTestContext(rec)
 		c.Request, _ = http.NewRequest("POST", "/test", nil)
@@ -149,14 +149,14 @@ func TestWebDAVAuth(t *testing.T) {
 			WillReturnRows(
 				sqlmock.NewRows([]string{"id", "password", "email", "options"}).AddRow(1, "123", "who@cloudreve.org", "{}"),
 			)
-		// 查找密码
+		// 尋找密碼
 		mock.ExpectQuery("SELECT(.+)webdav(.+)").WillReturnRows(sqlmock.NewRows([]string{"id"}))
 		AuthFunc(c)
 		asserts.NoError(mock.ExpectationsWereMet())
 		asserts.Equal(c.Writer.Status(), http.StatusUnauthorized)
 	}
 
-	//未启用 WebDAV
+	//未啟用 WebDAV
 	{
 		c, _ := gin.CreateTestContext(rec)
 		c.Request, _ = http.NewRequest("POST", "/test", nil)
@@ -175,7 +175,7 @@ func TestWebDAVAuth(t *testing.T) {
 					),
 			)
 		mock.ExpectQuery("SELECT(.+)groups(.+)").WillReturnRows(sqlmock.NewRows([]string{"id", "web_dav_enabled"}).AddRow(1, false))
-		// 查找密码
+		// 尋找密碼
 		mock.ExpectQuery("SELECT(.+)webdav(.+)").WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 		AuthFunc(c)
 		asserts.NoError(mock.ExpectationsWereMet())
@@ -201,7 +201,7 @@ func TestWebDAVAuth(t *testing.T) {
 					),
 			)
 		mock.ExpectQuery("SELECT(.+)groups(.+)").WillReturnRows(sqlmock.NewRows([]string{"id", "web_dav_enabled"}).AddRow(1, true))
-		// 查找密码
+		// 尋找密碼
 		mock.ExpectQuery("SELECT(.+)webdav(.+)").WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 		AuthFunc(c)
 		asserts.NoError(mock.ExpectationsWereMet())
@@ -261,7 +261,7 @@ func TestRemoteCallbackAuth(t *testing.T) {
 		asserts.True(c.IsAborted())
 	}
 
-	// 用户不存在
+	// 使用者不存在
 	{
 		cache.Set(
 			"callback_testCallBackRemote",
@@ -287,7 +287,7 @@ func TestRemoteCallbackAuth(t *testing.T) {
 		asserts.True(c.IsAborted())
 	}
 
-	// 签名错误
+	// 簽名錯誤
 	{
 		cache.Set(
 			"callback_testCallBackRemote",
@@ -315,7 +315,7 @@ func TestRemoteCallbackAuth(t *testing.T) {
 		asserts.True(c.IsAborted())
 	}
 
-	// Callback Key 为空
+	// Callback Key 為空
 	{
 		c, _ := gin.CreateTestContext(rec)
 		c.Request, _ = http.NewRequest("POST", "/api/v3/callback/remote", nil)
@@ -329,7 +329,7 @@ func TestQiniuCallbackAuth(t *testing.T) {
 	rec := httptest.NewRecorder()
 	AuthFunc := QiniuCallbackAuth()
 
-	// Callback Key 相关验证失败
+	// Callback Key 相關驗證失敗
 	{
 		c, _ := gin.CreateTestContext(rec)
 		c.Params = []gin.Param{
@@ -372,7 +372,7 @@ func TestQiniuCallbackAuth(t *testing.T) {
 		asserts.False(c.IsAborted())
 	}
 
-	// 验证失败
+	// 驗證失敗
 	{
 		cache.Set(
 			"callback_testCallBackQiniu",
@@ -410,7 +410,7 @@ func TestOSSCallbackAuth(t *testing.T) {
 	rec := httptest.NewRecorder()
 	AuthFunc := OSSCallbackAuth()
 
-	// Callback Key 相关验证失败
+	// Callback Key 相關驗證失敗
 	{
 		c, _ := gin.CreateTestContext(rec)
 		c.Params = []gin.Param{
@@ -421,7 +421,7 @@ func TestOSSCallbackAuth(t *testing.T) {
 		asserts.True(c.IsAborted())
 	}
 
-	// 签名验证失败
+	// 簽名驗證失敗
 	{
 		cache.Set(
 			"callback_testCallBackOSS",
@@ -496,7 +496,7 @@ func TestUpyunCallbackAuth(t *testing.T) {
 	rec := httptest.NewRecorder()
 	AuthFunc := UpyunCallbackAuth()
 
-	// Callback Key 相关验证失败
+	// Callback Key 相關驗證失敗
 	{
 		c, _ := gin.CreateTestContext(rec)
 		c.Params = []gin.Param{
@@ -507,7 +507,7 @@ func TestUpyunCallbackAuth(t *testing.T) {
 		asserts.True(c.IsAborted())
 	}
 
-	// 无法获取请求正文
+	// 無法獲取請求正文
 	{
 		cache.Set(
 			"callback_testCallBackUpyun",
@@ -564,7 +564,7 @@ func TestUpyunCallbackAuth(t *testing.T) {
 		asserts.True(c.IsAborted())
 	}
 
-	// 签名不一致
+	// 簽名不一致
 	{
 		cache.Set(
 			"callback_testCallBackUpyun",
@@ -629,7 +629,7 @@ func TestOneDriveCallbackAuth(t *testing.T) {
 	rec := httptest.NewRecorder()
 	AuthFunc := OneDriveCallbackAuth()
 
-	// Callback Key 相关验证失败
+	// Callback Key 相關驗證失敗
 	{
 		c, _ := gin.CreateTestContext(rec)
 		c.Params = []gin.Param{
@@ -674,7 +674,7 @@ func TestCOSCallbackAuth(t *testing.T) {
 	rec := httptest.NewRecorder()
 	AuthFunc := COSCallbackAuth()
 
-	// Callback Key 相关验证失败
+	// Callback Key 相關驗證失敗
 	{
 		c, _ := gin.CreateTestContext(rec)
 		c.Params = []gin.Param{
@@ -719,7 +719,7 @@ func TestIsAdmin(t *testing.T) {
 	rec := httptest.NewRecorder()
 	testFunc := IsAdmin()
 
-	// 非管理员
+	// 非管理員
 	{
 		c, _ := gin.CreateTestContext(rec)
 		c.Set("user", &model.User{})
@@ -727,7 +727,7 @@ func TestIsAdmin(t *testing.T) {
 		asserts.True(c.IsAborted())
 	}
 
-	// 是管理员
+	// 是管理員
 	{
 		c, _ := gin.CreateTestContext(rec)
 		user := &model.User{}
@@ -737,7 +737,7 @@ func TestIsAdmin(t *testing.T) {
 		asserts.False(c.IsAborted())
 	}
 
-	// 初始用户，非管理组
+	// 初始使用者，非管理組
 	{
 		c, _ := gin.CreateTestContext(rec)
 		user := &model.User{}
@@ -754,7 +754,7 @@ func TestS3CallbackAuth(t *testing.T) {
 	rec := httptest.NewRecorder()
 	AuthFunc := S3CallbackAuth()
 
-	// Callback Key 相关验证失败
+	// Callback Key 相關驗證失敗
 	{
 		c, _ := gin.CreateTestContext(rec)
 		c.Params = []gin.Param{

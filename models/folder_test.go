@@ -26,7 +26,7 @@ func TestFolder_Create(t *testing.T) {
 	asserts.Equal(uint(5), fid)
 	asserts.NoError(mock.ExpectationsWereMet())
 
-	// 插入失败
+	// 插入失敗
 	mock.ExpectBegin()
 	mock.ExpectExec("INSERT(.+)").WillReturnError(errors.New("error"))
 	mock.ExpectRollback()
@@ -44,7 +44,7 @@ func TestFolder_GetChild(t *testing.T) {
 		Name:    "/",
 	}
 
-	// 目录存在
+	// 目錄存在
 	{
 		mock.ExpectQuery("SELECT(.+)").
 			WithArgs(5, 1, "sub").
@@ -56,7 +56,7 @@ func TestFolder_GetChild(t *testing.T) {
 		asserts.Equal("/", sub.Position)
 	}
 
-	// 目录不存在
+	// 目錄不存在
 	{
 		mock.ExpectQuery("SELECT(.+)").
 			WithArgs(5, 1, "sub").
@@ -99,19 +99,19 @@ func TestGetRecursiveChildFolderSQLite(t *testing.T) {
 	conf.DatabaseConfig.Type = "sqlite3"
 	asserts := assert.New(t)
 
-	// 测试目录结构
+	// 測試目錄結構
 	//      1
 	//     2  3
 	//   4  5   6
 
-	// 查询第一层
+	// 查詢第一層
 	mock.ExpectQuery("SELECT(.+)").
 		WithArgs(1, 1).
 		WillReturnRows(
 			sqlmock.NewRows([]string{"id", "name"}).
 				AddRow(1, "folder1"),
 		)
-	// 查询第二层
+	// 查詢第二層
 	mock.ExpectQuery("SELECT(.+)").
 		WithArgs(1, 1).
 		WillReturnRows(
@@ -119,7 +119,7 @@ func TestGetRecursiveChildFolderSQLite(t *testing.T) {
 				AddRow(2, "folder2").
 				AddRow(3, "folder3"),
 		)
-	// 查询第三层
+	// 查詢第三層
 	mock.ExpectQuery("SELECT(.+)").
 		WithArgs(1, 2, 3).
 		WillReturnRows(
@@ -128,7 +128,7 @@ func TestGetRecursiveChildFolderSQLite(t *testing.T) {
 				AddRow(5, "folder5").
 				AddRow(6, "folder6"),
 		)
-	// 查询第四层
+	// 查詢第四層
 	mock.ExpectQuery("SELECT(.+)").
 		WithArgs(1, 4, 5, 6).
 		WillReturnRows(
@@ -144,7 +144,7 @@ func TestGetRecursiveChildFolderSQLite(t *testing.T) {
 func TestDeleteFolderByIDs(t *testing.T) {
 	asserts := assert.New(t)
 
-	// 出错
+	// 出錯
 	{
 		mock.ExpectBegin()
 		mock.ExpectExec("DELETE(.+)").
@@ -169,7 +169,7 @@ func TestDeleteFolderByIDs(t *testing.T) {
 func TestGetFoldersByIDs(t *testing.T) {
 	asserts := assert.New(t)
 
-	// 出错
+	// 出錯
 	{
 		mock.ExpectQuery("SELECT(.+)").
 			WithArgs(1, 2, 3, 1).
@@ -194,19 +194,19 @@ func TestGetFoldersByIDs(t *testing.T) {
 
 func TestFolder_MoveOrCopyFileTo(t *testing.T) {
 	asserts := assert.New(t)
-	// 当前目录
+	// 目前目錄
 	folder := Folder{
 		Model:   gorm.Model{ID: 1},
 		OwnerID: 1,
 		Name:    "test",
 	}
-	// 目标目录
+	// 目標目錄
 	dstFolder := Folder{
 		Model: gorm.Model{ID: 10},
 		Name:  "dst",
 	}
 
-	// 复制文件
+	// 複製文件
 	{
 		mock.ExpectQuery("SELECT(.+)").
 			WithArgs(
@@ -235,7 +235,7 @@ func TestFolder_MoveOrCopyFileTo(t *testing.T) {
 		asserts.Equal(uint64(30), storage)
 	}
 
-	// 复制文件, 检索文件出错
+	// 複製文件, 檢索文件出錯
 	{
 		mock.ExpectQuery("SELECT(.+)").
 			WithArgs(
@@ -255,7 +255,7 @@ func TestFolder_MoveOrCopyFileTo(t *testing.T) {
 		asserts.Equal(uint64(0), storage)
 	}
 
-	// 复制文件,第二个文件插入出错
+	// 複製文件,第二個文件插入出錯
 	{
 		mock.ExpectQuery("SELECT(.+)").
 			WithArgs(
@@ -284,7 +284,7 @@ func TestFolder_MoveOrCopyFileTo(t *testing.T) {
 		asserts.Equal(uint64(10), storage)
 	}
 
-	// 移动文件 成功
+	// 移動文件 成功
 	{
 		mock.ExpectBegin()
 		mock.ExpectExec("UPDATE(.+)").
@@ -301,7 +301,7 @@ func TestFolder_MoveOrCopyFileTo(t *testing.T) {
 		asserts.Equal(uint64(0), storage)
 	}
 
-	// 移动文件 出错
+	// 移動文件 出錯
 	{
 		mock.ExpectBegin()
 		mock.ExpectExec("UPDATE(.+)").
@@ -322,22 +322,22 @@ func TestFolder_MoveOrCopyFileTo(t *testing.T) {
 func TestFolder_CopyFolderTo(t *testing.T) {
 	conf.DatabaseConfig.Type = "mysql"
 	asserts := assert.New(t)
-	// 父目录
+	// 父目錄
 	parFolder := Folder{
 		Model:   gorm.Model{ID: 9},
 		OwnerID: 1,
 	}
-	// 目标目录
+	// 目標目錄
 	dstFolder := Folder{
 		Model: gorm.Model{ID: 10},
 	}
 
-	// 测试复制目录结构
+	// 測試複製目錄結構
 	//       test(2)(5)
 	//    1(3)(6)    2.txt
 	//  3(4)(7) 4.txt
 
-	// 正常情况 成功
+	// 正常情況 成功
 	{
 		// GetRecursiveChildFolder
 		mock.ExpectQuery("SELECT(.+)").WithArgs(1, 2).WillReturnRows(sqlmock.NewRows([]string{"id", "parent_id"}).AddRow(2, 9))
@@ -345,7 +345,7 @@ func TestFolder_CopyFolderTo(t *testing.T) {
 		mock.ExpectQuery("SELECT(.+)").WithArgs(1, 3).WillReturnRows(sqlmock.NewRows([]string{"id", "parent_id"}).AddRow(4, 3))
 		mock.ExpectQuery("SELECT(.+)").WithArgs(1, 4).WillReturnRows(sqlmock.NewRows([]string{"id", "parent_id"}))
 
-		// 复制目录
+		// 複製目錄
 		mock.ExpectBegin()
 		mock.ExpectExec("INSERT(.+)").WillReturnResult(sqlmock.NewResult(5, 1))
 		mock.ExpectCommit()
@@ -356,7 +356,7 @@ func TestFolder_CopyFolderTo(t *testing.T) {
 		mock.ExpectExec("INSERT(.+)").WillReturnResult(sqlmock.NewResult(7, 1))
 		mock.ExpectCommit()
 
-		// 查找子文件
+		// 尋找子文件
 		mock.ExpectQuery("SELECT(.+)").
 			WithArgs(1, 2, 3, 4).
 			WillReturnRows(
@@ -365,7 +365,7 @@ func TestFolder_CopyFolderTo(t *testing.T) {
 					AddRow(2, "3.txt", 3, 20),
 			)
 
-		// 复制子文件
+		// 複製子文件
 		mock.ExpectBegin()
 		mock.ExpectExec("INSERT(.+)").WillReturnResult(sqlmock.NewResult(5, 1))
 		mock.ExpectCommit()
@@ -379,7 +379,7 @@ func TestFolder_CopyFolderTo(t *testing.T) {
 		asserts.Equal(uint64(30), size)
 	}
 
-	// 递归查询失败
+	// 遞迴查詢失敗
 	{
 		// GetRecursiveChildFolder
 		mock.ExpectQuery("SELECT(.+)").WithArgs(1, 2).WillReturnError(errors.New("error"))
@@ -390,7 +390,7 @@ func TestFolder_CopyFolderTo(t *testing.T) {
 		asserts.Equal(uint64(0), size)
 	}
 
-	// 父目录ID不存在
+	// 父目錄ID不存在
 	{
 		// GetRecursiveChildFolder
 		mock.ExpectQuery("SELECT(.+)").WithArgs(1, 2).WillReturnRows(sqlmock.NewRows([]string{"id", "parent_id"}).AddRow(2, 9))
@@ -398,7 +398,7 @@ func TestFolder_CopyFolderTo(t *testing.T) {
 		mock.ExpectQuery("SELECT(.+)").WithArgs(1, 3).WillReturnRows(sqlmock.NewRows([]string{"id", "parent_id"}).AddRow(4, 3))
 		mock.ExpectQuery("SELECT(.+)").WithArgs(1, 4).WillReturnRows(sqlmock.NewRows([]string{"id", "parent_id"}))
 
-		// 复制目录
+		// 複製目錄
 		mock.ExpectBegin()
 		mock.ExpectExec("INSERT(.+)").WillReturnResult(sqlmock.NewResult(5, 1))
 		mock.ExpectCommit()
@@ -409,7 +409,7 @@ func TestFolder_CopyFolderTo(t *testing.T) {
 		asserts.Equal(uint64(0), size)
 	}
 
-	// 查询子文件失败
+	// 查詢子文件失敗
 	{
 		// GetRecursiveChildFolder
 		mock.ExpectQuery("SELECT(.+)").WithArgs(1, 2).WillReturnRows(sqlmock.NewRows([]string{"id", "parent_id"}).AddRow(2, 9))
@@ -417,7 +417,7 @@ func TestFolder_CopyFolderTo(t *testing.T) {
 		mock.ExpectQuery("SELECT(.+)").WithArgs(1, 3).WillReturnRows(sqlmock.NewRows([]string{"id", "parent_id"}).AddRow(4, 3))
 		mock.ExpectQuery("SELECT(.+)").WithArgs(1, 4).WillReturnRows(sqlmock.NewRows([]string{"id", "parent_id"}))
 
-		// 复制目录
+		// 複製目錄
 		mock.ExpectBegin()
 		mock.ExpectExec("INSERT(.+)").WillReturnResult(sqlmock.NewResult(5, 1))
 		mock.ExpectCommit()
@@ -428,7 +428,7 @@ func TestFolder_CopyFolderTo(t *testing.T) {
 		mock.ExpectExec("INSERT(.+)").WillReturnResult(sqlmock.NewResult(7, 1))
 		mock.ExpectCommit()
 
-		// 查找子文件
+		// 尋找子文件
 		mock.ExpectQuery("SELECT(.+)").
 			WithArgs(1, 2, 3, 4).
 			WillReturnError(errors.New("error"))
@@ -439,7 +439,7 @@ func TestFolder_CopyFolderTo(t *testing.T) {
 		asserts.Equal(uint64(0), size)
 	}
 
-	// 复制文件  一个失败
+	// 複製文件  一個失敗
 	{
 		// GetRecursiveChildFolder
 		mock.ExpectQuery("SELECT(.+)").WithArgs(1, 2).WillReturnRows(sqlmock.NewRows([]string{"id", "parent_id"}).AddRow(2, 9))
@@ -447,7 +447,7 @@ func TestFolder_CopyFolderTo(t *testing.T) {
 		mock.ExpectQuery("SELECT(.+)").WithArgs(1, 3).WillReturnRows(sqlmock.NewRows([]string{"id", "parent_id"}).AddRow(4, 3))
 		mock.ExpectQuery("SELECT(.+)").WithArgs(1, 4).WillReturnRows(sqlmock.NewRows([]string{"id", "parent_id"}))
 
-		// 复制目录
+		// 複製目錄
 		mock.ExpectBegin()
 		mock.ExpectExec("INSERT(.+)").WillReturnResult(sqlmock.NewResult(5, 1))
 		mock.ExpectCommit()
@@ -458,7 +458,7 @@ func TestFolder_CopyFolderTo(t *testing.T) {
 		mock.ExpectExec("INSERT(.+)").WillReturnResult(sqlmock.NewResult(7, 1))
 		mock.ExpectCommit()
 
-		// 查找子文件
+		// 尋找子文件
 		mock.ExpectQuery("SELECT(.+)").
 			WithArgs(1, 2, 3, 4).
 			WillReturnRows(
@@ -467,7 +467,7 @@ func TestFolder_CopyFolderTo(t *testing.T) {
 					AddRow(2, "3.txt", 3, 20),
 			)
 
-		// 复制子文件
+		// 複製子文件
 		mock.ExpectBegin()
 		mock.ExpectExec("INSERT(.+)").WillReturnResult(sqlmock.NewResult(5, 1))
 		mock.ExpectCommit()
@@ -486,12 +486,12 @@ func TestFolder_CopyFolderTo(t *testing.T) {
 func TestFolder_MoveOrCopyFolderTo_Move(t *testing.T) {
 	conf.DatabaseConfig.Type = "mysql"
 	asserts := assert.New(t)
-	// 父目录
+	// 父目錄
 	parFolder := Folder{
 		Model:   gorm.Model{ID: 9},
 		OwnerID: 1,
 	}
-	// 目标目录
+	// 目標目錄
 	dstFolder := Folder{
 		Model: gorm.Model{ID: 10},
 	}
@@ -552,7 +552,7 @@ func TestTraceRoot(t *testing.T) {
 		asserts.NoError(mock.ExpectationsWereMet())
 	}
 
-	// 出现错误
+	// 出現錯誤
 	// 成功
 	{
 		mock.ExpectQuery("SELECT(.+)").WithArgs(5, 1).

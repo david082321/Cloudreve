@@ -9,31 +9,31 @@ import (
 	"github.com/cloudreve/Cloudreve/v3/pkg/serializer"
 )
 
-// AddUserService 用户添加服务
+// AddUserService 使用者添加服務
 type AddUserService struct {
 	User     model.User `json:"User" binding:"required"`
 	Password string     `json:"password"`
 }
 
-// UserService 用户ID服务
+// UserService 使用者ID服務
 type UserService struct {
 	ID uint `uri:"id" json:"id" binding:"required"`
 }
 
-// UserBatchService 用户批量操作服务
+// UserBatchService 使用者批次操作服務
 type UserBatchService struct {
 	ID []uint `json:"id" binding:"min=1"`
 }
 
-// Ban 封禁/解封用户
+// Ban 封禁/解封使用者
 func (service *UserService) Ban() serializer.Response {
 	user, err := model.GetUserByID(service.ID)
 	if err != nil {
-		return serializer.Err(serializer.CodeNotFound, "用户不存在", err)
+		return serializer.Err(serializer.CodeNotFound, "使用者不存在", err)
 	}
 
 	if user.ID == 1 {
-		return serializer.Err(serializer.CodeNoPermissionErr, "无法封禁初始用户", err)
+		return serializer.Err(serializer.CodeNoPermissionErr, "無法封禁初始使用者", err)
 	}
 
 	if user.Status == model.Active {
@@ -45,57 +45,57 @@ func (service *UserService) Ban() serializer.Response {
 	return serializer.Response{Data: user.Status}
 }
 
-// Delete 删除用户
+// Delete 刪除使用者
 func (service *UserBatchService) Delete() serializer.Response {
 	for _, uid := range service.ID {
 		user, err := model.GetUserByID(uid)
 		if err != nil {
-			return serializer.Err(serializer.CodeNotFound, "用户不存在", err)
+			return serializer.Err(serializer.CodeNotFound, "使用者不存在", err)
 		}
 
-		// 不能删除初始用户
+		// 不能刪除初始使用者
 		if uid == 1 {
-			return serializer.Err(serializer.CodeNoPermissionErr, "无法删除初始用户", err)
+			return serializer.Err(serializer.CodeNoPermissionErr, "無法刪除初始使用者", err)
 		}
 
-		// 删除与此用户相关的所有资源
+		// 刪除與此使用者相關的所有資源
 
 		fs, err := filesystem.NewFileSystem(&user)
-		// 删除所有文件
+		// 刪除所有文件
 		root, err := fs.User.Root()
 		if err != nil {
-			return serializer.Err(serializer.CodeNotFound, "无法找到用户根目录", err)
+			return serializer.Err(serializer.CodeNotFound, "無法找到使用者根目錄", err)
 		}
 		fs.Delete(context.Background(), []uint{root.ID}, []uint{}, false)
 
-		// 删除相关任务
+		// 刪除相關任務
 		model.DB.Where("user_id = ?", uid).Delete(&model.Download{})
 		model.DB.Where("user_id = ?", uid).Delete(&model.Task{})
 
-		// 删除标签
+		// 刪除標籤
 		model.DB.Where("user_id = ?", uid).Delete(&model.Tag{})
 
-		// 删除WebDAV账号
+		// 刪除WebDAV帳號
 		model.DB.Where("user_id = ?", uid).Delete(&model.Webdav{})
 
-		// 删除此用户
+		// 刪除此使用者
 		model.DB.Unscoped().Delete(user)
 
 	}
 	return serializer.Response{}
 }
 
-// Get 获取用户详情
+// Get 獲取使用者詳情
 func (service *UserService) Get() serializer.Response {
 	group, err := model.GetUserByID(service.ID)
 	if err != nil {
-		return serializer.Err(serializer.CodeNotFound, "用户不存在", err)
+		return serializer.Err(serializer.CodeNotFound, "使用者不存在", err)
 	}
 
 	return serializer.Response{Data: group}
 }
 
-// Add 添加用户
+// Add 添加使用者
 func (service *AddUserService) Add() serializer.Response {
 	if service.User.ID > 0 {
 
@@ -104,31 +104,31 @@ func (service *AddUserService) Add() serializer.Response {
 			user.SetPassword(service.Password)
 		}
 
-		// 只更新必要字段
+		// 只更新必要欄位
 		user.Nick = service.User.Nick
 		user.Email = service.User.Email
 		user.GroupID = service.User.GroupID
 		user.Status = service.User.Status
 
-		// 检查愚蠢操作
+		// 檢查愚蠢操作
 		if user.ID == 1 && user.GroupID != 1 {
-			return serializer.ParamErr("无法更改初始用户的用户组", nil)
+			return serializer.ParamErr("無法更改初始使用者的使用者群組", nil)
 		}
 
 		if err := model.DB.Save(&user).Error; err != nil {
-			return serializer.ParamErr("用户保存失败", err)
+			return serializer.ParamErr("使用者儲存失敗", err)
 		}
 	} else {
 		service.User.SetPassword(service.Password)
 		if err := model.DB.Create(&service.User).Error; err != nil {
-			return serializer.ParamErr("用户组添加失败", err)
+			return serializer.ParamErr("使用者群組添加失敗", err)
 		}
 	}
 
 	return serializer.Response{Data: service.User.ID}
 }
 
-// Users 列出用户
+// Users 列出使用者
 func (service *AdminListService) Users() serializer.Response {
 	var res []model.User
 	total := 0
@@ -151,13 +151,13 @@ func (service *AdminListService) Users() serializer.Response {
 		tx = tx.Where(search)
 	}
 
-	// 计算总数用于分页
+	// 計算總數用於分頁
 	tx.Count(&total)
 
-	// 查询记录
+	// 查詢記錄
 	tx.Set("gorm:auto_preload", true).Limit(service.PageSize).Offset((service.Page - 1) * service.PageSize).Find(&res)
 
-	// 补齐缺失用户组
+	// 補齊缺失使用者群組
 
 	return serializer.Response{Data: map[string]interface{}{
 		"total": total,

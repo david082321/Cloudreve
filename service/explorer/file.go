@@ -23,52 +23,52 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-// SingleFileService 对单文件进行操作的五福，path为文件完整路径
+// SingleFileService 對單文件進行操作的五福，path為文件完整路徑
 type SingleFileService struct {
 	Path string `uri:"path" json:"path" binding:"required,min=1,max=65535"`
 }
 
-// FileIDService 通过文件ID对文件进行操作的服务
+// FileIDService 透過文件ID對文件進行操作的服務
 type FileIDService struct {
 }
 
-// FileAnonymousGetService 匿名（外链）获取文件服务
+// FileAnonymousGetService 匿名（外鏈）獲取文件服務
 type FileAnonymousGetService struct {
 	ID   uint   `uri:"id" binding:"required,min=1"`
 	Name string `uri:"name" binding:"required"`
 }
 
-// DownloadService 文件下載服务
+// DownloadService 文件下載服務
 type DownloadService struct {
 	ID string `uri:"id" binding:"required"`
 }
 
-// SlaveDownloadService 从机文件下載服务
+// SlaveDownloadService 從機文件下載服務
 type SlaveDownloadService struct {
 	PathEncoded string `uri:"path" binding:"required"`
 	Name        string `uri:"name" binding:"required"`
 	Speed       int    `uri:"speed" binding:"min=0"`
 }
 
-// SlaveFileService 从机单文件文件相关服务
+// SlaveFileService 從機單文件文件相關服務
 type SlaveFileService struct {
 	PathEncoded string `uri:"path" binding:"required"`
 }
 
-// SlaveFilesService 从机多文件相关服务
+// SlaveFilesService 從機多文件相關服務
 type SlaveFilesService struct {
 	Files []string `json:"files" binding:"required,gt=0"`
 }
 
-// SlaveListService 从机列表服务
+// SlaveListService 從機列表服務
 type SlaveListService struct {
 	Path      string `json:"path" binding:"required,min=1,max=65535"`
 	Recursive bool   `json:"recursive"`
 }
 
-// New 创建新文件
+// New 建立新文件
 func (service *SingleFileService) Create(c *gin.Context) serializer.Response {
-	// 创建文件系统
+	// 建立文件系統
 	fs, err := filesystem.NewFileSystemFromContext(c)
 	if err != nil {
 		return serializer.Err(serializer.CodePolicyNotAllowed, err.Error(), err)
@@ -80,11 +80,11 @@ func (service *SingleFileService) Create(c *gin.Context) serializer.Response {
 	defer cancel()
 	ctx = context.WithValue(ctx, fsctx.DisableOverwrite, true)
 
-	// 给文件系统分配钩子
+	// 給文件系統分配鉤子
 	fs.Use("BeforeUpload", filesystem.HookValidateFile)
 	fs.Use("AfterUpload", filesystem.GenericAfterUpload)
 
-	// 上传空文件
+	// 上傳空文件
 	err = fs.Upload(ctx, local.FileStream{
 		File:        ioutil.NopCloser(strings.NewReader("")),
 		Size:        0,
@@ -100,9 +100,9 @@ func (service *SingleFileService) Create(c *gin.Context) serializer.Response {
 	}
 }
 
-// List 列出从机上的文件
+// List 列出從機上的文件
 func (service *SlaveListService) List(c *gin.Context) serializer.Response {
-	// 创建文件系统
+	// 建立文件系統
 	fs, err := filesystem.NewAnonymousFileSystem()
 	if err != nil {
 		return serializer.Err(serializer.CodePolicyNotAllowed, err.Error(), err)
@@ -111,7 +111,7 @@ func (service *SlaveListService) List(c *gin.Context) serializer.Response {
 
 	objects, err := fs.Handler.List(context.Background(), service.Path, service.Recursive)
 	if err != nil {
-		return serializer.Err(serializer.CodeIOFailed, "无法列取文件", err)
+		return serializer.Err(serializer.CodeIOFailed, "無法列取文件", err)
 	}
 
 	res, _ := json.Marshal(objects)
@@ -120,20 +120,20 @@ func (service *SlaveListService) List(c *gin.Context) serializer.Response {
 
 // DownloadArchived 下載已打包的多文件
 func (service *DownloadService) DownloadArchived(ctx context.Context, c *gin.Context) serializer.Response {
-	// 创建文件系统
+	// 建立文件系統
 	fs, err := filesystem.NewFileSystemFromContext(c)
 	if err != nil {
 		return serializer.Err(serializer.CodePolicyNotAllowed, err.Error(), err)
 	}
 	defer fs.Recycle()
 
-	// 查找打包的临时文件
+	// 尋找打包的暫存檔
 	zipPath, exist := cache.Get("archive_" + service.ID)
 	if !exist {
-		return serializer.Err(404, "归档文件不存在", nil)
+		return serializer.Err(404, "歸檔文件不存在", nil)
 	}
 
-	// 获取文件流
+	// 獲取文件流
 	rs, err := fs.GetPhysicalFileContent(ctx, zipPath.(string))
 	defer rs.Close()
 	if err != nil {
@@ -141,7 +141,7 @@ func (service *DownloadService) DownloadArchived(ctx context.Context, c *gin.Con
 	}
 
 	if fs.User.Group.OptionsSerialized.OneTimeDownload {
-		// 清理资源，删除临时文件
+		// 清理資源，刪除暫存檔
 		_ = cache.Deletes([]string{service.ID}, "archive_")
 	}
 
@@ -155,7 +155,7 @@ func (service *DownloadService) DownloadArchived(ctx context.Context, c *gin.Con
 
 }
 
-// Download 签名的匿名文件下载
+// Download 簽名的匿名文件下載
 func (service *FileAnonymousGetService) Download(ctx context.Context, c *gin.Context) serializer.Response {
 	fs, err := filesystem.NewAnonymousFileSystem()
 	if err != nil {
@@ -163,20 +163,20 @@ func (service *FileAnonymousGetService) Download(ctx context.Context, c *gin.Con
 	}
 	defer fs.Recycle()
 
-	// 查找文件
+	// 尋找文件
 	err = fs.SetTargetFileByIDs([]uint{service.ID})
 	if err != nil {
 		return serializer.Err(serializer.CodeNotSet, err.Error(), err)
 	}
 
-	// 获取文件流
+	// 獲取文件流
 	rs, err := fs.GetDownloadContent(ctx, 0)
 	defer rs.Close()
 	if err != nil {
 		return serializer.Err(serializer.CodeNotSet, err.Error(), err)
 	}
 
-	// 发送文件
+	// 發送文件
 	http.ServeContent(c.Writer, c.Request, service.Name, fs.FileTarget[0].UpdatedAt, rs)
 
 	return serializer.Response{
@@ -184,7 +184,7 @@ func (service *FileAnonymousGetService) Download(ctx context.Context, c *gin.Con
 	}
 }
 
-// Source 重定向到文件的有效原始链接
+// Source 重定向到文件的有效原始連結
 func (service *FileAnonymousGetService) Source(ctx context.Context, c *gin.Context) serializer.Response {
 	fs, err := filesystem.NewAnonymousFileSystem()
 	if err != nil {
@@ -192,13 +192,13 @@ func (service *FileAnonymousGetService) Source(ctx context.Context, c *gin.Conte
 	}
 	defer fs.Recycle()
 
-	// 查找文件
+	// 尋找文件
 	err = fs.SetTargetFileByIDs([]uint{service.ID})
 	if err != nil {
 		return serializer.Err(serializer.CodeNotSet, err.Error(), err)
 	}
 
-	// 获取文件流
+	// 獲取文件流
 	res, err := fs.SignURL(ctx, &fs.FileTarget[0],
 		int64(model.GetIntSetting("preview_timeout", 60)), false)
 	if err != nil {
@@ -211,25 +211,25 @@ func (service *FileAnonymousGetService) Source(ctx context.Context, c *gin.Conte
 	}
 }
 
-// CreateDocPreviewSession 创建DOC文件预览会话，返回预览地址
+// CreateDocPreviewSession 建立DOC文件預覽工作階段，返回預覽地址
 func (service *FileIDService) CreateDocPreviewSession(ctx context.Context, c *gin.Context) serializer.Response {
-	// 创建文件系统
+	// 建立文件系統
 	fs, err := filesystem.NewFileSystemFromContext(c)
 	if err != nil {
 		return serializer.Err(serializer.CodePolicyNotAllowed, err.Error(), err)
 	}
 	defer fs.Recycle()
 
-	// 获取对象id
+	// 獲取物件id
 	objectID, _ := c.Get("object_id")
 
-	// 如果上下文中已有File对象，则重设目标
+	// 如果上下文中已有File物件，則重設目標
 	if file, ok := ctx.Value(fsctx.FileModelCtx).(*model.File); ok {
 		fs.SetTargetFile(&[]model.File{*file})
 		objectID = uint(0)
 	}
 
-	// 如果上下文中已有Folder对象，则重设根目录
+	// 如果上下文中已有Folder物件，則重設根目錄
 	if folder, ok := ctx.Value(fsctx.FolderModelCtx).(*model.Folder); ok {
 		fs.Root = folder
 		path := ctx.Value(fsctx.PathCtx).(string)
@@ -240,14 +240,14 @@ func (service *FileIDService) CreateDocPreviewSession(ctx context.Context, c *gi
 		objectID = uint(0)
 	}
 
-	// 获取文件临时下载地址
+	// 獲取文件臨時下載網址
 	downloadURL, err := fs.GetDownloadURL(ctx, objectID.(uint), "doc_preview_timeout")
 	if err != nil {
 		return serializer.Err(serializer.CodeNotSet, err.Error(), err)
 	}
 
-	// 生成最终的预览器地址
-	// TODO 从配置文件中读取
+	// 生成最終的預覽器地址
+	// TODO 從配置檔案中讀取
 	viewerBase, _ := url.Parse("https://view.officeapps.live.com/op/view.aspx")
 	params := viewerBase.Query()
 	params.Set("src", downloadURL)
@@ -259,19 +259,19 @@ func (service *FileIDService) CreateDocPreviewSession(ctx context.Context, c *gi
 	}
 }
 
-// CreateDownloadSession 创建下载会话，获取下载URL
+// CreateDownloadSession 建立下載工作階段，獲取下載URL
 func (service *FileIDService) CreateDownloadSession(ctx context.Context, c *gin.Context) serializer.Response {
-	// 创建文件系统
+	// 建立文件系統
 	fs, err := filesystem.NewFileSystemFromContext(c)
 	if err != nil {
 		return serializer.Err(serializer.CodePolicyNotAllowed, err.Error(), err)
 	}
 	defer fs.Recycle()
 
-	// 获取对象id
+	// 獲取物件id
 	objectID, _ := c.Get("object_id")
 
-	// 获取下载地址
+	// 獲取下載網址
 	downloadURL, err := fs.GetDownloadURL(ctx, objectID.(uint), "download_timeout")
 	if err != nil {
 		return serializer.Err(serializer.CodeNotSet, err.Error(), err)
@@ -283,23 +283,23 @@ func (service *FileIDService) CreateDownloadSession(ctx context.Context, c *gin.
 	}
 }
 
-// Download 通过签名URL的文件下载，无需登录
+// Download 透過簽名URL的文件下載，無需登入
 func (service *DownloadService) Download(ctx context.Context, c *gin.Context) serializer.Response {
-	// 创建文件系统
+	// 建立文件系統
 	fs, err := filesystem.NewFileSystemFromContext(c)
 	if err != nil {
 		return serializer.Err(serializer.CodePolicyNotAllowed, err.Error(), err)
 	}
 	defer fs.Recycle()
 
-	// 查找打包的临时文件
+	// 尋找打包的暫存檔
 	file, exist := cache.Get("download_" + service.ID)
 	if !exist {
-		return serializer.Err(404, "文件下载会话不存在", nil)
+		return serializer.Err(404, "文件下載工作階段不存在", nil)
 	}
 	fs.FileTarget = []model.File{file.(model.File)}
 
-	// 开始处理下载
+	// 開始處理下載
 	ctx = context.WithValue(ctx, fsctx.GinCtx, c)
 	rs, err := fs.GetDownloadContent(ctx, 0)
 	if err != nil {
@@ -307,15 +307,15 @@ func (service *DownloadService) Download(ctx context.Context, c *gin.Context) se
 	}
 	defer rs.Close()
 
-	// 设置文件名
+	// 設定檔案名
 	c.Header("Content-Disposition", "attachment; filename=\""+url.PathEscape(fs.FileTarget[0].Name)+"\"")
 
 	if fs.User.Group.OptionsSerialized.OneTimeDownload {
-		// 清理资源，删除临时文件
+		// 清理資源，刪除暫存檔
 		_ = cache.Deletes([]string{service.ID}, "download_")
 	}
 
-	// 发送文件
+	// 發送文件
 	http.ServeContent(c.Writer, c.Request, fs.FileTarget[0].Name, fs.FileTarget[0].UpdatedAt, rs)
 
 	return serializer.Response{
@@ -323,26 +323,26 @@ func (service *DownloadService) Download(ctx context.Context, c *gin.Context) se
 	}
 }
 
-// PreviewContent 预览文件，需要登录会话, isText - 是否为文本文件，文本文件会
-// 强制经由服务端中转
+// PreviewContent 預覽文件，需要登入工作階段, isText - 是否為文字文件，文字文件會
+// 強制經由服務端中轉
 func (service *FileIDService) PreviewContent(ctx context.Context, c *gin.Context, isText bool) serializer.Response {
-	// 创建文件系统
+	// 建立文件系統
 	fs, err := filesystem.NewFileSystemFromContext(c)
 	if err != nil {
 		return serializer.Err(serializer.CodePolicyNotAllowed, err.Error(), err)
 	}
 	defer fs.Recycle()
 
-	// 获取对象id
+	// 獲取物件id
 	objectID, _ := c.Get("object_id")
 
-	// 如果上下文中已有File对象，则重设目标
+	// 如果上下文中已有File物件，則重設目標
 	if file, ok := ctx.Value(fsctx.FileModelCtx).(*model.File); ok {
 		fs.SetTargetFile(&[]model.File{*file})
 		objectID = uint(0)
 	}
 
-	// 如果上下文中已有Folder对象，则重设根目录
+	// 如果上下文中已有Folder物件，則重設根目錄
 	if folder, ok := ctx.Value(fsctx.FolderModelCtx).(*model.Folder); ok {
 		fs.Root = folder
 		path := ctx.Value(fsctx.PathCtx).(string)
@@ -353,7 +353,7 @@ func (service *FileIDService) PreviewContent(ctx context.Context, c *gin.Context
 		objectID = uint(0)
 	}
 
-	// 获取文件预览响应
+	// 獲取文件預覽響應
 	resp, err := fs.Preview(ctx, objectID.(uint), isText)
 	if err != nil {
 		return serializer.Err(serializer.CodeNotSet, err.Error(), err)
@@ -368,7 +368,7 @@ func (service *FileIDService) PreviewContent(ctx context.Context, c *gin.Context
 		}
 	}
 
-	// 直接返回文件内容
+	// 直接返回文件內容
 	defer resp.Content.Close()
 
 	if isText {
@@ -382,17 +382,17 @@ func (service *FileIDService) PreviewContent(ctx context.Context, c *gin.Context
 	}
 }
 
-// PutContent 更新文件内容
+// PutContent 更新文件內容
 func (service *FileIDService) PutContent(ctx context.Context, c *gin.Context) serializer.Response {
-	// 创建上下文
+	// 建立上下文
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	// 取得文件大小
+	// 取得檔案大小
 	fileSize, err := strconv.ParseUint(c.Request.Header.Get("Content-Length"), 10, 64)
 	if err != nil {
 
-		return serializer.ParamErr("无法解析文件尺寸", err)
+		return serializer.ParamErr("無法解析文件尺寸", err)
 	}
 
 	fileData := local.FileStream{
@@ -401,14 +401,14 @@ func (service *FileIDService) PutContent(ctx context.Context, c *gin.Context) se
 		Size:     fileSize,
 	}
 
-	// 创建文件系统
+	// 建立文件系統
 	fs, err := filesystem.NewFileSystemFromContext(c)
 	if err != nil {
 		return serializer.Err(serializer.CodePolicyNotAllowed, err.Error(), err)
 	}
 	uploadCtx := context.WithValue(ctx, fsctx.GinCtx, c)
 
-	// 取得现有文件
+	// 取得現有文件
 	fileID, _ := c.Get("object_id")
 	originFile, _ := model.GetFilesByIDs([]uint{fileID.(uint)}, fs.User.ID)
 	if len(originFile) == 0 {
@@ -416,17 +416,17 @@ func (service *FileIDService) PutContent(ctx context.Context, c *gin.Context) se
 	}
 	fileData.Name = originFile[0].Name
 
-	// 检查此文件是否有软链接
+	// 檢查此文件是否有軟連結
 	fileList, err := model.RemoveFilesWithSoftLinks([]model.File{originFile[0]})
 	if err == nil && len(fileList) == 0 {
-		// 如果包含软连接，应重新生成新文件副本，并更新source_name
+		// 如果包含軟連接，應重新生成新文件副本，並更新source_name
 		originFile[0].SourceName = fs.GenerateSavePath(uploadCtx, fileData)
 		fs.Use("AfterUpload", filesystem.HookUpdateSourceName)
 		fs.Use("AfterUploadCanceled", filesystem.HookUpdateSourceName)
 		fs.Use("AfterValidateFailed", filesystem.HookUpdateSourceName)
 	}
 
-	// 给文件系统分配钩子
+	// 給文件系統分配鉤子
 	fs.Use("BeforeUpload", filesystem.HookResetPolicy)
 	fs.Use("BeforeUpload", filesystem.HookValidateFile)
 	fs.Use("BeforeUpload", filesystem.HookChangeCapacity)
@@ -438,7 +438,7 @@ func (service *FileIDService) PutContent(ctx context.Context, c *gin.Context) se
 	fs.Use("AfterValidateFailed", filesystem.HookClearFileSize)
 	fs.Use("AfterValidateFailed", filesystem.HookGiveBackCapacity)
 
-	// 执行上传
+	// 執行上傳
 	uploadCtx = context.WithValue(uploadCtx, fsctx.FileModelCtx, originFile[0])
 	err = fs.Upload(uploadCtx, fileData)
 	if err != nil {
@@ -450,22 +450,22 @@ func (service *FileIDService) PutContent(ctx context.Context, c *gin.Context) se
 	}
 }
 
-// ServeFile 通过签名的URL下载从机文件
+// ServeFile 透過簽名的URL下載從機文件
 func (service *SlaveDownloadService) ServeFile(ctx context.Context, c *gin.Context, isDownload bool) serializer.Response {
-	// 创建文件系统
+	// 建立文件系統
 	fs, err := filesystem.NewAnonymousFileSystem()
 	if err != nil {
 		return serializer.Err(serializer.CodePolicyNotAllowed, err.Error(), err)
 	}
 	defer fs.Recycle()
 
-	// 解码文件路径
+	// 解碼文件路徑
 	fileSource, err := base64.RawURLEncoding.DecodeString(service.PathEncoded)
 	if err != nil {
-		return serializer.ParamErr("无法解析的文件地址", err)
+		return serializer.ParamErr("無法解析的文件地址", err)
 	}
 
-	// 根据URL里的信息创建一个文件对象和用户对象
+	// 根據URL裡的訊息建立一個文件物件和使用者物件
 	file := model.File{
 		Name:       service.Name,
 		SourceName: string(fileSource),
@@ -479,7 +479,7 @@ func (service *SlaveDownloadService) ServeFile(ctx context.Context, c *gin.Conte
 	}
 	fs.FileTarget = []model.File{file}
 
-	// 开始处理下载
+	// 開始處理下載
 	ctx = context.WithValue(ctx, fsctx.GinCtx, c)
 	rs, err := fs.GetDownloadContent(ctx, 0)
 	if err != nil {
@@ -487,12 +487,12 @@ func (service *SlaveDownloadService) ServeFile(ctx context.Context, c *gin.Conte
 	}
 	defer rs.Close()
 
-	// 设置下载文件名
+	// 設定下載檔案名
 	if isDownload {
 		c.Header("Content-Disposition", "attachment; filename=\""+url.PathEscape(fs.FileTarget[0].Name)+"\"")
 	}
 
-	// 发送文件
+	// 發送文件
 	http.ServeContent(c.Writer, c.Request, fs.FileTarget[0].Name, time.Now(), rs)
 
 	return serializer.Response{
@@ -500,51 +500,51 @@ func (service *SlaveDownloadService) ServeFile(ctx context.Context, c *gin.Conte
 	}
 }
 
-// Delete 通过签名的URL删除从机文件
+// Delete 透過簽名的URL刪除從機文件
 func (service *SlaveFilesService) Delete(ctx context.Context, c *gin.Context) serializer.Response {
-	// 创建文件系统
+	// 建立文件系統
 	fs, err := filesystem.NewAnonymousFileSystem()
 	if err != nil {
 		return serializer.Err(serializer.CodePolicyNotAllowed, err.Error(), err)
 	}
 	defer fs.Recycle()
 
-	// 删除文件
+	// 刪除文件
 	failed, err := fs.Handler.Delete(ctx, service.Files)
 	if err != nil {
-		// 将Data字段写为字符串方便主控端解析
+		// 將Data欄位寫為字串方便主控端解析
 		data, _ := json.Marshal(serializer.RemoteDeleteRequest{Files: failed})
 
 		return serializer.Response{
 			Code:  serializer.CodeNotFullySuccess,
 			Data:  string(data),
-			Msg:   fmt.Sprintf("有 %d 个文件未能成功删除", len(failed)),
+			Msg:   fmt.Sprintf("有 %d 個文件未能成功刪除", len(failed)),
 			Error: err.Error(),
 		}
 	}
 	return serializer.Response{Code: 0}
 }
 
-// Thumb 通过签名URL获取从机文件缩略图
+// Thumb 透過簽名URL獲取從機文件縮圖
 func (service *SlaveFileService) Thumb(ctx context.Context, c *gin.Context) serializer.Response {
-	// 创建文件系统
+	// 建立文件系統
 	fs, err := filesystem.NewAnonymousFileSystem()
 	if err != nil {
 		return serializer.Err(serializer.CodePolicyNotAllowed, err.Error(), err)
 	}
 	defer fs.Recycle()
 
-	// 解码文件路径
+	// 解碼文件路徑
 	fileSource, err := base64.RawURLEncoding.DecodeString(service.PathEncoded)
 	if err != nil {
-		return serializer.ParamErr("无法解析的文件地址", err)
+		return serializer.ParamErr("無法解析的文件地址", err)
 	}
 	fs.FileTarget = []model.File{{SourceName: string(fileSource), PicInfo: "1,1"}}
 
-	// 获取缩略图
+	// 獲取縮圖
 	resp, err := fs.GetThumb(ctx, 0)
 	if err != nil {
-		return serializer.Err(serializer.CodeNotSet, "无法获取缩略图", err)
+		return serializer.Err(serializer.CodeNotSet, "無法獲取縮圖", err)
 	}
 
 	defer resp.Content.Close()

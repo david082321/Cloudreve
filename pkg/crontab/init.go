@@ -6,10 +6,10 @@ import (
 	"github.com/robfig/cron/v3"
 )
 
-// Cron 定时任务
+// Cron 定時任務
 var Cron *cron.Cron
 
-// Reload 重新启动定时任务
+// Reload 重新啟動定時任務
 func Reload() {
 	if Cron != nil {
 		Cron.Stop()
@@ -17,10 +17,10 @@ func Reload() {
 	Init()
 }
 
-// Init 初始化定时任务
+// Init 初始化定時任務
 func Init() {
-	util.Log().Info("初始化定时任务...")
-	// 读取cron日程设置
+	util.Log().Info("初始化定時任務...")
+	// 讀取cron日程設定
 	options := model.GetSettingByNames("cron_garbage_collect")
 	Cron := cron.New()
 	for k, v := range options {
@@ -29,12 +29,12 @@ func Init() {
 		case "cron_garbage_collect":
 			handler = garbageCollect
 		default:
-			util.Log().Warning("未知定时任务类型 [%s]，跳过", k)
+			util.Log().Warning("未知定時任務類型 [%s]，跳過", k)
 			continue
 		}
 
 		if _, err := Cron.AddFunc(v, handler); err != nil {
-			util.Log().Warning("无法启动定时任务 [%s] , %s", k, err)
+			util.Log().Warning("無法啟動定時任務 [%s] , %s", k, err)
 		}
 
 	}

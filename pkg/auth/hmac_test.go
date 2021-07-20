@@ -18,7 +18,7 @@ import (
 var mock sqlmock.Sqlmock
 
 func TestMain(m *testing.M) {
-	// 设置gin为测试模式
+	// 設定gin為測試模式
 	gin.SetMode(gin.TestMode)
 
 	// 初始化sqlmock
@@ -51,30 +51,30 @@ func TestHMACAuth_Check(t *testing.T) {
 		SecretKey: []byte(util.RandStringRunes(256)),
 	}
 
-	// 正常，永不过期
+	// 正常，永不過期
 	{
 		sign := auth.Sign("content", 0)
 		asserts.NoError(auth.Check("content", sign))
 	}
 
-	// 过期
+	// 過期
 	{
 		sign := auth.Sign("content", 1)
 		asserts.Error(auth.Check("content", sign))
 	}
 
-	// 签名格式错误
+	// 簽名格式錯誤
 	{
 		sign := auth.Sign("content", 1)
 		asserts.Error(auth.Check("content", sign+":"))
 	}
 
-	// 过期日期格式错误
+	// 過期日期格式錯誤
 	{
 		asserts.Error(auth.Check("content", "ErrAuthFailed:ErrAuthFailed"))
 	}
 
-	// 签名有误
+	// 簽名有誤
 	{
 		asserts.Error(auth.Check("content", fmt.Sprintf("sign:%d", time.Now().Unix()+10)))
 	}

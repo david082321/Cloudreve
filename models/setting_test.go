@@ -13,7 +13,7 @@ import (
 var mock sqlmock.Sqlmock
 var mockDB *gorm.DB
 
-// TestMain 初始化数据库Mock
+// TestMain 初始化資料庫Mock
 func TestMain(m *testing.M) {
 	var db *sql.DB
 	var err error
@@ -31,7 +31,7 @@ func TestGetSettingByType(t *testing.T) {
 	cache.Store = cache.NewMemoStore()
 	asserts := assert.New(t)
 
-	//找到设置时
+	//找到設定時
 	rows := sqlmock.NewRows([]string{"name", "value", "type"}).
 		AddRow("siteName", "Cloudreve", "basic").
 		AddRow("siteDes", "Something wonderful", "basic")
@@ -63,7 +63,7 @@ func TestGetSettingByNames(t *testing.T) {
 	cache.Store = cache.NewMemoStore()
 	asserts := assert.New(t)
 
-	//找到设置时
+	//找到設定時
 	rows := sqlmock.NewRows([]string{"name", "value", "type"}).
 		AddRow("siteName", "Cloudreve", "basic").
 		AddRow("siteDes", "Something wonderful", "basic")
@@ -75,7 +75,7 @@ func TestGetSettingByNames(t *testing.T) {
 	}, settings)
 	asserts.NoError(mock.ExpectationsWereMet())
 
-	//找到其中一个设置时
+	//找到其中一個設定時
 	rows = sqlmock.NewRows([]string{"name", "value", "type"}).
 		AddRow("siteName2", "Cloudreve", "basic")
 	mock.ExpectQuery("^SELECT \\* FROM `(.+)` WHERE `(.+)`\\.`deleted_at` IS NULL AND(.+)$").WillReturnRows(rows)
@@ -85,14 +85,14 @@ func TestGetSettingByNames(t *testing.T) {
 	}, settings)
 	asserts.NoError(mock.ExpectationsWereMet())
 
-	//找不到设置时
+	//找不到設定時
 	rows = sqlmock.NewRows([]string{"name", "value", "type"})
 	mock.ExpectQuery("^SELECT \\* FROM `(.+)` WHERE `(.+)`\\.`deleted_at` IS NULL AND(.+)$").WillReturnRows(rows)
 	settings = GetSettingByNames("siteName2333", "siteDes2333")
 	asserts.Equal(map[string]string{}, settings)
 	asserts.NoError(mock.ExpectationsWereMet())
 
-	// 一个设置命中缓存
+	// 一個設定命中快取
 	mock.ExpectQuery("^SELECT \\* FROM `(.+)` WHERE `(.+)`\\.`deleted_at` IS NULL AND(.+)$").WithArgs("siteDes2").WillReturnRows(sqlmock.NewRows([]string{"name", "value", "type"}).
 		AddRow("siteDes2", "Cloudreve2", "basic"))
 	settings = GetSettingByNames("siteName", "siteDes2")
@@ -104,12 +104,12 @@ func TestGetSettingByNames(t *testing.T) {
 
 }
 
-// TestGetSettingByName 测试GetSettingByName
+// TestGetSettingByName 測試GetSettingByName
 func TestGetSettingByName(t *testing.T) {
 	cache.Store = cache.NewMemoStore()
 	asserts := assert.New(t)
 
-	//找到设置时
+	//找到設定時
 	rows := sqlmock.NewRows([]string{"name", "value", "type"}).
 		AddRow("siteName", "Cloudreve", "basic")
 	mock.ExpectQuery("^SELECT \\* FROM `(.+)` WHERE `(.+)`\\.`deleted_at` IS NULL AND(.+)$").WillReturnRows(rows)
@@ -118,12 +118,12 @@ func TestGetSettingByName(t *testing.T) {
 	asserts.Equal("Cloudreve", siteName)
 	asserts.NoError(mock.ExpectationsWereMet())
 
-	// 第二次查询应返回缓存内容
+	// 第二次查詢應返回快取內容
 	siteNameCache := GetSettingByName("siteName")
 	asserts.Equal("Cloudreve", siteNameCache)
 	asserts.NoError(mock.ExpectationsWereMet())
 
-	// 找不到设置
+	// 找不到設定
 	rows = sqlmock.NewRows([]string{"name", "value", "type"})
 	mock.ExpectQuery("^SELECT \\* FROM `(.+)` WHERE `(.+)`\\.`deleted_at` IS NULL AND(.+)$").WillReturnRows(rows)
 
@@ -156,7 +156,7 @@ func TestGetSiteURL(t *testing.T) {
 		asserts.Equal("https://drive.cloudreve.org", siteURL.String())
 	}
 
-	// 失败 返回默认值
+	// 失敗 返回預設值
 	{
 		err := cache.Deletes([]string{"siteURL"}, "setting_")
 		asserts.NoError(err)
@@ -178,7 +178,7 @@ func TestGetIntSetting(t *testing.T) {
 		asserts.Equal(10, res)
 	}
 
-	// 使用默认值
+	// 使用預設值
 	{
 		res := GetIntSetting("TestGetIntSetting_2", 20)
 		asserts.Equal(20, res)

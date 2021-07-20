@@ -11,7 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// RemoteCallback 远程上传回调
+// RemoteCallback 遠端上傳回調
 func RemoteCallback(c *gin.Context) {
 	var callbackBody callback.RemoteUploadCallbackService
 	if err := c.ShouldBindJSON(&callbackBody); err == nil {
@@ -22,7 +22,7 @@ func RemoteCallback(c *gin.Context) {
 	}
 }
 
-// QiniuCallback 七牛上传回调
+// QiniuCallback 七牛上傳回調
 func QiniuCallback(c *gin.Context) {
 	var callbackBody callback.UploadCallbackService
 	if err := c.ShouldBindJSON(&callbackBody); err == nil {
@@ -37,7 +37,7 @@ func QiniuCallback(c *gin.Context) {
 	}
 }
 
-// OSSCallback 阿里云OSS上传回调
+// OSSCallback 阿里雲OSS上傳回調
 func OSSCallback(c *gin.Context) {
 	var callbackBody callback.UploadCallbackService
 	if err := c.ShouldBindJSON(&callbackBody); err == nil {
@@ -51,13 +51,13 @@ func OSSCallback(c *gin.Context) {
 	}
 }
 
-// UpyunCallback 又拍云上传回调
+// UpyunCallback 又拍雲上傳回調
 func UpyunCallback(c *gin.Context) {
 	var callbackBody callback.UpyunCallbackService
 	if err := c.ShouldBind(&callbackBody); err == nil {
 		if callbackBody.Code != 200 {
 			util.Log().Debug(
-				"又拍云回调返回错误代码%d，信息：%s",
+				"又拍雲回調返回錯誤代碼%d，訊息：%s",
 				callbackBody.Code,
 				callbackBody.Message,
 			)
@@ -70,7 +70,7 @@ func UpyunCallback(c *gin.Context) {
 	}
 }
 
-// OneDriveCallback OneDrive上传完成客户端回调
+// OneDriveCallback OneDrive上傳完成用戶端回調
 func OneDriveCallback(c *gin.Context) {
 	var callbackBody callback.OneDriveCallback
 	if err := c.ShouldBindJSON(&callbackBody); err == nil {
@@ -81,7 +81,7 @@ func OneDriveCallback(c *gin.Context) {
 	}
 }
 
-// OneDriveOAuth OneDrive 授权回调
+// OneDriveOAuth OneDrive 授權回調
 func OneDriveOAuth(c *gin.Context) {
 	var callbackBody callback.OneDriveOauthService
 	if err := c.ShouldBindQuery(&callbackBody); err == nil {
@@ -99,7 +99,7 @@ func OneDriveOAuth(c *gin.Context) {
 	}
 }
 
-// COSCallback COS上传完成客户端回调
+// COSCallback COS上傳完成用戶端回調
 func COSCallback(c *gin.Context) {
 	var callbackBody callback.COSCallback
 	if err := c.ShouldBindQuery(&callbackBody); err == nil {
@@ -110,7 +110,7 @@ func COSCallback(c *gin.Context) {
 	}
 }
 
-// S3Callback S3上传完成客户端回调
+// S3Callback S3上傳完成用戶端回調
 func S3Callback(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
 	var callbackBody callback.S3Callback

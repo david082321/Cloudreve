@@ -13,14 +13,14 @@ import (
 	"strings"
 )
 
-// OneDriveOauthService OneDrive 授权回调服务
+// OneDriveOauthService OneDrive 授權回調服務
 type OneDriveOauthService struct {
 	Code     string `form:"code"`
 	Error    string `form:"error"`
 	ErrorMsg string `form:"error_description"`
 }
 
-// Auth 更新认证信息
+// Auth 更新認證訊息
 func (service *OneDriveOauthService) Auth(c *gin.Context) serializer.Response {
 	if service.Error != "" {
 		return serializer.ParamErr(service.ErrorMsg, nil)
@@ -28,36 +28,36 @@ func (service *OneDriveOauthService) Auth(c *gin.Context) serializer.Response {
 
 	policyID, ok := util.GetSession(c, "onedrive_oauth_policy").(uint)
 	if !ok {
-		return serializer.Err(serializer.CodeNotFound, "授权会话不存在，请重试", nil)
+		return serializer.Err(serializer.CodeNotFound, "授權工作階段不存在，請重試", nil)
 	}
 
 	util.DeleteSession(c, "onedrive_oauth_policy")
 
 	policy, err := model.GetPolicyByID(policyID)
 	if err != nil {
-		return serializer.Err(serializer.CodeNotFound, "存储策略不存在", nil)
+		return serializer.Err(serializer.CodeNotFound, "儲存策略不存在", nil)
 	}
 
 	client, err := onedrive.NewClient(&policy)
 	if err != nil {
-		return serializer.Err(serializer.CodeInternalSetting, "无法初始化 OneDrive 客户端", err)
+		return serializer.Err(serializer.CodeInternalSetting, "無法初始化 OneDrive 用戶端", err)
 	}
 
 	credential, err := client.ObtainToken(c, onedrive.WithCode(service.Code))
 	if err != nil {
-		return serializer.Err(serializer.CodeInternalSetting, "AccessToken 获取失败", err)
+		return serializer.Err(serializer.CodeInternalSetting, "AccessToken 獲取失敗", err)
 	}
 
-	// 更新存储策略的 RefreshToken
+	// 更新儲存策略的 RefreshToken
 	client.Policy.AccessKey = credential.RefreshToken
 	if err := client.Policy.SaveAndClearCache(); err != nil {
-		return serializer.DBErr("无法更新 RefreshToken", err)
+		return serializer.DBErr("無法更新 RefreshToken", err)
 	}
 
 	cache.Deletes([]string{client.Policy.AccessKey}, "onedrive_")
 	if client.Policy.OptionsSerialized.OdDriver != "" && strings.Contains(client.Policy.OptionsSerialized.OdDriver, "http") {
 		if err := querySharePointSiteID(c, client.Policy); err != nil {
-			return serializer.Err(serializer.CodeInternalSetting, "无法查询 SharePoint 站点 ID", err)
+			return serializer.Err(serializer.CodeInternalSetting, "無法查詢 SharePoint 站點 ID", err)
 		}
 	}
 

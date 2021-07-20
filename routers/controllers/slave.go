@@ -14,14 +14,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// SlaveUpload 从机文件上传
+// SlaveUpload 從機文件上傳
 func SlaveUpload(c *gin.Context) {
-	// 创建上下文
+	// 建立上下文
 	ctx, cancel := context.WithCancel(context.Background())
 	ctx = context.WithValue(ctx, fsctx.GinCtx, c)
 	defer cancel()
 
-	// 创建匿名文件系统
+	// 建立匿名文件系統
 	fs, err := filesystem.NewAnonymousFileSystem()
 	if err != nil {
 		c.JSON(200, serializer.Err(serializer.CodePolicyNotAllowed, err.Error(), err))
@@ -29,29 +29,29 @@ func SlaveUpload(c *gin.Context) {
 	}
 	fs.Handler = local.Driver{}
 
-	// 从请求中取得上传策略
+	// 從請求中取得上傳策略
 	uploadPolicyRaw := c.GetHeader("X-Policy")
 	if uploadPolicyRaw == "" {
-		c.JSON(200, serializer.ParamErr("未指定上传策略", nil))
+		c.JSON(200, serializer.ParamErr("未指定上傳策略", nil))
 		return
 	}
 
-	// 解析上传策略
+	// 解析上傳策略
 	uploadPolicy, err := serializer.DecodeUploadPolicy(uploadPolicyRaw)
 	if err != nil {
-		c.JSON(200, serializer.ParamErr("上传策略格式有误", err))
+		c.JSON(200, serializer.ParamErr("上傳策略格式有誤", err))
 		return
 	}
 	ctx = context.WithValue(ctx, fsctx.UploadPolicyCtx, *uploadPolicy)
 
-	// 取得文件大小
+	// 取得檔案大小
 	fileSize, err := strconv.ParseUint(c.Request.Header.Get("Content-Length"), 10, 64)
 	if err != nil {
 		c.JSON(200, ErrorResponse(err))
 		return
 	}
 
-	// 解码文件名和路径
+	// 解碼檔案名和路徑
 	fileName, err := url.QueryUnescape(c.Request.Header.Get("X-FileName"))
 	if err != nil {
 		c.JSON(200, ErrorResponse(err))
@@ -65,18 +65,18 @@ func SlaveUpload(c *gin.Context) {
 		Size:     fileSize,
 	}
 
-	// 给文件系统分配钩子
+	// 給文件系統分配鉤子
 	fs.Use("BeforeUpload", filesystem.HookSlaveUploadValidate)
 	fs.Use("AfterUploadCanceled", filesystem.HookDeleteTempFile)
 	fs.Use("AfterUpload", filesystem.SlaveAfterUpload)
 	fs.Use("AfterValidateFailed", filesystem.HookDeleteTempFile)
 
-	// 是否允许覆盖
+	// 是否允許覆蓋
 	if c.Request.Header.Get("X-Overwrite") == "false" {
 		ctx = context.WithValue(ctx, fsctx.DisableOverwrite, true)
 	}
 
-	// 执行上传
+	// 執行上傳
 	err = fs.Upload(ctx, fileData)
 	if err != nil {
 		c.JSON(200, serializer.Err(serializer.CodeUploadFailed, err.Error(), err))
@@ -88,9 +88,9 @@ func SlaveUpload(c *gin.Context) {
 	})
 }
 
-// SlaveDownload 从机文件下载,此请求返回的HTTP状态码不全为200
+// SlaveDownload 從機文件下載,此請求返回的HTTP狀態碼不全為200
 func SlaveDownload(c *gin.Context) {
-	// 创建上下文
+	// 建立上下文
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -105,9 +105,9 @@ func SlaveDownload(c *gin.Context) {
 	}
 }
 
-// SlavePreview 从机文件预览
+// SlavePreview 從機文件預覽
 func SlavePreview(c *gin.Context) {
-	// 创建上下文
+	// 建立上下文
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -122,9 +122,9 @@ func SlavePreview(c *gin.Context) {
 	}
 }
 
-// SlaveThumb 从机文件缩略图
+// SlaveThumb 從機文件縮圖
 func SlaveThumb(c *gin.Context) {
-	// 创建上下文
+	// 建立上下文
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -139,9 +139,9 @@ func SlaveThumb(c *gin.Context) {
 	}
 }
 
-// SlaveDelete 从机删除
+// SlaveDelete 從機刪除
 func SlaveDelete(c *gin.Context) {
-	// 创建上下文
+	// 建立上下文
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -154,7 +154,7 @@ func SlaveDelete(c *gin.Context) {
 	}
 }
 
-// SlavePing 从机测试
+// SlavePing 從機測試
 func SlavePing(c *gin.Context) {
 	var service admin.SlavePingService
 	if err := c.ShouldBindJSON(&service); err == nil {
@@ -165,7 +165,7 @@ func SlavePing(c *gin.Context) {
 	}
 }
 
-// SlaveList 从机列出文件
+// SlaveList 從機列出文件
 func SlaveList(c *gin.Context) {
 	var service explorer.SlaveListService
 	if err := c.ShouldBindJSON(&service); err == nil {

@@ -28,7 +28,7 @@ func TestNewThumbFromFile(t *testing.T) {
 	file := CreateTestImage()
 	defer file.Close()
 
-	// 无扩展名时
+	// 無副檔名時
 	{
 		thumb, err := NewThumbFromFile(file, "123")
 		asserts.Error(err)

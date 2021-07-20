@@ -51,7 +51,7 @@ func TestLocalFileUpload(t *testing.T) {
 		ExpectCode int
 		RollBack   func()
 	}{
-		// 文件大小指定错误
+		// 檔案大小指定錯誤
 		{
 			GetRequest: func() *http.Request {
 				req, _ := http.NewRequest(
@@ -64,7 +64,7 @@ func TestLocalFileUpload(t *testing.T) {
 			},
 			ExpectCode: 40001,
 		},
-		// 返回错误
+		// 返回錯誤
 		{
 			GetRequest: func() *http.Request {
 				req, _ := http.NewRequest(
@@ -101,8 +101,8 @@ func TestLocalFileUpload(t *testing.T) {
 		asserts.Equal(200, w.Code)
 		resJSON := &serializer.Response{}
 		err := json.Unmarshal(w.Body.Bytes(), resJSON)
-		asserts.NoError(err, "测试用例%d", key)
-		asserts.Equal(testCase.ExpectCode, resJSON.Code, "测试用例%d", key)
+		asserts.NoError(err, "測試用例%d", key)
+		asserts.Equal(testCase.ExpectCode, resJSON.Code, "測試用例%d", key)
 		if testCase.RollBack != nil {
 			testCase.RollBack()
 		}
@@ -123,7 +123,7 @@ func TestObjectDelete(t *testing.T) {
 		ExpectCode int
 		RollBack   []string
 	}{
-		// 路径不存在，返回无错误
+		// 路徑不存在，返回無錯誤
 		{
 			GetRequest: func() *http.Request {
 				body := explorer.ItemService{
@@ -139,7 +139,7 @@ func TestObjectDelete(t *testing.T) {
 			},
 			ExpectCode: 0,
 		},
-		// 文件删除失败，返回203
+		// 文件刪除失敗，返回203
 		{
 			Mock: []string{"INSERT INTO `files` (`id`, `created_at`, `updated_at`, `deleted_at`, `name`, `source_name`, `user_id`, `size`, `pic_info`, `folder_id`, `policy_id`) VALUES(5, '2019-11-30 07:08:33', '2019-11-30 07:08:33', NULL, 'pigeon.zip', '65azil3B_pigeon.zip', 1, 1667217, '', 1, 1);"},
 			GetRequest: func() *http.Request {
@@ -168,8 +168,8 @@ func TestObjectDelete(t *testing.T) {
 		asserts.Equal(200, w.Code)
 		resJSON := &serializer.Response{}
 		err := json.Unmarshal(w.Body.Bytes(), resJSON)
-		asserts.NoError(err, "测试用例%d", key)
-		asserts.Equal(testCase.ExpectCode, resJSON.Code, "测试用例%d", key)
+		asserts.NoError(err, "測試用例%d", key)
+		asserts.Equal(testCase.ExpectCode, resJSON.Code, "測試用例%d", key)
 
 		for _, value := range testCase.RollBack {
 			model.DB.Exec(value)

@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// FilterTagCreateService 文件分类标签创建服务
+// FilterTagCreateService 文件分類標籤建立服務
 type FilterTagCreateService struct {
 	Expression string `json:"expression" binding:"required,min=1,max=65535"`
 	Icon       string `json:"icon" binding:"required,min=1,max=255"`
@@ -18,28 +18,28 @@ type FilterTagCreateService struct {
 	Color      string `json:"color" binding:"hexcolor|rgb|rgba|hsl"`
 }
 
-// LinkTagCreateService 目录快捷方式标签创建服务
+// LinkTagCreateService 目錄捷徑標籤建立服務
 type LinkTagCreateService struct {
 	Path string `json:"path" binding:"required,min=1,max=65535"`
 	Name string `json:"name" binding:"required,min=1,max=255"`
 }
 
-// TagService 标签服务
+// TagService 標籤服務
 type TagService struct {
 }
 
-// Delete 删除标签
+// Delete 刪除標籤
 func (service *TagService) Delete(c *gin.Context, user *model.User) serializer.Response {
 	id, _ := c.Get("object_id")
 	if err := model.DeleteTagByID(id.(uint), user.ID); err != nil {
-		return serializer.Err(serializer.CodeDBError, "删除失败", err)
+		return serializer.Err(serializer.CodeDBError, "刪除失敗", err)
 	}
 	return serializer.Response{}
 }
 
-// Create 创建标签
+// Create 建立標籤
 func (service *LinkTagCreateService) Create(c *gin.Context, user *model.User) serializer.Response {
-	// 创建标签
+	// 建立標籤
 	tag := model.Tag{
 		Name:       service.Name,
 		Icon:       "FolderHeartOutline",
@@ -49,7 +49,7 @@ func (service *LinkTagCreateService) Create(c *gin.Context, user *model.User) se
 	}
 	id, err := tag.Create()
 	if err != nil {
-		return serializer.Err(serializer.CodeDBError, "标签创建失败", err)
+		return serializer.Err(serializer.CodeDBError, "標籤建立失敗", err)
 	}
 
 	return serializer.Response{
@@ -57,18 +57,18 @@ func (service *LinkTagCreateService) Create(c *gin.Context, user *model.User) se
 	}
 }
 
-// Create 创建标签
+// Create 建立標籤
 func (service *FilterTagCreateService) Create(c *gin.Context, user *model.User) serializer.Response {
-	// 分割表达式，将通配符转换为SQL内的%
+	// 分割表達式，將萬用字元轉換為SQL內的%
 	expressions := strings.Split(service.Expression, "\n")
 	for i := 0; i < len(expressions); i++ {
 		expressions[i] = strings.ReplaceAll(expressions[i], "*", "%")
 		if expressions[i] == "" {
-			return serializer.ParamErr(fmt.Sprintf("第 %d 行包含空的匹配表达式", i+1), nil)
+			return serializer.ParamErr(fmt.Sprintf("第 %d 行包含空的匹配表達式", i+1), nil)
 		}
 	}
 
-	// 创建标签
+	// 建立標籤
 	tag := model.Tag{
 		Name:       service.Name,
 		Icon:       service.Icon,
@@ -79,7 +79,7 @@ func (service *FilterTagCreateService) Create(c *gin.Context, user *model.User) 
 	}
 	id, err := tag.Create()
 	if err != nil {
-		return serializer.Err(serializer.CodeDBError, "标签创建失败", err)
+		return serializer.Err(serializer.CodeDBError, "標籤建立失敗", err)
 	}
 
 	return serializer.Response{

@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// AddAria2URL 添加离线下载URL
+// AddAria2URL 添加離線下載URL
 func AddAria2URL(c *gin.Context) {
 	var addService aria2.AddURLService
 	if err := c.ShouldBindJSON(&addService); err == nil {
@@ -20,7 +20,7 @@ func AddAria2URL(c *gin.Context) {
 	}
 }
 
-// SelectAria2File 选择多文件离线下载中要下载的文件
+// SelectAria2File 選擇多文件離線下載中要下載的文件
 func SelectAria2File(c *gin.Context) {
 	var selectService aria2.SelectFileService
 	if err := c.ShouldBindJSON(&selectService); err == nil {
@@ -31,22 +31,22 @@ func SelectAria2File(c *gin.Context) {
 	}
 }
 
-// AddAria2Torrent 添加离线下载种子
+// AddAria2Torrent 添加離線下載種子
 func AddAria2Torrent(c *gin.Context) {
-	// 创建上下文
+	// 建立上下文
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	var service explorer.FileIDService
 	if err := c.ShouldBindUri(&service); err == nil {
-		// 获取种子内容的下载地址
+		// 獲取種子內容的下載網址
 		res := service.CreateDownloadSession(ctx, c)
 		if res.Code != 0 {
 			c.JSON(200, res)
 			return
 		}
 
-		// 创建下载任务
+		// 建立下載任務
 		var addService aria2.AddURLService
 		addService.URL = res.Data.(string)
 
@@ -63,7 +63,7 @@ func AddAria2Torrent(c *gin.Context) {
 	}
 }
 
-// CancelAria2Download 取消或删除aria2离线下载任务
+// CancelAria2Download 取消或刪除aria2離線下載任務
 func CancelAria2Download(c *gin.Context) {
 	var selectService aria2.DownloadTaskService
 	if err := c.ShouldBindUri(&selectService); err == nil {
@@ -74,7 +74,7 @@ func CancelAria2Download(c *gin.Context) {
 	}
 }
 
-// ListDownloading 获取正在下载中的任务
+// ListDownloading 獲取正在下載中的任務
 func ListDownloading(c *gin.Context) {
 	var service aria2.DownloadListService
 	if err := c.ShouldBindQuery(&service); err == nil {
@@ -85,7 +85,7 @@ func ListDownloading(c *gin.Context) {
 	}
 }
 
-// ListFinished 获取已完成的任务
+// ListFinished 獲取已完成的任務
 func ListFinished(c *gin.Context) {
 	var service aria2.DownloadListService
 	if err := c.ShouldBindQuery(&service); err == nil {

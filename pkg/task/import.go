@@ -12,7 +12,7 @@ import (
 	"github.com/cloudreve/Cloudreve/v3/pkg/util"
 )
 
-// ImportTask 导入务
+// ImportTask 匯入務
 type ImportTask struct {
 	User      *model.User
 	TaskModel *model.Task
@@ -20,48 +20,48 @@ type ImportTask struct {
 	Err       *JobError
 }
 
-// ImportProps 导入任务属性
+// ImportProps 匯入任務屬性
 type ImportProps struct {
-	PolicyID  uint   `json:"policy_id"`    // 存储策略ID
-	Src       string `json:"src"`          // 原始路径
-	Recursive bool   `json:"is_recursive"` // 是否递归导入
-	Dst       string `json:"dst"`          // 目的目录
+	PolicyID  uint   `json:"policy_id"`    // 儲存策略ID
+	Src       string `json:"src"`          // 原始路徑
+	Recursive bool   `json:"is_recursive"` // 是否遞迴匯入
+	Dst       string `json:"dst"`          // 目的目錄
 }
 
-// Props 获取任务属性
+// Props 獲取任務屬性
 func (job *ImportTask) Props() string {
 	res, _ := json.Marshal(job.TaskProps)
 	return string(res)
 }
 
-// Type 获取任务状态
+// Type 獲取任務狀態
 func (job *ImportTask) Type() int {
 	return ImportTaskType
 }
 
-// Creator 获取创建者ID
+// Creator 獲取建立者ID
 func (job *ImportTask) Creator() uint {
 	return job.User.ID
 }
 
-// Model 获取任务的数据库模型
+// Model 獲取任務的資料庫模型
 func (job *ImportTask) Model() *model.Task {
 	return job.TaskModel
 }
 
-// SetStatus 设定状态
+// SetStatus 設定狀態
 func (job *ImportTask) SetStatus(status int) {
 	job.TaskModel.SetStatus(status)
 }
 
-// SetError 设定任务失败信息
+// SetError 設定任務失敗訊息
 func (job *ImportTask) SetError(err *JobError) {
 	job.Err = err
 	res, _ := json.Marshal(job.Err)
 	job.TaskModel.SetError(string(res))
 }
 
-// SetErrorMsg 设定任务失败信息
+// SetErrorMsg 設定任務失敗訊息
 func (job *ImportTask) SetErrorMsg(msg string, err error) {
 	jobErr := &JobError{Msg: msg}
 	if err != nil {
@@ -70,23 +70,23 @@ func (job *ImportTask) SetErrorMsg(msg string, err error) {
 	job.SetError(jobErr)
 }
 
-// GetError 返回任务失败信息
+// GetError 返回任務失敗訊息
 func (job *ImportTask) GetError() *JobError {
 	return job.Err
 }
 
-// Do 开始执行任务
+// Do 開始執行任務
 func (job *ImportTask) Do() {
 	ctx := context.Background()
 
-	// 查找存储策略
+	// 尋找儲存策略
 	policy, err := model.GetPolicyByID(job.TaskProps.PolicyID)
 	if err != nil {
-		job.SetErrorMsg("找不到存储策略", err)
+		job.SetErrorMsg("找不到儲存策略", err)
 		return
 	}
 
-	// 创建文件系统
+	// 建立文件系統
 	job.User.Policy = policy
 	fs, err := filesystem.NewFileSystem(job.User)
 	if err != nil {
@@ -95,44 +95,44 @@ func (job *ImportTask) Do() {
 	}
 	defer fs.Recycle()
 
-	// 注册钩子
+	// 註冊鉤子
 	fs.Use("BeforeAddFile", filesystem.HookValidateFile)
 	fs.Use("BeforeAddFile", filesystem.HookValidateCapacity)
 	fs.Use("AfterValidateFailed", filesystem.HookGiveBackCapacity)
 
-	// 列取目录、对象
+	// 列取目錄、物件
 	job.TaskModel.SetProgress(ListingProgress)
 	coxIgnoreConflict := context.WithValue(context.Background(), fsctx.IgnoreDirectoryConflictCtx,
 		true)
 	objects, err := fs.Handler.List(ctx, job.TaskProps.Src, job.TaskProps.Recursive)
 	if err != nil {
-		job.SetErrorMsg("无法列取文件", err)
+		job.SetErrorMsg("無法列取文件", err)
 		return
 	}
 
 	job.TaskModel.SetProgress(InsertingProgress)
 
-	// 虚拟目录路径与folder对象ID的对应
+	// 虛擬目錄路徑與folder物件ID的對應
 	pathCache := make(map[string]*model.Folder, len(objects))
 
-	// 插入目录记录到用户文件系统
+	// 插入目錄記錄到使用者文件系統
 	for _, object := range objects {
 		if object.IsDir {
-			// 创建目录
+			// 建立目錄
 			virtualPath := path.Join(job.TaskProps.Dst, object.RelativePath)
 			folder, err := fs.CreateDirectory(coxIgnoreConflict, virtualPath)
 			if err != nil {
-				util.Log().Warning("导入任务无法创建用户目录[%s], %s", virtualPath, err)
+				util.Log().Warning("匯入任務無法建立使用者目錄[%s], %s", virtualPath, err)
 			} else if folder.ID > 0 {
 				pathCache[virtualPath] = folder
 			}
 		}
 	}
 
-	// 插入文件记录到用户文件系统
+	// 插入文件記錄到使用者文件系統
 	for _, object := range objects {
 		if !object.IsDir {
-			// 创建文件信息
+			// 建立文件訊息
 			virtualPath := path.Dir(path.Join(job.TaskProps.Dst, object.RelativePath))
 			fileHeader := local.FileStream{
 				Size:        object.Size,
@@ -142,7 +142,7 @@ func (job *ImportTask) Do() {
 			addFileCtx := context.WithValue(ctx, fsctx.FileHeaderCtx, fileHeader)
 			addFileCtx = context.WithValue(addFileCtx, fsctx.SavePathCtx, object.Source)
 
-			// 查找父目录
+			// 尋找父目錄
 			parentFolder := &model.Folder{}
 			if parent, ok := pathCache[virtualPath]; ok {
 				parentFolder = parent
@@ -153,7 +153,7 @@ func (job *ImportTask) Do() {
 				} else {
 					folder, err := fs.CreateDirectory(context.Background(), virtualPath)
 					if err != nil {
-						util.Log().Warning("导入任务无法创建用户目录[%s], %s",
+						util.Log().Warning("匯入任務無法建立使用者目錄[%s], %s",
 							virtualPath, err)
 						continue
 					}
@@ -161,10 +161,10 @@ func (job *ImportTask) Do() {
 				}
 			}
 
-			// 插入文件记录
+			// 插入文件記錄
 			_, err := fs.AddFile(addFileCtx, parentFolder)
 			if err != nil {
-				util.Log().Warning("导入任务无法创插入文件[%s], %s",
+				util.Log().Warning("匯入任務無法創插入文件[%s], %s",
 					object.RelativePath, err)
 				if err == filesystem.ErrInsufficientCapacity {
 					job.SetErrorMsg("容量不足", err)
@@ -176,7 +176,7 @@ func (job *ImportTask) Do() {
 	}
 }
 
-// NewImportTask 新建导入任务
+// NewImportTask 建立匯入任務
 func NewImportTask(user, policy uint, src, dst string, recursive bool) (Job, error) {
 	creator, err := model.GetActiveUserByID(user)
 	if err != nil {
@@ -202,7 +202,7 @@ func NewImportTask(user, policy uint, src, dst string, recursive bool) (Job, err
 	return newTask, nil
 }
 
-// NewImportTaskFromModel 从数据库记录中恢复导入任务
+// NewImportTaskFromModel 從資料庫記錄中復原匯入任務
 func NewImportTaskFromModel(task *model.Task) (Job, error) {
 	user, err := model.GetActiveUserByID(task.UserID)
 	if err != nil {

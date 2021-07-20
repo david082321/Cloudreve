@@ -12,45 +12,45 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// FileService 文件ID服务
+// FileService 文件ID服務
 type FileService struct {
 	ID uint `uri:"id" json:"id" binding:"required"`
 }
 
-// FileBatchService 文件批量操作服务
+// FileBatchService 文件批次操作服務
 type FileBatchService struct {
 	ID    []uint `json:"id" binding:"min=1"`
 	Force bool   `json:"force"`
 }
 
-// ListFolderService 列目录结构
+// ListFolderService 列目錄結構
 type ListFolderService struct {
 	Path string `uri:"path" binding:"required,max=65535"`
 	ID   uint   `uri:"id" binding:"required"`
 	Type string `uri:"type" binding:"eq=policy|eq=user"`
 }
 
-// List 列出指定路径下的目录
+// List 列出指定路徑下的目錄
 func (service *ListFolderService) List(c *gin.Context) serializer.Response {
 	if service.Type == "policy" {
-		// 列取存储策略中的目录
+		// 列取儲存策略中的目錄
 		policy, err := model.GetPolicyByID(service.ID)
 		if err != nil {
-			return serializer.Err(serializer.CodeNotFound, "存储策略不存在", err)
+			return serializer.Err(serializer.CodeNotFound, "儲存策略不存在", err)
 		}
 
-		// 创建文件系统
+		// 建立文件系統
 		fs, err := filesystem.NewAnonymousFileSystem()
 		if err != nil {
-			return serializer.Err(serializer.CodeInternalSetting, "无法创建文件系统", err)
+			return serializer.Err(serializer.CodeInternalSetting, "無法建立文件系統", err)
 		}
 		defer fs.Recycle()
 
-		// 列取存储策略中的文件
+		// 列取儲存策略中的文件
 		fs.Policy = &policy
 		res, err := fs.ListPhysical(c.Request.Context(), service.Path)
 		if err != nil {
-			return serializer.Err(serializer.CodeIOFailed, "无法列取目录", err)
+			return serializer.Err(serializer.CodeIOFailed, "無法列取目錄", err)
 		}
 
 		return serializer.Response{
@@ -61,24 +61,24 @@ func (service *ListFolderService) List(c *gin.Context) serializer.Response {
 
 	}
 
-	// 列取用户空间目录
-	// 查找用户
+	// 列取使用者空間目錄
+	// 尋找使用者
 	user, err := model.GetUserByID(service.ID)
 	if err != nil {
-		return serializer.Err(serializer.CodeNotFound, "用户不存在", err)
+		return serializer.Err(serializer.CodeNotFound, "使用者不存在", err)
 	}
 
-	// 创建文件系统
+	// 建立文件系統
 	fs, err := filesystem.NewFileSystem(&user)
 	if err != nil {
-		return serializer.Err(serializer.CodeInternalSetting, "无法创建文件系统", err)
+		return serializer.Err(serializer.CodeInternalSetting, "無法建立文件系統", err)
 	}
 	defer fs.Recycle()
 
-	// 列取目录
+	// 列取目錄
 	res, err := fs.List(c.Request.Context(), service.Path, nil)
 	if err != nil {
-		return serializer.Err(serializer.CodeIOFailed, "无法列取目录", err)
+		return serializer.Err(serializer.CodeIOFailed, "無法列取目錄", err)
 	}
 
 	return serializer.Response{
@@ -88,14 +88,14 @@ func (service *ListFolderService) List(c *gin.Context) serializer.Response {
 	}
 }
 
-// Delete 删除文件
+// Delete 刪除文件
 func (service *FileBatchService) Delete(c *gin.Context) serializer.Response {
 	files, err := model.GetFilesByIDs(service.ID, 0)
 	if err != nil {
-		return serializer.DBErr("无法列出待删除文件", err)
+		return serializer.DBErr("無法列出待刪除文件", err)
 	}
 
-	// 根据用户分组
+	// 根據使用者分組
 	userFile := make(map[uint][]model.File)
 	for i := 0; i < len(files); i++ {
 		if _, ok := userFile[files[i].UserID]; !ok {
@@ -104,7 +104,7 @@ func (service *FileBatchService) Delete(c *gin.Context) serializer.Response {
 		userFile[files[i].UserID] = append(userFile[files[i].UserID], files[i])
 	}
 
-	// 异步执行删除
+	// 非同步執行刪除
 	go func(files map[uint][]model.File) {
 		for uid, file := range files {
 			user, err := model.GetUserByID(uid)
@@ -118,24 +118,24 @@ func (service *FileBatchService) Delete(c *gin.Context) serializer.Response {
 				continue
 			}
 
-			// 汇总文件ID
+			// 匯總文件ID
 			ids := make([]uint, 0, len(file))
 			for i := 0; i < len(file); i++ {
 				ids = append(ids, file[i].ID)
 			}
 
-			// 执行删除
+			// 執行刪除
 			fs.Delete(context.Background(), []uint{}, ids, service.Force)
 			fs.Recycle()
 		}
 	}(userFile)
 
-	// 分组执行删除
+	// 分組執行刪除
 	return serializer.Response{}
 
 }
 
-// Get 预览文件
+// Get 預覽文件
 func (service *FileService) Get(c *gin.Context) serializer.Response {
 	file, err := model.GetFilesByIDs([]uint{service.ID}, 0)
 	if err != nil {
@@ -172,13 +172,13 @@ func (service *AdminListService) Files() serializer.Response {
 		tx = tx.Where(search)
 	}
 
-	// 计算总数用于分页
+	// 計算總數用於分頁
 	tx.Count(&total)
 
-	// 查询记录
+	// 查詢記錄
 	tx.Limit(service.PageSize).Offset((service.Page - 1) * service.PageSize).Find(&res)
 
-	// 查询对应用户
+	// 查詢對應使用者
 	users := make(map[uint]model.User)
 	for _, file := range res {
 		users[file.UserID] = model.User{}

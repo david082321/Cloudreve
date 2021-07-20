@@ -15,7 +15,7 @@ func TestDecodeUploadPolicy(t *testing.T) {
 		expectRes   *UploadPolicy
 	}{
 		{
-			"错误的base64字符",
+			"錯誤的base64字元",
 			true,
 			true,
 			&UploadPolicy{},

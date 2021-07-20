@@ -7,9 +7,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Delete 删除文件或目录
+// Delete 刪除文件或目錄
 func Delete(c *gin.Context) {
-	// 创建上下文
+	// 建立上下文
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -22,9 +22,9 @@ func Delete(c *gin.Context) {
 	}
 }
 
-// Move 移动文件或目录
+// Move 移動文件或目錄
 func Move(c *gin.Context) {
-	// 创建上下文
+	// 建立上下文
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -37,9 +37,9 @@ func Move(c *gin.Context) {
 	}
 }
 
-// Copy 复制文件或目录
+// Copy 複製文件或目錄
 func Copy(c *gin.Context) {
-	// 创建上下文
+	// 建立上下文
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -52,9 +52,9 @@ func Copy(c *gin.Context) {
 	}
 }
 
-// Rename 重命名文件或目录
+// Rename 重新命名文件或目錄
 func Rename(c *gin.Context) {
-	// 创建上下文
+	// 建立上下文
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -67,9 +67,9 @@ func Rename(c *gin.Context) {
 	}
 }
 
-// Rename 重命名文件或目录
+// Rename 重新命名文件或目錄
 func GetProperty(c *gin.Context) {
-	// 创建上下文
+	// 建立上下文
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 

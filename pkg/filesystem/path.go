@@ -8,23 +8,23 @@ import (
 )
 
 /* =================
-	 路径/目录相关
+	 路徑/目錄相關
    =================
 */
 
-// IsPathExist 返回给定目录是否存在
-// 如果存在就返回目录
+// IsPathExist 返回給定目錄是否存在
+// 如果存在就返回目錄
 func (fs *FileSystem) IsPathExist(path string) (bool, *model.Folder) {
 	pathList := util.SplitPath(path)
 	if len(pathList) == 0 {
 		return false, nil
 	}
 
-	// 递归步入目录
-	// TODO:测试新增
+	// 遞迴步入目錄
+	// TODO:測試新增
 	var currentFolder *model.Folder
 
-	// 如果已设定跟目录对象，则从给定目录向下遍历
+	// 如果已設定跟目錄物件，則從給定目錄向下遍歷
 	if fs.Root != nil {
 		currentFolder = fs.Root
 	}
@@ -32,7 +32,7 @@ func (fs *FileSystem) IsPathExist(path string) (bool, *model.Folder) {
 	for _, folderName := range pathList {
 		var err error
 
-		// 根目录
+		// 根目錄
 		if folderName == "/" {
 			if currentFolder != nil {
 				continue
@@ -52,12 +52,12 @@ func (fs *FileSystem) IsPathExist(path string) (bool, *model.Folder) {
 	return true, currentFolder
 }
 
-// IsFileExist 返回给定路径的文件是否存在
+// IsFileExist 返回給定路徑的文件是否存在
 func (fs *FileSystem) IsFileExist(fullPath string) (bool, *model.File) {
 	basePath := path.Dir(fullPath)
 	fileName := path.Base(fullPath)
 
-	// 获得父目录
+	// 獲得父目錄
 	exist, parent := fs.IsPathExist(basePath)
 	if !exist {
 		return false, nil
@@ -68,7 +68,7 @@ func (fs *FileSystem) IsFileExist(fullPath string) (bool, *model.File) {
 	return err == nil, file
 }
 
-// IsChildFileExist 确定folder目录下是否有名为name的文件
+// IsChildFileExist 確定folder目錄下是否有名為name的文件
 func (fs *FileSystem) IsChildFileExist(folder *model.Folder, name string) (bool, *model.File) {
 	file, err := folder.GetChildFile(name)
 	return err == nil, file

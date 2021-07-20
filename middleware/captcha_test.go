@@ -21,7 +21,7 @@ func TestCaptchaRequired_General(t *testing.T) {
 	asserts := assert.New(t)
 	rec := httptest.NewRecorder()
 
-	// 未启用验证码
+	// 未啟用驗證碼
 	{
 		cache.SetSettings(map[string]string{
 			"login_captcha":                 "0",
@@ -40,7 +40,7 @@ func TestCaptchaRequired_General(t *testing.T) {
 		asserts.False(c.IsAborted())
 	}
 
-	// body 无法读取
+	// body 無法讀取
 	{
 		cache.SetSettings(map[string]string{
 			"login_captcha":                 "1",
@@ -59,7 +59,7 @@ func TestCaptchaRequired_General(t *testing.T) {
 		asserts.True(c.IsAborted())
 	}
 
-	// body JSON 解析失败
+	// body JSON 解析失敗
 	{
 		cache.SetSettings(map[string]string{
 			"login_captcha":                 "1",
@@ -84,7 +84,7 @@ func TestCaptchaRequired_Normal(t *testing.T) {
 	asserts := assert.New(t)
 	rec := httptest.NewRecorder()
 
-	// 验证码错误
+	// 驗證碼錯誤
 	{
 		cache.SetSettings(map[string]string{
 			"login_captcha":                 "1",
@@ -110,7 +110,7 @@ func TestCaptchaRequired_Recaptcha(t *testing.T) {
 	asserts := assert.New(t)
 	rec := httptest.NewRecorder()
 
-	// 无法初始化reCaptcha实例
+	// 無法初始化reCaptcha實例
 	{
 		cache.SetSettings(map[string]string{
 			"login_captcha":                 "1",
@@ -130,7 +130,7 @@ func TestCaptchaRequired_Recaptcha(t *testing.T) {
 		asserts.True(c.IsAborted())
 	}
 
-	// 验证码错误
+	// 驗證碼錯誤
 	{
 		cache.SetSettings(map[string]string{
 			"login_captcha":                 "1",
@@ -155,7 +155,7 @@ func TestCaptchaRequired_Tcaptcha(t *testing.T) {
 	asserts := assert.New(t)
 	rec := httptest.NewRecorder()
 
-	// 验证出错
+	// 驗證出錯
 	{
 		cache.SetSettings(map[string]string{
 			"login_captcha":                 "1",

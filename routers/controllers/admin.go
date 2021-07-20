@@ -11,7 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// AdminSummary 获取管理站点概况
+// AdminSummary 獲取管理站點概況
 func AdminSummary(c *gin.Context) {
 	var service admin.NoParamService
 	if err := c.ShouldBindUri(&service); err == nil {
@@ -22,16 +22,16 @@ func AdminSummary(c *gin.Context) {
 	}
 }
 
-// AdminNews 获取社区新闻
+// AdminNews 獲取社群新聞
 func AdminNews(c *gin.Context) {
 	r := request.HTTPClient{}
-	res := r.Request("GET", "https://forum.cloudreve.org/api/discussions?include=startUser%2ClastUser%2CstartPost%2Ctags&filter%5Bq%5D=%20tag%3Anotice&sort=-startTime&page%5Blimit%5D=10", nil)
+	res := r.Request("GET", "https://forum.cloudreve.org/api/discussions?include=startUser,lastUser,startPost,tags&filter[q]= tag:notice&sort=-startTime&page[limit]=10", nil)
 	if res.Err == nil {
 		io.Copy(c.Writer, res.Response.Body)
 	}
 }
 
-// AdminChangeSetting 获取站点设定项
+// AdminChangeSetting 獲取站點設定項
 func AdminChangeSetting(c *gin.Context) {
 	var service admin.BatchSettingChangeService
 	if err := c.ShouldBindJSON(&service); err == nil {
@@ -42,7 +42,7 @@ func AdminChangeSetting(c *gin.Context) {
 	}
 }
 
-// AdminGetSetting 获取站点设置
+// AdminGetSetting 獲取站點設定
 func AdminGetSetting(c *gin.Context) {
 	var service admin.BatchSettingGet
 	if err := c.ShouldBindJSON(&service); err == nil {
@@ -53,7 +53,7 @@ func AdminGetSetting(c *gin.Context) {
 	}
 }
 
-// AdminGetGroups 获取用户组列表
+// AdminGetGroups 獲取使用者群組列表
 func AdminGetGroups(c *gin.Context) {
 	var service admin.NoParamService
 	if err := c.ShouldBindUri(&service); err == nil {
@@ -64,7 +64,7 @@ func AdminGetGroups(c *gin.Context) {
 	}
 }
 
-// AdminReloadService 重新加载子服务
+// AdminReloadService 重新載入子服務
 func AdminReloadService(c *gin.Context) {
 	service := c.Param("service")
 	switch service {
@@ -77,7 +77,7 @@ func AdminReloadService(c *gin.Context) {
 	c.JSON(200, serializer.Response{})
 }
 
-// AdminSendTestMail 发送测试邮件
+// AdminSendTestMail 發送測試郵件
 func AdminSendTestMail(c *gin.Context) {
 	var service admin.MailTestService
 	if err := c.ShouldBindJSON(&service); err == nil {
@@ -88,7 +88,7 @@ func AdminSendTestMail(c *gin.Context) {
 	}
 }
 
-// AdminTestAria2 测试aria2连接
+// AdminTestAria2 測試aria2連接
 func AdminTestAria2(c *gin.Context) {
 	var service admin.Aria2TestService
 	if err := c.ShouldBindJSON(&service); err == nil {
@@ -99,7 +99,7 @@ func AdminTestAria2(c *gin.Context) {
 	}
 }
 
-// AdminListPolicy 列出存储策略
+// AdminListPolicy 列出儲存策略
 func AdminListPolicy(c *gin.Context) {
 	var service admin.AdminListService
 	if err := c.ShouldBindJSON(&service); err == nil {
@@ -110,7 +110,7 @@ func AdminListPolicy(c *gin.Context) {
 	}
 }
 
-// AdminTestPath 测试本地路径可用性
+// AdminTestPath 測試本機路徑可用性
 func AdminTestPath(c *gin.Context) {
 	var service admin.PathTestService
 	if err := c.ShouldBindJSON(&service); err == nil {
@@ -121,7 +121,7 @@ func AdminTestPath(c *gin.Context) {
 	}
 }
 
-// AdminTestSlave 测试从机可用性
+// AdminTestSlave 測試從機可用性
 func AdminTestSlave(c *gin.Context) {
 	var service admin.SlaveTestService
 	if err := c.ShouldBindJSON(&service); err == nil {
@@ -132,7 +132,7 @@ func AdminTestSlave(c *gin.Context) {
 	}
 }
 
-// AdminAddPolicy 新建存储策略
+// AdminAddPolicy 建立儲存策略
 func AdminAddPolicy(c *gin.Context) {
 	var service admin.AddPolicyService
 	if err := c.ShouldBindJSON(&service); err == nil {
@@ -143,7 +143,7 @@ func AdminAddPolicy(c *gin.Context) {
 	}
 }
 
-// AdminAddCORS 创建跨域策略
+// AdminAddCORS 建立跨域策略
 func AdminAddCORS(c *gin.Context) {
 	var service admin.PolicyService
 	if err := c.ShouldBindJSON(&service); err == nil {
@@ -154,7 +154,7 @@ func AdminAddCORS(c *gin.Context) {
 	}
 }
 
-// AdminAddSCF 创建回调函数
+// AdminAddSCF 建立回調函數
 func AdminAddSCF(c *gin.Context) {
 	var service admin.PolicyService
 	if err := c.ShouldBindJSON(&service); err == nil {
@@ -165,7 +165,7 @@ func AdminAddSCF(c *gin.Context) {
 	}
 }
 
-// AdminOneDriveOAuth 获取 OneDrive OAuth URL
+// AdminOneDriveOAuth 獲取 OneDrive OAuth URL
 func AdminOneDriveOAuth(c *gin.Context) {
 	var service admin.PolicyService
 	if err := c.ShouldBindUri(&service); err == nil {
@@ -176,7 +176,7 @@ func AdminOneDriveOAuth(c *gin.Context) {
 	}
 }
 
-// AdminGetPolicy 获取存储策略详情
+// AdminGetPolicy 獲取儲存策略詳情
 func AdminGetPolicy(c *gin.Context) {
 	var service admin.PolicyService
 	if err := c.ShouldBindUri(&service); err == nil {
@@ -187,7 +187,7 @@ func AdminGetPolicy(c *gin.Context) {
 	}
 }
 
-// AdminDeletePolicy 删除存储策略
+// AdminDeletePolicy 刪除儲存策略
 func AdminDeletePolicy(c *gin.Context) {
 	var service admin.PolicyService
 	if err := c.ShouldBindUri(&service); err == nil {
@@ -198,7 +198,7 @@ func AdminDeletePolicy(c *gin.Context) {
 	}
 }
 
-// AdminListGroup 列出用户组
+// AdminListGroup 列出使用者群組
 func AdminListGroup(c *gin.Context) {
 	var service admin.AdminListService
 	if err := c.ShouldBindJSON(&service); err == nil {
@@ -209,7 +209,7 @@ func AdminListGroup(c *gin.Context) {
 	}
 }
 
-// AdminAddGroup 新建用户组
+// AdminAddGroup 建立使用者群組
 func AdminAddGroup(c *gin.Context) {
 	var service admin.AddGroupService
 	if err := c.ShouldBindJSON(&service); err == nil {
@@ -220,7 +220,7 @@ func AdminAddGroup(c *gin.Context) {
 	}
 }
 
-// AdminDeleteGroup 删除用户组
+// AdminDeleteGroup 刪除使用者群組
 func AdminDeleteGroup(c *gin.Context) {
 	var service admin.GroupService
 	if err := c.ShouldBindUri(&service); err == nil {
@@ -231,7 +231,7 @@ func AdminDeleteGroup(c *gin.Context) {
 	}
 }
 
-// AdminGetGroup 获取用户组详情
+// AdminGetGroup 獲取使用者群組詳情
 func AdminGetGroup(c *gin.Context) {
 	var service admin.GroupService
 	if err := c.ShouldBindUri(&service); err == nil {
@@ -242,7 +242,7 @@ func AdminGetGroup(c *gin.Context) {
 	}
 }
 
-// AdminListUser 列出用户
+// AdminListUser 列出使用者
 func AdminListUser(c *gin.Context) {
 	var service admin.AdminListService
 	if err := c.ShouldBindJSON(&service); err == nil {
@@ -253,7 +253,7 @@ func AdminListUser(c *gin.Context) {
 	}
 }
 
-// AdminAddUser 新建用户组
+// AdminAddUser 建立使用者群組
 func AdminAddUser(c *gin.Context) {
 	var service admin.AddUserService
 	if err := c.ShouldBindJSON(&service); err == nil {
@@ -264,7 +264,7 @@ func AdminAddUser(c *gin.Context) {
 	}
 }
 
-// AdminGetUser 获取用户详情
+// AdminGetUser 獲取使用者詳情
 func AdminGetUser(c *gin.Context) {
 	var service admin.UserService
 	if err := c.ShouldBindUri(&service); err == nil {
@@ -275,7 +275,7 @@ func AdminGetUser(c *gin.Context) {
 	}
 }
 
-// AdminDeleteUser 批量删除用户
+// AdminDeleteUser 批次刪除使用者
 func AdminDeleteUser(c *gin.Context) {
 	var service admin.UserBatchService
 	if err := c.ShouldBindJSON(&service); err == nil {
@@ -286,7 +286,7 @@ func AdminDeleteUser(c *gin.Context) {
 	}
 }
 
-// AdminBanUser 封禁/解封用户
+// AdminBanUser 封禁/解封使用者
 func AdminBanUser(c *gin.Context) {
 	var service admin.UserService
 	if err := c.ShouldBindUri(&service); err == nil {
@@ -308,7 +308,7 @@ func AdminListFile(c *gin.Context) {
 	}
 }
 
-// AdminGetFile 获取文件
+// AdminGetFile 獲取文件
 func AdminGetFile(c *gin.Context) {
 	var service admin.FileService
 	if err := c.ShouldBindUri(&service); err == nil {
@@ -318,7 +318,7 @@ func AdminGetFile(c *gin.Context) {
 			c.Redirect(302, res.Data.(string))
 			return
 		}
-		// 是否有错误发生
+		// 是否有錯誤發生
 		if res.Code != 0 {
 			c.JSON(200, res)
 		}
@@ -327,7 +327,7 @@ func AdminGetFile(c *gin.Context) {
 	}
 }
 
-// AdminDeleteFile 批量删除文件
+// AdminDeleteFile 批次刪除文件
 func AdminDeleteFile(c *gin.Context) {
 	var service admin.FileBatchService
 	if err := c.ShouldBindJSON(&service); err == nil {
@@ -349,7 +349,7 @@ func AdminListShare(c *gin.Context) {
 	}
 }
 
-// AdminDeleteShare 批量删除分享
+// AdminDeleteShare 批次刪除分享
 func AdminDeleteShare(c *gin.Context) {
 	var service admin.ShareBatchService
 	if err := c.ShouldBindJSON(&service); err == nil {
@@ -360,7 +360,7 @@ func AdminDeleteShare(c *gin.Context) {
 	}
 }
 
-// AdminListDownload 列出离线下载任务
+// AdminListDownload 列出離線下載任務
 func AdminListDownload(c *gin.Context) {
 	var service admin.AdminListService
 	if err := c.ShouldBindJSON(&service); err == nil {
@@ -371,7 +371,7 @@ func AdminListDownload(c *gin.Context) {
 	}
 }
 
-// AdminDeleteDownload 批量删除任务
+// AdminDeleteDownload 批次刪除任務
 func AdminDeleteDownload(c *gin.Context) {
 	var service admin.TaskBatchService
 	if err := c.ShouldBindJSON(&service); err == nil {
@@ -382,7 +382,7 @@ func AdminDeleteDownload(c *gin.Context) {
 	}
 }
 
-// AdminListTask 列出任务
+// AdminListTask 列出任務
 func AdminListTask(c *gin.Context) {
 	var service admin.AdminListService
 	if err := c.ShouldBindJSON(&service); err == nil {
@@ -393,7 +393,7 @@ func AdminListTask(c *gin.Context) {
 	}
 }
 
-// AdminDeleteTask 批量删除任务
+// AdminDeleteTask 批次刪除任務
 func AdminDeleteTask(c *gin.Context) {
 	var service admin.TaskBatchService
 	if err := c.ShouldBindJSON(&service); err == nil {
@@ -404,7 +404,7 @@ func AdminDeleteTask(c *gin.Context) {
 	}
 }
 
-// AdminCreateImportTask 新建文件导入任务
+// AdminCreateImportTask 建立文件匯入任務
 func AdminCreateImportTask(c *gin.Context) {
 	var service admin.ImportTaskService
 	if err := c.ShouldBindJSON(&service); err == nil {
@@ -415,7 +415,7 @@ func AdminCreateImportTask(c *gin.Context) {
 	}
 }
 
-// AdminListFolders 列出用户或外部文件系统目录
+// AdminListFolders 列出使用者或外部文件系統目錄
 func AdminListFolders(c *gin.Context) {
 	var service admin.ListFolderService
 	if err := c.ShouldBindUri(&service); err == nil {

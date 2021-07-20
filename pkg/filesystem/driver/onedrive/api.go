@@ -23,15 +23,15 @@ import (
 )
 
 const (
-	// SmallFileSize 单文件上传接口最大尺寸
+	// SmallFileSize 單文件上傳介面最大尺寸
 	SmallFileSize uint64 = 4 * 1024 * 1024
-	// ChunkSize 服务端中转分片上传分片大小
+	// ChunkSize 服務端中轉分片上傳分片大小
 	ChunkSize uint64 = 10 * 1024 * 1024
-	// ListRetry 列取请求重试次数
+	// ListRetry 列取請求重試次數
 	ListRetry = 1
 )
 
-// GetSourcePath 获取文件的绝对路径
+// GetSourcePath 獲取文件的絕對路徑
 func (info *FileInfo) GetSourcePath() string {
 	res, err := url.PathUnescape(
 		strings.TrimPrefix(
@@ -48,7 +48,7 @@ func (info *FileInfo) GetSourcePath() string {
 	return res
 }
 
-// Error 实现error接口
+// Error 實現error介面
 func (err RespError) Error() string {
 	return err.APIError.Message
 }
@@ -73,7 +73,7 @@ func (client *Client) getRequestURL(api string, opts ...Option) string {
 	return base.String()
 }
 
-// ListChildren 根据路径列取子对象
+// ListChildren 根據路徑列取子物件
 func (client *Client) ListChildren(ctx context.Context, path string) ([]FileInfo, error) {
 	var requestURL string
 	dst := strings.TrimPrefix(path, "/")
@@ -91,7 +91,7 @@ func (client *Client) ListChildren(ctx context.Context, path string) ([]FileInfo
 		}
 		if retried < ListRetry {
 			retried++
-			util.Log().Debug("路径[%s]列取请求失败[%s]，5秒钟后重试", path, err)
+			util.Log().Debug("路徑[%s]列取請求失敗[%s]，5秒鐘後重試", path, err)
 			time.Sleep(time.Duration(5) * time.Second)
 			return client.ListChildren(context.WithValue(ctx, fsctx.RetryCtx, retried), path)
 		}
@@ -110,7 +110,7 @@ func (client *Client) ListChildren(ctx context.Context, path string) ([]FileInfo
 	return fileInfo.Value, nil
 }
 
-// Meta 根据资源ID或文件路径获取文件元信息
+// Meta 根據資源ID或文件路徑獲取文件元訊息
 func (client *Client) Meta(ctx context.Context, id string, path string) (*FileInfo, error) {
 	var requestURL string
 	if id != "" {
@@ -138,7 +138,7 @@ func (client *Client) Meta(ctx context.Context, id string, path string) (*FileIn
 
 }
 
-// CreateUploadSession 创建分片上传会话
+// CreateUploadSession 建立分片上傳工作階段
 func (client *Client) CreateUploadSession(ctx context.Context, dst string, opts ...Option) (string, error) {
 	options := newDefaultOption()
 	for _, o := range opts {
@@ -171,7 +171,7 @@ func (client *Client) CreateUploadSession(ctx context.Context, dst string, opts 
 	return uploadSession.UploadURL, nil
 }
 
-// GetSiteIDByURL 通过 SharePoint 站点 URL 获取站点ID
+// GetSiteIDByURL 通過 SharePoint 站點 URL 獲取站點ID
 func (client *Client) GetSiteIDByURL(ctx context.Context, siteUrl string) (string, error) {
 	siteUrlParsed, err := url.Parse(siteUrl)
 	if err != nil {
@@ -198,7 +198,7 @@ func (client *Client) GetSiteIDByURL(ctx context.Context, siteUrl string) (strin
 	return siteInfo.ID, nil
 }
 
-// GetUploadSessionStatus 查询上传会话状态
+// GetUploadSessionStatus 查詢上傳工作階段狀態
 func (client *Client) GetUploadSessionStatus(ctx context.Context, uploadURL string) (*UploadSessionResponse, error) {
 	res, err := client.requestWithStr(ctx, "GET", uploadURL, "", 200)
 	if err != nil {
@@ -217,7 +217,7 @@ func (client *Client) GetUploadSessionStatus(ctx context.Context, uploadURL stri
 	return &uploadSession, nil
 }
 
-// UploadChunk 上传分片
+// UploadChunk 上傳分片
 func (client *Client) UploadChunk(ctx context.Context, uploadURL string, chunk *Chunk) (*UploadSessionResponse, error) {
 	res, err := client.request(
 		ctx, "PUT", uploadURL, bytes.NewReader(chunk.Data[0:chunk.ChunkSize]),
@@ -229,10 +229,10 @@ func (client *Client) UploadChunk(ctx context.Context, uploadURL string, chunk *
 		request.WithTimeout(time.Duration(300)*time.Second),
 	)
 	if err != nil {
-		// 如果重试次数小于限制，5秒后重试
+		// 如果重試次數小於限制，5秒後重試
 		if chunk.Retried < model.GetIntSetting("onedrive_chunk_retries", 1) {
 			chunk.Retried++
-			util.Log().Debug("分片偏移%d上传失败[%s]，5秒钟后重试", chunk.Offset, err)
+			util.Log().Debug("分片偏移%d上傳失敗[%s]，5秒鐘後重試", chunk.Offset, err)
 			time.Sleep(time.Duration(5) * time.Second)
 			return client.UploadChunk(ctx, uploadURL, chunk)
 		}
@@ -255,22 +255,22 @@ func (client *Client) UploadChunk(ctx context.Context, uploadURL string, chunk *
 	return &uploadRes, nil
 }
 
-// Upload 上传文件
+// Upload 上傳文件
 func (client *Client) Upload(ctx context.Context, dst string, size int, file io.Reader) error {
-	// 决定是否覆盖文件
+	// 決定是否覆蓋文件
 	overwrite := "replace"
 	if ctx.Value(fsctx.DisableOverwrite) != nil {
 		overwrite = "fail"
 	}
 
-	// 小文件，使用简单上传接口上传
+	// 小文件，使用簡單上傳介面上傳
 	if size <= int(SmallFileSize) {
 		_, err := client.SimpleUpload(ctx, dst, file, int64(size), WithConflictBehavior(overwrite))
 		return err
 	}
 
-	// 大文件，进行分片
-	// 创建上传会话
+	// 大文件，進行分片
+	// 建立上傳工作階段
 	uploadURL, err := client.CreateUploadSession(ctx, dst, WithConflictBehavior(overwrite))
 	if err != nil {
 		return err
@@ -287,16 +287,16 @@ func (client *Client) Upload(ctx context.Context, dst string, size int, file io.
 	for i := 0; i < chunkNum; i++ {
 		select {
 		case <-ctx.Done():
-			util.Log().Debug("OneDrive 客户端取消")
+			util.Log().Debug("OneDrive 用戶端取消")
 			return ErrClientCanceled
 		default:
-			// 分块
+			// 分塊
 			chunkSize := int(ChunkSize)
 			if size-offset < chunkSize {
 				chunkSize = size - offset
 			}
 
-			// 因为后面需要错误重试，这里要把分片内容读到内存中
+			// 因為後面需要錯誤重試，這裡要把分片內容讀到記憶體中
 			chunkContent := chunkData[:chunkSize]
 			_, err := io.ReadFull(file, chunkContent)
 
@@ -307,7 +307,7 @@ func (client *Client) Upload(ctx context.Context, dst string, size int, file io.
 				Data:      chunkContent,
 			}
 
-			// 上传
+			// 上傳
 			_, err = client.UploadChunk(ctx, uploadURL, &chunk)
 			if err != nil {
 				return err
@@ -319,7 +319,7 @@ func (client *Client) Upload(ctx context.Context, dst string, size int, file io.
 	return nil
 }
 
-// DeleteUploadSession 删除上传会话
+// DeleteUploadSession 刪除上傳工作階段
 func (client *Client) DeleteUploadSession(ctx context.Context, uploadURL string) error {
 	_, err := client.requestWithStr(ctx, "DELETE", uploadURL, "", 204)
 	if err != nil {
@@ -329,7 +329,7 @@ func (client *Client) DeleteUploadSession(ctx context.Context, uploadURL string)
 	return nil
 }
 
-// SimpleUpload 上传小文件到dst
+// SimpleUpload 上傳小文件到dst
 func (client *Client) SimpleUpload(ctx context.Context, dst string, body io.Reader, size int64, opts ...Option) (*UploadResult, error) {
 	options := newDefaultOption()
 	for _, o := range opts {
@@ -350,7 +350,7 @@ func (client *Client) SimpleUpload(ctx context.Context, dst string, body io.Read
 		}
 		if retried < model.GetIntSetting("onedrive_chunk_retries", 1) {
 			retried++
-			util.Log().Debug("文件[%s]上传失败[%s]，5秒钟后重试", dst, err)
+			util.Log().Debug("文件[%s]上傳失敗[%s]，5秒鐘後重試", dst, err)
 			time.Sleep(time.Duration(5) * time.Second)
 			return client.SimpleUpload(context.WithValue(ctx, fsctx.RetryCtx, retried), dst, body, size, opts...)
 		}
@@ -369,9 +369,9 @@ func (client *Client) SimpleUpload(ctx context.Context, dst string, body io.Read
 	return &uploadRes, nil
 }
 
-// BatchDelete 并行删除给出的文件，返回删除失败的文件，及第一个遇到的错误。此方法将文件分为
-// 20个一组，调用Delete并行删除
-// TODO 测试
+// BatchDelete 並行刪除給出的文件，返回刪除失敗的文件，及第一個遇到的錯誤。此方法將文件分為
+// 20個一組，呼叫Delete並行刪除
+// TODO 測試
 func (client *Client) BatchDelete(ctx context.Context, dst []string) ([]string, error) {
 	groupNum := len(dst)/20 + 1
 	finalRes := make([]string, 0, len(dst))
@@ -390,8 +390,8 @@ func (client *Client) BatchDelete(ctx context.Context, dst []string) ([]string, 
 	return finalRes, err
 }
 
-// Delete 并行删除文件，返回删除失败的文件，及第一个遇到的错误，
-// 由于API限制，最多删除20个
+// Delete 並行刪除文件，返回刪除失敗的文件，及第一個遇到的錯誤，
+// 由於API限制，最多刪除20個
 func (client *Client) Delete(ctx context.Context, dst []string) ([]string, error) {
 	body := client.makeBatchDeleteRequestsBody(dst)
 	res, err := client.requestWithStr(ctx, "POST", client.getRequestURL("$batch",
@@ -409,7 +409,7 @@ func (client *Client) Delete(ctx context.Context, dst []string) ([]string, error
 		return dst, decodeErr
 	}
 
-	// 取得删除失败的文件
+	// 取得刪除失敗的文件
 	failed := getDeleteFailed(&deleteRes)
 	if len(failed) != 0 {
 		return failed, ErrDeleteFile
@@ -427,7 +427,7 @@ func getDeleteFailed(res *BatchResponses) []string {
 	return failed
 }
 
-// makeBatchDeleteRequestsBody 生成批量删除请求正文
+// makeBatchDeleteRequestsBody 生成批次刪除請求正文
 func (client *Client) makeBatchDeleteRequestsBody(files []string) string {
 	req := BatchRequests{
 		Requests: make([]BatchRequest, len(files)),
@@ -447,7 +447,7 @@ func (client *Client) makeBatchDeleteRequestsBody(files []string) string {
 	return string(res)
 }
 
-// GetThumbURL 获取给定尺寸的缩略图URL
+// GetThumbURL 獲取給定尺寸的縮圖URL
 func (client *Client) GetThumbURL(ctx context.Context, dst string, w, h uint) (string, error) {
 	dst = strings.TrimPrefix(dst, "/")
 	requestURL := client.getRequestURL("root:/"+dst+":/thumbnails/0") + "/large"
@@ -476,12 +476,12 @@ func (client *Client) GetThumbURL(ctx context.Context, dst string, w, h uint) (s
 		}
 	}
 
-	return "", errors.New("无法生成缩略图")
+	return "", errors.New("無法生成縮圖")
 }
 
-// MonitorUpload 监控客户端分片上传进度
+// MonitorUpload 監控用戶端分片上傳進度
 func (client *Client) MonitorUpload(uploadURL, callbackKey, path string, size uint64, ttl int64) {
-	// 回调完成通知chan
+	// 回調完成通知chan
 	callbackChan := make(chan bool)
 	callbackSignal.Store(callbackKey, callbackChan)
 	defer callbackSignal.Delete(callbackKey)
@@ -491,43 +491,43 @@ func (client *Client) MonitorUpload(uploadURL, callbackKey, path string, size ui
 	for {
 		select {
 		case <-callbackChan:
-			util.Log().Debug("客户端完成回调")
+			util.Log().Debug("用戶端完成回調")
 			return
 		case <-time.After(time.Duration(ttl) * time.Second):
-			// 上传会话到期，仍未完成上传，创建占位符
+			// 上傳工作階段到期，仍未完成上傳，建立占位符
 			client.DeleteUploadSession(context.Background(), uploadURL)
 			_, err := client.SimpleUpload(context.Background(), path, strings.NewReader(""), 0, WithConflictBehavior("replace"))
 			if err != nil {
-				util.Log().Debug("无法创建占位文件，%s", err)
+				util.Log().Debug("無法建立占位文件，%s", err)
 			}
 			return
 		case <-time.After(time.Duration(timeout) * time.Second):
-			util.Log().Debug("检查上传情况")
+			util.Log().Debug("檢查上傳情況")
 			status, err := client.GetUploadSessionStatus(context.Background(), uploadURL)
 
 			if err != nil {
 				if resErr, ok := err.(*RespError); ok {
 					if resErr.APIError.Code == "itemNotFound" {
-						util.Log().Debug("上传会话已完成，稍后检查回调")
+						util.Log().Debug("上傳工作階段已完成，稍後檢查回調")
 						time.Sleep(time.Duration(interval) * time.Second)
-						util.Log().Debug("开始检查回调")
+						util.Log().Debug("開始檢查回調")
 						_, ok := cache.Get("callback_" + callbackKey)
 						if ok {
-							util.Log().Warning("未发送回调，删除文件")
+							util.Log().Warning("未發送回調，刪除文件")
 							cache.Deletes([]string{callbackKey}, "callback_")
 							_, err = client.Delete(context.Background(), []string{path})
 							if err != nil {
-								util.Log().Warning("无法删除未回调的文件，%s", err)
+								util.Log().Warning("無法刪除未回調的文件，%s", err)
 							}
 						}
 						return
 					}
 				}
-				util.Log().Debug("无法获取上传会话状态，继续下一轮，%s", err.Error())
+				util.Log().Debug("無法獲取上傳工作階段狀態，繼續下一輪，%s", err.Error())
 				continue
 			}
 
-			// 成功获取分片上传状态，检查文件大小
+			// 成功獲取分片上傳狀態，檢查檔案大小
 			if len(status.NextExpectedRanges) == 0 {
 				continue
 			}
@@ -540,13 +540,13 @@ func (client *Client) MonitorUpload(uploadURL, callbackKey, path string, size ui
 			}
 			uploadFullSize, _ := strconv.ParseUint(sizeRange[1], 10, 64)
 			if (sizeRange[0] == "0" && sizeRange[1] == "") || uploadFullSize+1 != size {
-				util.Log().Debug("未开始上传或文件大小不一致，取消上传会话")
-				// 取消上传会话，实测OneDrive取消上传会话后，客户端还是可以上传，
-				// 所以上传一个空文件占位，阻止客户端上传
+				util.Log().Debug("未開始上傳或檔案大小不一致，取消上傳工作階段")
+				// 取消上傳工作階段，實測OneDrive取消上傳工作階段後，用戶端還是可以上傳，
+				// 所以上傳一個空文件占位，阻止用戶端上傳
 				client.DeleteUploadSession(context.Background(), uploadURL)
 				_, err := client.SimpleUpload(context.Background(), path, strings.NewReader(""), 0, WithConflictBehavior("replace"))
 				if err != nil {
-					util.Log().Debug("无法创建占位文件，%s", err)
+					util.Log().Debug("無法建立占位文件，%s", err)
 				}
 				return
 			}
@@ -555,7 +555,7 @@ func (client *Client) MonitorUpload(uploadURL, callbackKey, path string, size ui
 	}
 }
 
-// FinishCallback 向Monitor发送回调结束信号
+// FinishCallback 向Monitor發送回調結束訊號
 func FinishCallback(key string) {
 	if signal, ok := callbackSignal.Load(key); ok {
 		if signalChan, ok := signal.(chan bool); ok {
@@ -572,7 +572,7 @@ func sysError(err error) *RespError {
 }
 
 func (client *Client) request(ctx context.Context, method string, url string, body io.Reader, option ...request.Option) (string, *RespError) {
-	// 获取凭证
+	// 獲取憑證
 	err := client.UpdateCredential(ctx)
 	if err != nil {
 		return "", sysError(err)
@@ -586,7 +586,7 @@ func (client *Client) request(ctx context.Context, method string, url string, bo
 		request.WithContext(ctx),
 	)
 
-	// 发送请求
+	// 發送請求
 	res := client.Request.Request(
 		method,
 		url,
@@ -603,16 +603,16 @@ func (client *Client) request(ctx context.Context, method string, url string, bo
 		return "", sysError(err)
 	}
 
-	// 解析请求响应
+	// 解析請求響應
 	var (
 		errResp   RespError
 		decodeErr error
 	)
-	// 如果有错误
+	// 如果有錯誤
 	if res.Response.StatusCode < 200 || res.Response.StatusCode >= 300 {
 		decodeErr = json.Unmarshal([]byte(respBody), &errResp)
 		if decodeErr != nil {
-			util.Log().Debug("Onedrive返回未知响应[%s]", respBody)
+			util.Log().Debug("Onedrive返回未知響應[%s]", respBody)
 			return "", sysError(decodeErr)
 		}
 		return "", &errResp
@@ -622,7 +622,7 @@ func (client *Client) request(ctx context.Context, method string, url string, bo
 }
 
 func (client *Client) requestWithStr(ctx context.Context, method string, url string, body string, expectedCode int) (string, *RespError) {
-	// 发送请求
+	// 發送請求
 	bodyReader := ioutil.NopCloser(strings.NewReader(body))
 	return client.request(ctx, method, url, bodyReader,
 		request.WithContentLength(int64(len(body))),

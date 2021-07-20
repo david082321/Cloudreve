@@ -15,18 +15,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// StartLoginAuthn 开始注册WebAuthn登录
+// StartLoginAuthn 開始註冊WebAuthn登入
 func StartLoginAuthn(c *gin.Context) {
 	userName := c.Param("username")
 	expectedUser, err := model.GetActiveUserByEmail(userName)
 	if err != nil {
-		c.JSON(200, serializer.Err(serializer.CodeNotFound, "用户不存在", err))
+		c.JSON(200, serializer.Err(serializer.CodeNotFound, "使用者不存在", err))
 		return
 	}
 
 	instance, err := authn.NewAuthnInstance()
 	if err != nil {
-		c.JSON(200, serializer.Err(serializer.CodeInternalSetting, "无法初始化Authn", err))
+		c.JSON(200, serializer.Err(serializer.CodeInternalSetting, "無法初始化Authn", err))
 		return
 	}
 
@@ -49,12 +49,12 @@ func StartLoginAuthn(c *gin.Context) {
 	c.JSON(200, serializer.Response{Code: 0, Data: options})
 }
 
-// FinishLoginAuthn 完成注册WebAuthn登录
+// FinishLoginAuthn 完成註冊WebAuthn登入
 func FinishLoginAuthn(c *gin.Context) {
 	userName := c.Param("username")
 	expectedUser, err := model.GetActiveUserByEmail(userName)
 	if err != nil {
-		c.JSON(200, serializer.Err(serializer.CodeCredentialInvalid, "用户邮箱或密码错误", err))
+		c.JSON(200, serializer.Err(serializer.CodeCredentialInvalid, "使用者信箱或密碼錯誤", err))
 		return
 	}
 
@@ -65,14 +65,14 @@ func FinishLoginAuthn(c *gin.Context) {
 
 	instance, err := authn.NewAuthnInstance()
 	if err != nil {
-		c.JSON(200, serializer.Err(serializer.CodeInternalSetting, "无法初始化Authn", err))
+		c.JSON(200, serializer.Err(serializer.CodeInternalSetting, "無法初始化Authn", err))
 		return
 	}
 
 	_, err = instance.FinishLogin(expectedUser, sessionData, c.Request)
 
 	if err != nil {
-		c.JSON(200, serializer.Err(serializer.CodeCredentialInvalid, "登录验证失败", err))
+		c.JSON(200, serializer.Err(serializer.CodeCredentialInvalid, "登入驗證失敗", err))
 		return
 	}
 
@@ -82,13 +82,13 @@ func FinishLoginAuthn(c *gin.Context) {
 	c.JSON(200, serializer.BuildUserResponse(expectedUser))
 }
 
-// StartRegAuthn 开始注册WebAuthn信息
+// StartRegAuthn 開始註冊WebAuthn訊息
 func StartRegAuthn(c *gin.Context) {
 	currUser := CurrentUser(c)
 
 	instance, err := authn.NewAuthnInstance()
 	if err != nil {
-		c.JSON(200, serializer.Err(serializer.CodeInternalSetting, "无法初始化Authn", err))
+		c.JSON(200, serializer.Err(serializer.CodeInternalSetting, "無法初始化Authn", err))
 		return
 	}
 
@@ -111,7 +111,7 @@ func StartRegAuthn(c *gin.Context) {
 	c.JSON(200, serializer.Response{Code: 0, Data: options})
 }
 
-// FinishRegAuthn 完成注册WebAuthn信息
+// FinishRegAuthn 完成註冊WebAuthn訊息
 func FinishRegAuthn(c *gin.Context) {
 	currUser := CurrentUser(c)
 	sessionDataJSON := util.GetSession(c, "registration-session").([]byte)
@@ -121,7 +121,7 @@ func FinishRegAuthn(c *gin.Context) {
 
 	instance, err := authn.NewAuthnInstance()
 	if err != nil {
-		c.JSON(200, serializer.Err(serializer.CodeInternalSetting, "无法初始化Authn", err))
+		c.JSON(200, serializer.Err(serializer.CodeInternalSetting, "無法初始化Authn", err))
 		return
 	}
 
@@ -147,7 +147,7 @@ func FinishRegAuthn(c *gin.Context) {
 	})
 }
 
-// UserLogin 用户登录
+// UserLogin 使用者登入
 func UserLogin(c *gin.Context) {
 	var service user.UserLoginService
 	if err := c.ShouldBindJSON(&service); err == nil {
@@ -158,7 +158,7 @@ func UserLogin(c *gin.Context) {
 	}
 }
 
-// UserRegister 用户注册
+// UserRegister 使用者註冊
 func UserRegister(c *gin.Context) {
 	var service user.UserRegisterService
 	if err := c.ShouldBindJSON(&service); err == nil {
@@ -169,7 +169,7 @@ func UserRegister(c *gin.Context) {
 	}
 }
 
-// User2FALogin 用户二步验证登录
+// User2FALogin 使用者二步驗證登入
 func User2FALogin(c *gin.Context) {
 	var service user.Enable2FA
 	if err := c.ShouldBindJSON(&service); err == nil {
@@ -180,7 +180,7 @@ func User2FALogin(c *gin.Context) {
 	}
 }
 
-// UserSendReset 发送密码重设邮件
+// UserSendReset 發送密碼重設郵件
 func UserSendReset(c *gin.Context) {
 	var service user.UserResetEmailService
 	if err := c.ShouldBindJSON(&service); err == nil {
@@ -191,7 +191,7 @@ func UserSendReset(c *gin.Context) {
 	}
 }
 
-// UserReset 重设密码
+// UserReset 重設密碼
 func UserReset(c *gin.Context) {
 	var service user.UserResetService
 	if err := c.ShouldBindJSON(&service); err == nil {
@@ -202,7 +202,7 @@ func UserReset(c *gin.Context) {
 	}
 }
 
-// UserActivate 用户激活
+// UserActivate 使用者啟動
 func UserActivate(c *gin.Context) {
 	var service user.SettingService
 	if err := c.ShouldBindUri(&service); err == nil {
@@ -213,27 +213,27 @@ func UserActivate(c *gin.Context) {
 	}
 }
 
-// UserSignOut 用户退出登录
+// UserSignOut 使用者退出登入
 func UserSignOut(c *gin.Context) {
 	util.DeleteSession(c, "user_id")
 	c.JSON(200, serializer.Response{})
 }
 
-// UserMe 获取当前登录的用户
+// UserMe 獲取目前登入的使用者
 func UserMe(c *gin.Context) {
 	currUser := CurrentUser(c)
 	res := serializer.BuildUserResponse(*currUser)
 	c.JSON(200, res)
 }
 
-// UserStorage 获取用户的存储信息
+// UserStorage 獲取使用者的儲存訊息
 func UserStorage(c *gin.Context) {
 	currUser := CurrentUser(c)
 	res := serializer.BuildUserStorageResponse(*currUser)
 	c.JSON(200, res)
 }
 
-// UserTasks 获取任务队列
+// UserTasks 獲取任務佇列
 func UserTasks(c *gin.Context) {
 	var service user.SettingListService
 	if err := c.ShouldBindQuery(&service); err == nil {
@@ -244,7 +244,7 @@ func UserTasks(c *gin.Context) {
 	}
 }
 
-// UserSetting 获取用户设定
+// UserSetting 獲取使用者設定
 func UserSetting(c *gin.Context) {
 	var service user.SettingService
 	if err := c.ShouldBindUri(&service); err == nil {
@@ -255,65 +255,65 @@ func UserSetting(c *gin.Context) {
 	}
 }
 
-// UseGravatar 设定头像使用全球通用
+// UseGravatar 設定大頭貼使用全球通用
 func UseGravatar(c *gin.Context) {
 	u := CurrentUser(c)
 	if err := u.Update(map[string]interface{}{"avatar": "gravatar"}); err != nil {
-		c.JSON(200, serializer.Err(serializer.CodeDBError, "无法更新头像", err))
+		c.JSON(200, serializer.Err(serializer.CodeDBError, "無法更新大頭貼", err))
 		return
 	}
 	c.JSON(200, serializer.Response{})
 }
 
-// UploadAvatar 从文件上传头像
+// UploadAvatar 從文件上傳大頭貼
 func UploadAvatar(c *gin.Context) {
-	// 取得头像上传大小限制
+	// 取得大頭貼上傳大小限制
 	maxSize := model.GetIntSetting("avatar_size", 2097152)
 	if c.Request.ContentLength == -1 || c.Request.ContentLength > int64(maxSize) {
 		request.BlackHole(c.Request.Body)
-		c.JSON(200, serializer.Err(serializer.CodeUploadFailed, "头像尺寸太大", nil))
+		c.JSON(200, serializer.Err(serializer.CodeUploadFailed, "大頭貼尺寸太大", nil))
 		return
 	}
 
-	// 取得上传的文件
+	// 取得上傳的文件
 	file, err := c.FormFile("avatar")
 	if err != nil {
-		c.JSON(200, serializer.Err(serializer.CodeIOFailed, "无法读取头像数据", err))
+		c.JSON(200, serializer.Err(serializer.CodeIOFailed, "無法讀取大頭貼資料", err))
 		return
 	}
 
-	// 初始化头像
+	// 初始化大頭貼
 	r, err := file.Open()
 	if err != nil {
-		c.JSON(200, serializer.Err(serializer.CodeIOFailed, "无法读取头像数据", err))
+		c.JSON(200, serializer.Err(serializer.CodeIOFailed, "無法讀取大頭貼資料", err))
 		return
 	}
 	avatar, err := thumb.NewThumbFromFile(r, file.Filename)
 	if err != nil {
-		c.JSON(200, serializer.Err(serializer.CodeIOFailed, "无法解析图像数据", err))
+		c.JSON(200, serializer.Err(serializer.CodeIOFailed, "無法解析圖像資料", err))
 		return
 	}
 
-	// 创建头像
+	// 建立大頭貼
 	u := CurrentUser(c)
 	err = avatar.CreateAvatar(u.ID)
 	if err != nil {
-		c.JSON(200, serializer.Err(serializer.CodeIOFailed, "无法创建头像", err))
+		c.JSON(200, serializer.Err(serializer.CodeIOFailed, "無法建立大頭貼", err))
 		return
 	}
 
-	// 保存头像标记
+	// 儲存大頭貼標記
 	if err := u.Update(map[string]interface{}{
 		"avatar": "file",
 	}); err != nil {
-		c.JSON(200, serializer.Err(serializer.CodeDBError, "无法更新头像", err))
+		c.JSON(200, serializer.Err(serializer.CodeDBError, "無法更新大頭貼", err))
 		return
 	}
 
 	c.JSON(200, serializer.Response{})
 }
 
-// GetUserAvatar 获取用户头像
+// GetUserAvatar 獲取使用者大頭貼
 func GetUserAvatar(c *gin.Context) {
 	var service user.AvatarService
 	if err := c.ShouldBindUri(&service); err == nil {
@@ -327,7 +327,7 @@ func GetUserAvatar(c *gin.Context) {
 	}
 }
 
-// UpdateOption 更改用户设定
+// UpdateOption 更改使用者設定
 func UpdateOption(c *gin.Context) {
 	var service user.SettingUpdateService
 	if err := c.ShouldBindUri(&service); err == nil {
@@ -367,7 +367,7 @@ func UpdateOption(c *gin.Context) {
 	}
 }
 
-// UserInit2FA 初始化二步验证
+// UserInit2FA 初始化二步驗證
 func UserInit2FA(c *gin.Context) {
 	var service user.SettingService
 	if err := c.ShouldBindUri(&service); err == nil {

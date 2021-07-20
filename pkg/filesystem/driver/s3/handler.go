@@ -29,33 +29,33 @@ import (
 	"github.com/cloudreve/Cloudreve/v3/pkg/serializer"
 )
 
-// Driver 适配器模板
+// Driver 適配器模板
 type Driver struct {
 	Policy *model.Policy
 	sess   *session.Session
 	svc    *s3.S3
 }
 
-// UploadPolicy S3上传策略
+// UploadPolicy S3上傳策略
 type UploadPolicy struct {
 	Expiration string        `json:"expiration"`
 	Conditions []interface{} `json:"conditions"`
 }
 
-//MetaData 文件信息
+//MetaData 文件訊息
 type MetaData struct {
 	Size uint64
 	Etag string
 }
 
-// InitS3Client 初始化S3会话
+// InitS3Client 初始化S3工作階段
 func (handler *Driver) InitS3Client() error {
 	if handler.Policy == nil {
-		return errors.New("存储策略为空")
+		return errors.New("儲存策略為空")
 	}
 
 	if handler.svc == nil {
-		// 初始化会话
+		// 初始化工作階段
 		sess, err := session.NewSession(&aws.Config{
 			Credentials:      credentials.NewStaticCredentials(handler.Policy.AccessKey, handler.Policy.SecretKey, ""),
 			Endpoint:         &handler.Policy.Server,
@@ -72,15 +72,15 @@ func (handler *Driver) InitS3Client() error {
 	return nil
 }
 
-// List 列出给定路径下的文件
+// List 列出給定路徑下的文件
 func (handler Driver) List(ctx context.Context, base string, recursive bool) ([]response.Object, error) {
 
-	// 初始化客户端
+	// 初始化用戶端
 	if err := handler.InitS3Client(); err != nil {
 		return nil, err
 	}
 
-	// 初始化列目录参数
+	// 初始化列目錄參數
 	base = strings.TrimPrefix(base, "/")
 	if base != "" {
 		base += "/"
@@ -92,7 +92,7 @@ func (handler Driver) List(ctx context.Context, base string, recursive bool) ([]
 		MaxKeys: aws.Int64(1000),
 	}
 
-	// 是否为递归列出
+	// 是否為遞迴列出
 	if !recursive {
 		opt.Delimiter = aws.String("/")
 	}
@@ -110,7 +110,7 @@ func (handler Driver) List(ctx context.Context, base string, recursive bool) ([]
 		objects = append(objects, res.Contents...)
 		commons = append(commons, res.CommonPrefixes...)
 
-		// 如果本次未列取完，则继续使用marker获取结果
+		// 如果本次未列取完，則繼續使用marker獲取結果
 		if *res.IsTruncated {
 			opt.Marker = res.NextMarker
 		} else {
@@ -118,10 +118,10 @@ func (handler Driver) List(ctx context.Context, base string, recursive bool) ([]
 		}
 	}
 
-	// 处理列取结果
+	// 處理列取結果
 	res := make([]response.Object, 0, len(objects)+len(commons))
 
-	// 处理目录
+	// 處理目錄
 	for _, object := range commons {
 		rel, err := filepath.Rel(*opt.Prefix, *object.Prefix)
 		if err != nil {
@@ -135,7 +135,7 @@ func (handler Driver) List(ctx context.Context, base string, recursive bool) ([]
 			LastModify:   time.Now(),
 		})
 	}
-	// 处理文件
+	// 處理文件
 	for _, object := range objects {
 		rel, err := filepath.Rel(*opt.Prefix, *object.Key)
 		if err != nil {
@@ -155,10 +155,10 @@ func (handler Driver) List(ctx context.Context, base string, recursive bool) ([]
 
 }
 
-// Get 获取文件
+// Get 獲取文件
 func (handler Driver) Get(ctx context.Context, path string) (response.RSCloser, error) {
 
-	// 获取文件源地址
+	// 獲取文件源地址
 	downloadURL, err := handler.Source(
 		ctx,
 		path,
@@ -171,7 +171,7 @@ func (handler Driver) Get(ctx context.Context, path string) (response.RSCloser, 
 		return nil, err
 	}
 
-	// 获取文件数据流
+	// 獲取文件資料流
 	client := request.HTTPClient{}
 	resp, err := client.Request(
 		"GET",
@@ -189,7 +189,7 @@ func (handler Driver) Get(ctx context.Context, path string) (response.RSCloser, 
 
 	resp.SetFirstFakeChunk()
 
-	// 尝试自主获取文件大小
+	// 嘗試自主獲取檔案大小
 	if file, ok := ctx.Value(fsctx.FileModelCtx).(model.File); ok {
 		resp.SetContentLength(int64(file.Size))
 	}
@@ -197,10 +197,10 @@ func (handler Driver) Get(ctx context.Context, path string) (response.RSCloser, 
 	return resp, nil
 }
 
-// Put 将文件流保存到指定目录
+// Put 將文件流儲存到指定目錄
 func (handler Driver) Put(ctx context.Context, file io.ReadCloser, dst string, size uint64) error {
 
-	// 初始化客户端
+	// 初始化用戶端
 	if err := handler.InitS3Client(); err != nil {
 		return err
 	}
@@ -220,11 +220,11 @@ func (handler Driver) Put(ctx context.Context, file io.ReadCloser, dst string, s
 	return nil
 }
 
-// Delete 删除一个或多个文件，
-// 返回未删除的文件，及遇到的最后一个错误
+// Delete 刪除一個或多個文件，
+// 返回未刪除的文件，及遇到的最後一個錯誤
 func (handler Driver) Delete(ctx context.Context, files []string) ([]string, error) {
 
-	// 初始化客户端
+	// 初始化用戶端
 	if err := handler.InitS3Client(); err != nil {
 		return files, err
 	}
@@ -238,7 +238,7 @@ func (handler Driver) Delete(ctx context.Context, files []string) ([]string, err
 		keys = append(keys, &s3.ObjectIdentifier{Key: &filePath})
 	}
 
-	// 发送异步删除请求
+	// 發送非同步刪除請求
 	res, err := handler.svc.DeleteObjects(
 		&s3.DeleteObjectsInput{
 			Bucket: &handler.Policy.BucketName,
@@ -251,7 +251,7 @@ func (handler Driver) Delete(ctx context.Context, files []string) ([]string, err
 		return files, err
 	}
 
-	// 统计未删除的文件
+	// 統計未刪除的文件
 	for _, deleteRes := range res.Deleted {
 		deleted = append(deleted, *deleteRes.Key)
 	}
@@ -261,12 +261,12 @@ func (handler Driver) Delete(ctx context.Context, files []string) ([]string, err
 
 }
 
-// Thumb 获取文件缩略图
+// Thumb 獲取文件縮圖
 func (handler Driver) Thumb(ctx context.Context, path string) (*response.ContentResponse, error) {
-	return nil, errors.New("未实现")
+	return nil, errors.New("未實現")
 }
 
-// Source 获取外链URL
+// Source 獲取外鏈URL
 func (handler Driver) Source(
 	ctx context.Context,
 	path string,
@@ -276,13 +276,13 @@ func (handler Driver) Source(
 	speed int,
 ) (string, error) {
 
-	// 尝试从上下文获取文件名
+	// 嘗試從上下文獲取檔案名
 	fileName := ""
 	if file, ok := ctx.Value(fsctx.FileModelCtx).(model.File); ok {
 		fileName = file.Name
 	}
 
-	// 初始化客户端
+	// 初始化用戶端
 	if err := handler.InitS3Client(); err != nil {
 		return "", err
 	}
@@ -300,13 +300,13 @@ func (handler Driver) Source(
 
 	signedURL, _ := req.Presign(time.Duration(ttl) * time.Second)
 
-	// 将最终生成的签名URL域名换成用户自定义的加速域名（如果有）
+	// 將最終生成的簽名URL域名換成使用者自訂的加速域名（如果有）
 	finalURL, err := url.Parse(signedURL)
 	if err != nil {
 		return "", err
 	}
 
-	// 公有空间替换掉Key及不支持的头
+	// 公有空間取代掉Key及不支援的頭
 	if !handler.Policy.IsPrivate {
 		finalURL.RawQuery = ""
 	}
@@ -323,21 +323,21 @@ func (handler Driver) Source(
 	return finalURL.String(), nil
 }
 
-// Token 获取上传策略和认证Token
+// Token 獲取上傳策略和認證Token
 func (handler Driver) Token(ctx context.Context, TTL int64, key string) (serializer.UploadCredential, error) {
 
-	// 读取上下文中生成的存储路径和文件大小
+	// 讀取上下文中生成的儲存路徑和檔案大小
 	savePath, ok := ctx.Value(fsctx.SavePathCtx).(string)
 	if !ok {
-		return serializer.UploadCredential{}, errors.New("无法获取存储路径")
+		return serializer.UploadCredential{}, errors.New("無法獲取儲存路徑")
 	}
 
-	// 生成回调地址
+	// 生成回調地址
 	siteURL := model.GetSiteURL()
 	apiBaseURI, _ := url.Parse("/api/v3/callback/s3/" + key)
 	apiURL := siteURL.ResolveReference(apiBaseURI)
 
-	// 上传策略
+	// 上傳策略
 	putPolicy := UploadPolicy{
 		Expiration: time.Now().UTC().Add(time.Duration(TTL) * time.Second).Format(time.RFC3339),
 		Conditions: []interface{}{
@@ -354,13 +354,13 @@ func (handler Driver) Token(ctx context.Context, TTL int64, key string) (seriali
 			[]interface{}{"content-length-range", 0, handler.Policy.MaxSize})
 	}
 
-	// 生成上传凭证
+	// 生成上傳憑證
 	return handler.getUploadCredential(ctx, putPolicy, apiURL)
 }
 
-// Meta 获取文件信息
+// Meta 獲取文件訊息
 func (handler Driver) Meta(ctx context.Context, path string) (*MetaData, error) {
-	// 初始化客户端
+	// 初始化用戶端
 	if err := handler.InitS3Client(); err != nil {
 		return nil, err
 	}
@@ -384,10 +384,10 @@ func (handler Driver) Meta(ctx context.Context, path string) (*MetaData, error) 
 
 func (handler Driver) getUploadCredential(ctx context.Context, policy UploadPolicy, callback *url.URL) (serializer.UploadCredential, error) {
 
-	// 读取上下文中生成的存储路径和文件大小
+	// 讀取上下文中生成的儲存路徑和檔案大小
 	savePath, ok := ctx.Value(fsctx.SavePathCtx).(string)
 	if !ok {
-		return serializer.UploadCredential{}, errors.New("无法获取存储路径")
+		return serializer.UploadCredential{}, errors.New("無法獲取儲存路徑")
 	}
 
 	longDate := time.Now().UTC().Format("20060102T150405Z")
@@ -397,14 +397,14 @@ func (handler Driver) getUploadCredential(ctx context.Context, policy UploadPoli
 	policy.Conditions = append(policy.Conditions, map[string]string{"x-amz-credential": credential})
 	policy.Conditions = append(policy.Conditions, map[string]string{"x-amz-date": longDate})
 
-	// 编码上传策略
+	// 編碼上傳策略
 	policyJSON, err := json.Marshal(policy)
 	if err != nil {
 		return serializer.UploadCredential{}, err
 	}
 	policyEncoded := base64.StdEncoding.EncodeToString(policyJSON)
 
-	//签名
+	//簽名
 	signature := getHMAC([]byte("AWS4"+handler.Policy.SecretKey), []byte(shortDate))
 	signature = getHMAC(signature, []byte(handler.Policy.OptionsSerialized.Region))
 	signature = getHMAC(signature, []byte("s3"))
@@ -427,9 +427,9 @@ func getHMAC(key []byte, data []byte) []byte {
 	return hash.Sum(nil)
 }
 
-// CORS 创建跨域策略
+// CORS 建立跨域策略
 func (handler Driver) CORS() error {
-	// 初始化客户端
+	// 初始化用戶端
 	if err := handler.InitS3Client(); err != nil {
 		return err
 	}

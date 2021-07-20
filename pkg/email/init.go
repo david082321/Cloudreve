@@ -7,15 +7,15 @@ import (
 	"github.com/cloudreve/Cloudreve/v3/pkg/util"
 )
 
-// Client 默认的邮件发送客户端
+// Client 預設的郵件發送用戶端
 var Client Driver
 
-// Lock 读写锁
+// Lock 讀寫鎖
 var Lock sync.RWMutex
 
 // Init 初始化
 func Init() {
-	util.Log().Debug("邮件队列初始化")
+	util.Log().Debug("郵件佇列初始化")
 	Lock.Lock()
 	defer Lock.Unlock()
 
@@ -23,7 +23,7 @@ func Init() {
 		Client.Close()
 	}
 
-	// 读取SMTP设置
+	// 讀取SMTP設定
 	options := model.GetSettingByNames(
 		"fromName",
 		"fromAdress",

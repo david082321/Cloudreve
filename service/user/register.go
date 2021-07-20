@@ -11,23 +11,23 @@ import (
 	"strings"
 )
 
-// UserRegisterService 管理用户注册的服务
+// UserRegisterService 管理使用者註冊的服務
 type UserRegisterService struct {
-	//TODO 细致调整验证规则
+	//TODO 細緻調整驗證規則
 	UserName string `form:"userName" json:"userName" binding:"required,email"`
 	Password string `form:"Password" json:"Password" binding:"required,min=4,max=64"`
 }
 
-// Register 新用户注册
+// Register 新使用者註冊
 func (service *UserRegisterService) Register(c *gin.Context) serializer.Response {
-	// 相关设定
+	// 相關設定
 	options := model.GetSettingByNames("email_active")
 
-	// 相关设定
+	// 相關設定
 	isEmailRequired := model.IsTrueVal(options["email_active"])
 	defaultGroup := model.GetIntSetting("default_group", 2)
 
-	// 创建新的用户对象
+	// 建立新的使用者物件
 	user := model.NewUser()
 	user.Email = service.UserName
 	user.Nick = strings.Split(service.UserName, "@")[0]
@@ -38,34 +38,34 @@ func (service *UserRegisterService) Register(c *gin.Context) serializer.Response
 	}
 	user.GroupID = uint(defaultGroup)
 	userNotActivated := false
-	// 创建用户
+	// 建立使用者
 	if err := model.DB.Create(&user).Error; err != nil {
-		//检查已存在使用者是否尚未激活
+		//檢查已存在使用者是否尚未啟動
 		expectedUser, err := model.GetUserByEmail(service.UserName)
 		if expectedUser.Status == model.NotActivicated {
 			userNotActivated = true
 			user = expectedUser
 		} else {
-			return serializer.DBErr("此邮箱已被使用", err)
+			return serializer.DBErr("此信箱已被使用", err)
 		}
 	}
 
-	// 发送激活邮件
+	// 發送啟動郵件
 	if isEmailRequired {
 
-		// 签名激活请求API
+		// 簽名啟動請求API
 		base := model.GetSiteURL()
 		userID := hashid.HashID(user.ID, hashid.UserID)
 		controller, _ := url.Parse("/api/v3/user/activate/" + userID)
 		activateURL, err := auth.SignURI(auth.General, base.ResolveReference(controller).String(), 86400)
 		if err != nil {
-			return serializer.Err(serializer.CodeEncryptError, "无法签名激活URL", err)
+			return serializer.Err(serializer.CodeEncryptError, "無法簽名啟動URL", err)
 		}
 
-		// 取得签名
+		// 取得簽名
 		credential := activateURL.Query().Get("sign")
 
-		// 生成对用户访问的激活地址
+		// 生成對使用者訪問的啟動地址
 		controller, _ = url.Parse("/activate")
 		finalURL := base.ResolveReference(controller)
 		queries := finalURL.Query()
@@ -73,16 +73,16 @@ func (service *UserRegisterService) Register(c *gin.Context) serializer.Response
 		queries.Add("sign", credential)
 		finalURL.RawQuery = queries.Encode()
 
-		// 返送激活邮件
+		// 返送啟動郵件
 		title, body := email.NewActivationEmail(user.Email,
 			finalURL.String(),
 		)
 		if err := email.Send(user.Email, title, body); err != nil {
-			return serializer.Err(serializer.CodeInternalSetting, "无法发送激活邮件", err)
+			return serializer.Err(serializer.CodeInternalSetting, "無法發送啟動郵件", err)
 		}
 		if userNotActivated == true {
-			//原本在上面要抛出的DBErr，放来这边抛出
-			return serializer.DBErr("用户未激活，已重新发送激活邮件", nil)
+			//原本在上面要拋出的DBErr，放來這邊拋出
+			return serializer.DBErr("使用者未啟動，已重新髮送啟動郵件", nil)
 		} else {
 			return serializer.Response{Code: 203}
 		}
@@ -91,21 +91,21 @@ func (service *UserRegisterService) Register(c *gin.Context) serializer.Response
 	return serializer.Response{}
 }
 
-// Activate 激活用户
+// Activate 啟動使用者
 func (service *SettingService) Activate(c *gin.Context) serializer.Response {
-	// 查找待激活用户
+	// 尋找待啟動使用者
 	uid, _ := c.Get("object_id")
 	user, err := model.GetUserByID(uid.(uint))
 	if err != nil {
-		return serializer.Err(serializer.CodeNotFound, "用户不存在", err)
+		return serializer.Err(serializer.CodeNotFound, "使用者不存在", err)
 	}
 
-	// 检查状态
+	// 檢查狀態
 	if user.Status != model.NotActivicated {
-		return serializer.Err(serializer.CodeNoPermissionErr, "该用户无法被激活", nil)
+		return serializer.Err(serializer.CodeNoPermissionErr, "該使用者無法被啟動", nil)
 	}
 
-	// 激活用户
+	// 啟動使用者
 	user.SetStatus(model.Active)
 
 	return serializer.Response{Data: user.Email}

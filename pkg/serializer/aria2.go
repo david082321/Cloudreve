@@ -8,7 +8,7 @@ import (
 	"github.com/cloudreve/Cloudreve/v3/pkg/aria2/rpc"
 )
 
-// DownloadListResponse 下载列表响应条目
+// DownloadListResponse 下載列表響應條目
 type DownloadListResponse struct {
 	UpdateTime     time.Time      `json:"update"`
 	UpdateInterval int            `json:"interval"`
@@ -21,7 +21,7 @@ type DownloadListResponse struct {
 	Info           rpc.StatusInfo `json:"info"`
 }
 
-// FinishedListResponse 已完成任务条目
+// FinishedListResponse 已完成任務條目
 type FinishedListResponse struct {
 	Name       string         `json:"name"`
 	GID        string         `json:"gid"`
@@ -36,7 +36,7 @@ type FinishedListResponse struct {
 	UpdateTime time.Time      `json:"update"`
 }
 
-// BuildFinishedListResponse 构建已完成任务条目
+// BuildFinishedListResponse 構建已完成任務條目
 func BuildFinishedListResponse(tasks []model.Download) Response {
 	resp := make([]FinishedListResponse, 0, len(tasks))
 
@@ -46,7 +46,7 @@ func BuildFinishedListResponse(tasks []model.Download) Response {
 			fileName = path.Base(tasks[i].StatusInfo.Files[0].Path)
 		}
 
-		// 过滤敏感信息
+		// 過濾敏感訊息
 		for i2 := 0; i2 < len(tasks[i].StatusInfo.Files); i2++ {
 			tasks[i].StatusInfo.Files[i2].Path = path.Base(tasks[i].StatusInfo.Files[i2].Path)
 		}
@@ -75,7 +75,7 @@ func BuildFinishedListResponse(tasks []model.Download) Response {
 	return Response{Data: resp}
 }
 
-// BuildDownloadingResponse 构建正在下载的列表响应
+// BuildDownloadingResponse 構建正在下載的列表響應
 func BuildDownloadingResponse(tasks []model.Download) Response {
 	resp := make([]DownloadListResponse, 0, len(tasks))
 	interval := model.GetIntSetting("aria2_interval", 10)
@@ -86,7 +86,7 @@ func BuildDownloadingResponse(tasks []model.Download) Response {
 			fileName = path.Base(tasks[i].StatusInfo.Files[0].Path)
 		}
 
-		// 过滤敏感信息
+		// 過濾敏感訊息
 		tasks[i].StatusInfo.Dir = ""
 		for i2 := 0; i2 < len(tasks[i].StatusInfo.Files); i2++ {
 			tasks[i].StatusInfo.Files[i2].Path = path.Base(tasks[i].StatusInfo.Files[i2].Path)

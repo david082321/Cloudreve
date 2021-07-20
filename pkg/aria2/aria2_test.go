@@ -13,7 +13,7 @@ import (
 
 var mock sqlmock.Sqlmock
 
-// TestMain 初始化数据库Mock
+// TestMain 初始化資料庫Mock
 func TestMain(m *testing.M) {
 	var db *sql.DB
 	var err error
@@ -43,21 +43,21 @@ func TestInit(t *testing.T) {
 	cache.Set("setting_aria2_call_timeout", "5", 0)
 	cache.Set("setting_aria2_options", `[]`, 0)
 
-	// 未指定RPC地址，跳过
+	// 未指定RPC地址，跳過
 	{
 		cache.Set("setting_aria2_rpcurl", "", 0)
 		Init(false)
 		asserts.IsType(&DummyAria2{}, Instance)
 	}
 
-	// 无法解析服务器地址
+	// 無法解析伺服器地址
 	{
 		cache.Set("setting_aria2_rpcurl", string(byte(0x7f)), 0)
 		Init(false)
 		asserts.IsType(&DummyAria2{}, Instance)
 	}
 
-	// 无法解析全局配置
+	// 無法解析全域配置
 	{
 		Instance = &RPCService{}
 		cache.Set("setting_aria2_options", "?", 0)
@@ -66,7 +66,7 @@ func TestInit(t *testing.T) {
 		asserts.IsType(&DummyAria2{}, Instance)
 	}
 
-	// 连接失败
+	// 連線失敗
 	{
 		cache.Set("setting_aria2_options", "{}", 0)
 		cache.Set("setting_aria2_rpcurl", "http://127.0.0.1:1234", 0)

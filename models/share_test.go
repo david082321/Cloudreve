@@ -29,7 +29,7 @@ func TestShare_Create(t *testing.T) {
 		asserts.EqualValues(2, id)
 	}
 
-	// 失败
+	// 失敗
 	{
 		mock.ExpectBegin()
 		mock.ExpectExec("INSERT(.+)").WillReturnError(errors.New("error"))
@@ -54,7 +54,7 @@ func TestGetShareByHashID(t *testing.T) {
 		asserts.NotNil(res)
 	}
 
-	// 查询失败
+	// 查詢失敗
 	{
 		mock.ExpectQuery("SELECT(.+)").
 			WillReturnError(errors.New("error"))
@@ -63,7 +63,7 @@ func TestGetShareByHashID(t *testing.T) {
 		asserts.Nil(res)
 	}
 
-	// ID解码失败
+	// ID解碼失敗
 	{
 		res := GetShareByHashID("empty")
 		asserts.Nil(res)
@@ -74,13 +74,13 @@ func TestGetShareByHashID(t *testing.T) {
 func TestShare_IsAvailable(t *testing.T) {
 	asserts := assert.New(t)
 
-	// 下载剩余次数为0
+	// 下載剩餘次數為0
 	{
 		share := Share{}
 		asserts.False(share.IsAvailable())
 	}
 
-	// 时效过期
+	// 時效過期
 	{
 		expires := time.Unix(10, 10)
 		share := Share{
@@ -90,7 +90,7 @@ func TestShare_IsAvailable(t *testing.T) {
 		asserts.False(share.IsAvailable())
 	}
 
-	// 源对象为目录，但不存在
+	// 源物件為目錄，但不存在
 	{
 		share := Share{
 			RemainDownloads: -1,
@@ -103,7 +103,7 @@ func TestShare_IsAvailable(t *testing.T) {
 		asserts.NoError(mock.ExpectationsWereMet())
 	}
 
-	// 源对象为目录，存在
+	// 源物件為目錄，存在
 	{
 		share := Share{
 			RemainDownloads: -1,
@@ -116,7 +116,7 @@ func TestShare_IsAvailable(t *testing.T) {
 		asserts.NoError(mock.ExpectationsWereMet())
 	}
 
-	// 用户被封禁
+	// 使用者被封禁
 	{
 		share := Share{
 			RemainDownloads: -1,
@@ -142,7 +142,7 @@ func TestShare_GetCreator(t *testing.T) {
 func TestShare_Source(t *testing.T) {
 	asserts := assert.New(t)
 
-	// 目录
+	// 目錄
 	{
 		share := Share{IsDir: true, SourceID: 3}
 		mock.ExpectQuery("SELECT(.+)").WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(3))
@@ -163,7 +163,7 @@ func TestShare_CanBeDownloadBy(t *testing.T) {
 	asserts := assert.New(t)
 	share := Share{}
 
-	// 未登录，无权
+	// 未登入，無權
 	{
 		user := &User{
 			Group: Group{
@@ -175,7 +175,7 @@ func TestShare_CanBeDownloadBy(t *testing.T) {
 		asserts.Error(share.CanBeDownloadBy(user))
 	}
 
-	// 已登录，无权
+	// 已登入，無權
 	{
 		user := &User{
 			Model: gorm.Model{ID: 1},
@@ -188,7 +188,7 @@ func TestShare_CanBeDownloadBy(t *testing.T) {
 		asserts.Error(share.CanBeDownloadBy(user))
 	}
 
-	// 未登录，需要积分
+	// 未登入，需要積分
 	{
 		user := &User{
 			Group: Group{
@@ -220,7 +220,7 @@ func TestShare_WasDownloadedBy(t *testing.T) {
 		Model: gorm.Model{ID: 1},
 	}
 
-	// 已登录，已下载
+	// 已登入，已下載
 	{
 		user := User{
 			Model: gorm.Model{

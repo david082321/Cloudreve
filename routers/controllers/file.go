@@ -20,7 +20,7 @@ import (
 )
 
 func DownloadArchive(c *gin.Context) {
-	// 创建上下文
+	// 建立上下文
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -36,7 +36,7 @@ func DownloadArchive(c *gin.Context) {
 }
 
 func Archive(c *gin.Context) {
-	// 创建上下文
+	// 建立上下文
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -49,7 +49,7 @@ func Archive(c *gin.Context) {
 	}
 }
 
-// Compress 创建文件压缩任务
+// Compress 建立文件壓縮任務
 func Compress(c *gin.Context) {
 	var service explorer.ItemCompressService
 	if err := c.ShouldBindJSON(&service); err == nil {
@@ -60,7 +60,7 @@ func Compress(c *gin.Context) {
 	}
 }
 
-// Decompress 创建文件解压缩任务
+// Decompress 建立文件解壓縮任務
 func Decompress(c *gin.Context) {
 	var service explorer.ItemDecompressService
 	if err := c.ShouldBindJSON(&service); err == nil {
@@ -71,9 +71,9 @@ func Decompress(c *gin.Context) {
 	}
 }
 
-// AnonymousGetContent 匿名获取文件资源
+// AnonymousGetContent 匿名獲取文件資源
 func AnonymousGetContent(c *gin.Context) {
-	// 创建上下文
+	// 建立上下文
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -88,9 +88,9 @@ func AnonymousGetContent(c *gin.Context) {
 	}
 }
 
-// AnonymousPermLink 文件签名后的永久链接
+// AnonymousPermLink 文件簽名後的永久連結
 func AnonymousPermLink(c *gin.Context) {
-	// 创建上下文
+	// 建立上下文
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -102,7 +102,7 @@ func AnonymousPermLink(c *gin.Context) {
 			c.Redirect(302, res.Data.(string))
 			return
 		}
-		// 是否有错误发生
+		// 是否有錯誤發生
 		if res.Code != 0 {
 			c.JSON(200, res)
 		}
@@ -111,9 +111,9 @@ func AnonymousPermLink(c *gin.Context) {
 	}
 }
 
-// GetSource 获取文件的外链地址
+// GetSource 獲取文件的外鏈地址
 func GetSource(c *gin.Context) {
-	// 创建上下文
+	// 建立上下文
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -124,7 +124,7 @@ func GetSource(c *gin.Context) {
 	}
 	defer fs.Recycle()
 
-	// 获取文件ID
+	// 獲取文件ID
 	fileID, ok := c.Get("object_id")
 	if !ok {
 		c.JSON(200, serializer.ParamErr("文件不存在", err))
@@ -146,9 +146,9 @@ func GetSource(c *gin.Context) {
 
 }
 
-// Thumb 获取文件缩略图
+// Thumb 獲取文件縮圖
 func Thumb(c *gin.Context) {
-	// 创建上下文
+	// 建立上下文
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -159,17 +159,17 @@ func Thumb(c *gin.Context) {
 	}
 	defer fs.Recycle()
 
-	// 获取文件ID
+	// 獲取文件ID
 	fileID, ok := c.Get("object_id")
 	if !ok {
 		c.JSON(200, serializer.ParamErr("文件不存在", err))
 		return
 	}
 
-	// 获取缩略图
+	// 獲取縮圖
 	resp, err := fs.GetThumb(ctx, fileID.(uint))
 	if err != nil {
-		c.JSON(200, serializer.Err(serializer.CodeNotSet, "无法获取缩略图", err))
+		c.JSON(200, serializer.Err(serializer.CodeNotSet, "無法獲取縮圖", err))
 		return
 	}
 
@@ -184,9 +184,9 @@ func Thumb(c *gin.Context) {
 
 }
 
-// Preview 预览文件
+// Preview 預覽文件
 func Preview(c *gin.Context) {
-	// 创建上下文
+	// 建立上下文
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -198,7 +198,7 @@ func Preview(c *gin.Context) {
 			c.Redirect(301, res.Data.(string))
 			return
 		}
-		// 是否有错误发生
+		// 是否有錯誤發生
 		if res.Code != 0 {
 			c.JSON(200, res)
 		}
@@ -207,16 +207,16 @@ func Preview(c *gin.Context) {
 	}
 }
 
-// PreviewText 预览文本文件
+// PreviewText 預覽文字文件
 func PreviewText(c *gin.Context) {
-	// 创建上下文
+	// 建立上下文
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	var service explorer.FileIDService
 	if err := c.ShouldBindUri(&service); err == nil {
 		res := service.PreviewContent(ctx, c, true)
-		// 是否有错误发生
+		// 是否有錯誤發生
 		if res.Code != 0 {
 			c.JSON(200, res)
 		}
@@ -225,9 +225,9 @@ func PreviewText(c *gin.Context) {
 	}
 }
 
-// GetDocPreview 获取DOC文件预览地址
+// GetDocPreview 獲取DOC文件預覽地址
 func GetDocPreview(c *gin.Context) {
-	// 创建上下文
+	// 建立上下文
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -240,9 +240,9 @@ func GetDocPreview(c *gin.Context) {
 	}
 }
 
-// CreateDownloadSession 创建文件下载会话
+// CreateDownloadSession 建立文件下載工作階段
 func CreateDownloadSession(c *gin.Context) {
-	// 创建上下文
+	// 建立上下文
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -255,9 +255,9 @@ func CreateDownloadSession(c *gin.Context) {
 	}
 }
 
-// Download 文件下载
+// Download 文件下載
 func Download(c *gin.Context) {
-	// 创建上下文
+	// 建立上下文
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -272,9 +272,9 @@ func Download(c *gin.Context) {
 	}
 }
 
-// PutContent 更新文件内容
+// PutContent 更新文件內容
 func PutContent(c *gin.Context) {
-	// 创建上下文
+	// 建立上下文
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -287,27 +287,27 @@ func PutContent(c *gin.Context) {
 	}
 }
 
-// FileUploadStream 本地策略流式上传
+// FileUploadStream 本機策略流式上傳
 func FileUploadStream(c *gin.Context) {
-	// 创建上下文
+	// 建立上下文
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	// 取得文件大小
+	// 取得檔案大小
 	fileSize, err := strconv.ParseUint(c.Request.Header.Get("Content-Length"), 10, 64)
 	if err != nil {
 		c.JSON(200, ErrorResponse(err))
 		return
 	}
 
-	// 非可用策略时拒绝上传
+	// 非可用策略時拒絕上傳
 	if user, ok := c.Get("user"); ok && !user.(*model.User).Policy.IsTransitUpload(fileSize) {
 		request.BlackHole(c.Request.Body)
-		c.JSON(200, serializer.Err(serializer.CodePolicyNotAllowed, "当前存储策略无法使用", nil))
+		c.JSON(200, serializer.Err(serializer.CodePolicyNotAllowed, "目前儲存策略無法使用", nil))
 		return
 	}
 
-	// 解码文件名和路径
+	// 解碼檔案名和路徑
 	fileName, err := url.QueryUnescape(c.Request.Header.Get("X-FileName"))
 	filePath, err := url.QueryUnescape(c.Request.Header.Get("X-Path"))
 	if err != nil {
@@ -323,14 +323,14 @@ func FileUploadStream(c *gin.Context) {
 		VirtualPath: filePath,
 	}
 
-	// 创建文件系统
+	// 建立文件系統
 	fs, err := filesystem.NewFileSystemFromContext(c)
 	if err != nil {
 		c.JSON(200, serializer.Err(serializer.CodePolicyNotAllowed, err.Error(), err))
 		return
 	}
 
-	// 给文件系统分配钩子
+	// 給文件系統分配鉤子
 	fs.Use("BeforeUpload", filesystem.HookValidateFile)
 	fs.Use("BeforeUpload", filesystem.HookValidateCapacity)
 	fs.Use("AfterUploadCanceled", filesystem.HookDeleteTempFile)
@@ -340,7 +340,7 @@ func FileUploadStream(c *gin.Context) {
 	fs.Use("AfterValidateFailed", filesystem.HookGiveBackCapacity)
 	fs.Use("AfterUploadFailed", filesystem.HookGiveBackCapacity)
 
-	// 执行上传
+	// 執行上傳
 	ctx = context.WithValue(ctx, fsctx.ValidateCapacityOnceCtx, &sync.Once{})
 	ctx = context.WithValue(ctx, fsctx.DisableOverwrite, true)
 	uploadCtx := context.WithValue(ctx, fsctx.GinCtx, c)
@@ -355,9 +355,9 @@ func FileUploadStream(c *gin.Context) {
 	})
 }
 
-// GetUploadCredential 获取上传凭证
+// GetUploadCredential 獲取上傳憑證
 func GetUploadCredential(c *gin.Context) {
-	// 创建上下文
+	// 建立上下文
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -370,7 +370,7 @@ func GetUploadCredential(c *gin.Context) {
 	}
 }
 
-// SearchFile 搜索文件
+// SearchFile 搜尋文件
 func SearchFile(c *gin.Context) {
 	var service explorer.ItemSearchService
 	if err := c.ShouldBindUri(&service); err == nil {
@@ -381,7 +381,7 @@ func SearchFile(c *gin.Context) {
 	}
 }
 
-// CreateFile 创建空白文件
+// CreateFile 建立空白文件
 func CreateFile(c *gin.Context) {
 	var service explorer.SingleFileService
 	if err := c.ShouldBindJSON(&service); err == nil {

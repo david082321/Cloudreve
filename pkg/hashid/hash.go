@@ -7,22 +7,22 @@ import (
 	"github.com/speps/go-hashids"
 )
 
-// ID类型
+// ID類型
 const (
 	ShareID  = iota // 分享
-	UserID          // 用户
+	UserID          // 使用者
 	FileID          // 文件ID
-	FolderID        // 目录ID
-	TagID           // 标签ID
-	PolicyID        // 存储策略ID
+	FolderID        // 目錄ID
+	TagID           // 標籤ID
+	PolicyID        // 儲存策略ID
 )
 
 var (
-	// ErrTypeNotMatch ID类型不匹配
-	ErrTypeNotMatch = errors.New("ID类型不匹配")
+	// ErrTypeNotMatch ID類型不匹配
+	ErrTypeNotMatch = errors.New("ID類型不匹配")
 )
 
-// HashEncode 对给定数据计算HashID
+// HashEncode 對給定資料計算HashID
 func HashEncode(v []int) (string, error) {
 	hd := hashids.NewData()
 	hd.Salt = conf.SystemConfig.HashIDSalt
@@ -39,7 +39,7 @@ func HashEncode(v []int) (string, error) {
 	return id, nil
 }
 
-// HashDecode 对给定数据计算原始数据
+// HashDecode 對給定資料計算原始資料
 func HashDecode(raw string) ([]int, error) {
 	hd := hashids.NewData()
 	hd.Salt = conf.SystemConfig.HashIDSalt
@@ -53,13 +53,13 @@ func HashDecode(raw string) ([]int, error) {
 
 }
 
-// HashID 计算数据库内主键对应的HashID
+// HashID 計算資料庫內主鍵對應的HashID
 func HashID(id uint, t int) string {
 	v, _ := HashEncode([]int{int(id), t})
 	return v
 }
 
-// DecodeHashID 计算HashID对应的数据库ID
+// DecodeHashID 計算HashID對應的資料庫ID
 func DecodeHashID(id string, t int) (uint, error) {
 	v, _ := HashDecode(id)
 	if len(v) != 2 || v[1] != t {

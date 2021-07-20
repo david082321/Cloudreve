@@ -5,7 +5,7 @@ import (
 	"github.com/duo-labs/webauthn/webauthn"
 )
 
-// NewAuthnInstance 新建Authn实例
+// NewAuthnInstance 建立Authn實例
 func NewAuthnInstance() (*webauthn.WebAuthn, error) {
 	base := model.GetSiteURL()
 	return webauthn.New(&webauthn.Config{

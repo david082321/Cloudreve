@@ -11,7 +11,7 @@ import (
 
 // File 文件
 type File struct {
-	// 表字段
+	// 表欄位
 	gorm.Model
 	Name       string `gorm:"unique_index:idx_only_one"`
 	SourceName string `gorm:"type:text"`
@@ -21,28 +21,28 @@ type File struct {
 	FolderID   uint `gorm:"index:folder_id;unique_index:idx_only_one"`
 	PolicyID   uint
 
-	// 关联模型
+	// 關聯模型
 	Policy Policy `gorm:"PRELOAD:false,association_autoupdate:false"`
 
-	// 数据库忽略字段
+	// 資料庫忽略欄位
 	Position string `gorm:"-"`
 }
 
 func init() {
-	// 注册缓存用到的复杂结构
+	// 註冊快取用到的複雜結構
 	gob.Register(File{})
 }
 
-// Create 创建文件记录
+// Create 建立文件記錄
 func (file *File) Create() (uint, error) {
 	if err := DB.Create(file).Error; err != nil {
-		util.Log().Warning("无法插入文件记录, %s", err)
+		util.Log().Warning("無法插入文件記錄, %s", err)
 		return 0, err
 	}
 	return file.ID, nil
 }
 
-// GetChildFile 查找目录下名为name的子文件
+// GetChildFile 尋找目錄下名為name的子文件
 func (folder *Folder) GetChildFile(name string) (*File, error) {
 	var file File
 	result := DB.Where("folder_id = ? AND name = ?", folder.ID, name).Find(&file)
@@ -53,7 +53,7 @@ func (folder *Folder) GetChildFile(name string) (*File, error) {
 	return &file, result.Error
 }
 
-// GetChildFiles 查找目录下子文件
+// GetChildFiles 尋找目錄下子文件
 func (folder *Folder) GetChildFiles() ([]File, error) {
 	var files []File
 	result := DB.Where("folder_id = ?", folder.ID).Find(&files)
@@ -66,8 +66,8 @@ func (folder *Folder) GetChildFiles() ([]File, error) {
 	return files, result.Error
 }
 
-// GetFilesByIDs 根据文件ID批量获取文件,
-// UID为0表示忽略用户，只根据文件ID检索
+// GetFilesByIDs 根據文件ID批次獲取文件,
+// UID為0表示忽略使用者，只根據文件ID檢索
 func GetFilesByIDs(ids []uint, uid uint) ([]File, error) {
 	var files []File
 	var result *gorm.DB
@@ -79,8 +79,8 @@ func GetFilesByIDs(ids []uint, uid uint) ([]File, error) {
 	return files, result.Error
 }
 
-// GetFilesByKeywords 根据关键字搜索文件,
-// UID为0表示忽略用户，只根据文件ID检索
+// GetFilesByKeywords 根據關鍵字搜尋文件,
+// UID為0表示忽略使用者，只根據文件ID檢索
 func GetFilesByKeywords(uid uint, keywords ...interface{}) ([]File, error) {
 	var (
 		files      []File
@@ -88,7 +88,7 @@ func GetFilesByKeywords(uid uint, keywords ...interface{}) ([]File, error) {
 		conditions string
 	)
 
-	// 生成查询条件
+	// 生成查詢條件
 	for i := 0; i < len(keywords); i++ {
 		conditions += "name like ?"
 		if i != len(keywords)-1 {
@@ -104,21 +104,21 @@ func GetFilesByKeywords(uid uint, keywords ...interface{}) ([]File, error) {
 	return files, result.Error
 }
 
-// GetChildFilesOfFolders 批量检索目录子文件
+// GetChildFilesOfFolders 批次檢索目錄子文件
 func GetChildFilesOfFolders(folders *[]Folder) ([]File, error) {
-	// 将所有待删除目录ID抽离，以便检索文件
+	// 將所有待刪除目錄ID抽離，以便檢索文件
 	folderIDs := make([]uint, 0, len(*folders))
 	for _, value := range *folders {
 		folderIDs = append(folderIDs, value.ID)
 	}
 
-	// 检索文件
+	// 檢索文件
 	var files []File
 	result := DB.Where("folder_id in (?)", folderIDs).Find(&files)
 	return files, result.Error
 }
 
-// GetPolicy 获取文件所属策略
+// GetPolicy 獲取文件所屬策略
 func (file *File) GetPolicy() *Policy {
 	if file.Policy.Model.ID == 0 {
 		file.Policy, _ = GetPolicyByID(file.PolicyID)
@@ -126,12 +126,12 @@ func (file *File) GetPolicy() *Policy {
 	return &file.Policy
 }
 
-// RemoveFilesWithSoftLinks 去除给定的文件列表中有软链接的文件
+// RemoveFilesWithSoftLinks 去除給定的文件列表中有軟連結的文件
 func RemoveFilesWithSoftLinks(files []File) ([]File, error) {
-	// 结果值
+	// 結果值
 	filteredFiles := make([]File, 0)
 
-	// 查询软链接的文件
+	// 查詢軟連結的文件
 	var filesWithSoftLinks []File
 	tx := DB
 	for _, value := range files {
@@ -142,8 +142,8 @@ func RemoveFilesWithSoftLinks(files []File) ([]File, error) {
 		return nil, result.Error
 	}
 
-	// 过滤具有软连接的文件
-	// TODO: 优化复杂度
+	// 過濾具有軟連接的文件
+	// TODO: 最佳化複雜度
 	if len(filesWithSoftLinks) == 0 {
 		filteredFiles = files
 	} else {
@@ -166,41 +166,41 @@ func RemoveFilesWithSoftLinks(files []File) ([]File, error) {
 
 }
 
-// DeleteFileByIDs 根据给定ID批量删除文件记录
+// DeleteFileByIDs 根據給定ID批次刪除文件記錄
 func DeleteFileByIDs(ids []uint) error {
 	result := DB.Where("id in (?)", ids).Unscoped().Delete(&File{})
 	return result.Error
 }
 
-// GetFilesByParentIDs 根据父目录ID查找文件
+// GetFilesByParentIDs 根據父目錄ID尋找文件
 func GetFilesByParentIDs(ids []uint, uid uint) ([]File, error) {
 	files := make([]File, 0, len(ids))
 	result := DB.Where("user_id = ? and folder_id in (?)", uid, ids).Find(&files)
 	return files, result.Error
 }
 
-// Rename 重命名文件
+// Rename 重新命名文件
 func (file *File) Rename(new string) error {
 	return DB.Model(&file).Update("name", new).Error
 }
 
-// UpdatePicInfo 更新文件的图像信息
+// UpdatePicInfo 更新文件的圖像訊息
 func (file *File) UpdatePicInfo(value string) error {
 	return DB.Model(&file).Set("gorm:association_autoupdate", false).Update("pic_info", value).Error
 }
 
-// UpdateSize 更新文件的大小信息
+// UpdateSize 更新文件的大小訊息
 func (file *File) UpdateSize(value uint64) error {
 	return DB.Model(&file).Set("gorm:association_autoupdate", false).Update("size", value).Error
 }
 
-// UpdateSourceName 更新文件的源文件名
+// UpdateSourceName 更新文件的來源檔案名
 func (file *File) UpdateSourceName(value string) error {
 	return DB.Model(&file).Set("gorm:association_autoupdate", false).Update("source_name", value).Error
 }
 
 /*
-	实现 webdav.FileInfo 接口
+	實現 webdav.FileInfo 介面
 */
 
 func (file *File) GetName() string {

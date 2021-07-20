@@ -68,7 +68,7 @@ func TestCompressTask_Do(t *testing.T) {
 		},
 	}
 
-	// 无法创建文件系统
+	// 無法建立文件系統
 	{
 		task.User = &model.User{
 			Policy: model.Policy{
@@ -84,7 +84,7 @@ func TestCompressTask_Do(t *testing.T) {
 		asserts.NotEmpty(task.GetError().Msg)
 	}
 
-	// 压缩出错
+	// 壓縮出錯
 	{
 		task.User = &model.User{
 			Policy: model.Policy{
@@ -92,14 +92,14 @@ func TestCompressTask_Do(t *testing.T) {
 			},
 		}
 		task.TaskProps.Dirs = []uint{1}
-		// 更新进度
+		// 更新進度
 		mock.ExpectBegin()
 		mock.ExpectExec("UPDATE(.+)").WillReturnResult(sqlmock.NewResult(1,
 			1))
 		mock.ExpectCommit()
-		// 查找目录
+		// 尋找目錄
 		mock.ExpectQuery("SELECT(.+)").WillReturnError(errors.New("error"))
-		// 更新错误
+		// 更新錯誤
 		mock.ExpectBegin()
 		mock.ExpectExec("UPDATE(.+)").WillReturnResult(sqlmock.NewResult(1,
 			1))
@@ -109,7 +109,7 @@ func TestCompressTask_Do(t *testing.T) {
 		asserts.NotEmpty(task.GetError().Msg)
 	}
 
-	// 上传出错
+	// 上傳出錯
 	{
 		task.User = &model.User{
 			Policy: model.Policy{
@@ -119,24 +119,24 @@ func TestCompressTask_Do(t *testing.T) {
 		}
 		task.TaskProps.Dirs = []uint{1}
 		cache.Set("setting_temp_path", "test", 0)
-		// 更新进度
+		// 更新進度
 		mock.ExpectBegin()
 		mock.ExpectExec("UPDATE(.+)").WillReturnResult(sqlmock.NewResult(1,
 			1))
 		mock.ExpectCommit()
-		// 查找目录
+		// 尋找目錄
 		mock.ExpectQuery("SELECT(.+)folders").
 			WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
-		// 查找文件
+		// 尋找文件
 		mock.ExpectQuery("SELECT(.+)files").
 			WillReturnRows(sqlmock.NewRows([]string{"id"}))
-		// 查找子文件
+		// 尋找子文件
 		mock.ExpectQuery("SELECT(.+)files").
 			WillReturnRows(sqlmock.NewRows([]string{"id"}))
-		// 查找子目录
+		// 尋找子目錄
 		mock.ExpectQuery("SELECT(.+)folders").
 			WillReturnRows(sqlmock.NewRows([]string{"id"}))
-		// 更新错误
+		// 更新錯誤
 		mock.ExpectBegin()
 		mock.ExpectExec("UPDATE(.+)").WillReturnResult(sqlmock.NewResult(1,
 			1))
@@ -162,7 +162,7 @@ func TestNewCompressTask(t *testing.T) {
 		asserts.NoError(err)
 	}
 
-	// 失败
+	// 失敗
 	{
 		mock.ExpectBegin()
 		mock.ExpectExec("INSERT(.+)").WillReturnError(errors.New("error"))
@@ -186,7 +186,7 @@ func TestNewCompressTaskFromModel(t *testing.T) {
 		asserts.NotNil(job)
 	}
 
-	// JSON解析失败
+	// JSON解析失敗
 	{
 		mock.ExpectQuery("SELECT(.+)").WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 		job, err := NewCompressTaskFromModel(&model.Task{Props: ""})

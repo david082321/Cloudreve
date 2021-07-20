@@ -14,12 +14,12 @@ import (
 	"github.com/cloudreve/Cloudreve/v3/pkg/util"
 )
 
-// Error 实现error接口
+// Error 實現error介面
 func (err OAuthError) Error() string {
 	return err.ErrorDescription
 }
 
-// OAuthURL 获取OAuth认证页面URL
+// OAuthURL 獲取OAuth認證頁面URL
 func (client *Client) OAuthURL(ctx context.Context, scope []string) string {
 	query := url.Values{
 		"client_id":     {client.ClientID},
@@ -31,7 +31,7 @@ func (client *Client) OAuthURL(ctx context.Context, scope []string) string {
 	return client.Endpoints.OAuthEndpoints.authorize.String()
 }
 
-// getOAuthEndpoint 根据指定的AuthURL获取详细的认证接口地址
+// getOAuthEndpoint 根據指定的AuthURL獲取詳細的認證介面地址
 func (client *Client) getOAuthEndpoint() *oauthEndpoint {
 	base, err := url.Parse(client.Endpoints.OAuthURL)
 	if err != nil {
@@ -60,7 +60,7 @@ func (client *Client) getOAuthEndpoint() *oauthEndpoint {
 	}
 }
 
-// ObtainToken 通过code或refresh_token兑换token
+// ObtainToken 透過code或refresh_token兌換token
 func (client *Client) ObtainToken(ctx context.Context, opts ...Option) (*Credential, error) {
 	options := newDefaultOption()
 	for _, o := range opts {
@@ -122,18 +122,18 @@ func (client *Client) ObtainToken(ctx context.Context, opts ...Option) (*Credent
 
 }
 
-// UpdateCredential 更新凭证，并检查有效期
+// UpdateCredential 更新憑證，並檢查有效期
 func (client *Client) UpdateCredential(ctx context.Context) error {
-	// 如果已存在凭证
+	// 如果已存在憑證
 	if client.Credential != nil && client.Credential.AccessToken != "" {
-		// 检查已有凭证是否过期
+		// 檢查已有憑證是否過期
 		if client.Credential.ExpiresIn > time.Now().Unix() {
-			// 未过期，不要更新
+			// 未過期，不要更新
 			return nil
 		}
 	}
 
-	// 尝试从缓存中获取凭证
+	// 嘗試從快取中獲取憑證
 	if cacheCredential, ok := cache.Get("onedrive_" + client.ClientID); ok {
 		credential := cacheCredential.(Credential)
 		if credential.ExpiresIn > time.Now().Unix() {
@@ -142,10 +142,10 @@ func (client *Client) UpdateCredential(ctx context.Context) error {
 		}
 	}
 
-	// 获取新的凭证
+	// 獲取新的憑證
 	if client.Credential == nil || client.Credential.RefreshToken == "" {
-		// 无有效的RefreshToken
-		util.Log().Error("上传策略[%s]凭证刷新失败，请重新授权OneDrive账号", client.Policy.Name)
+		// 無有效的RefreshToken
+		util.Log().Error("上傳策略[%s]憑證重新整理失敗，請重新授權OneDrive帳號", client.Policy.Name)
 		return ErrInvalidRefreshToken
 	}
 
@@ -154,16 +154,16 @@ func (client *Client) UpdateCredential(ctx context.Context) error {
 		return err
 	}
 
-	// 更新有效期为绝对时间戳
+	// 更新有效期為絕對時間戳
 	expires := credential.ExpiresIn - 60
 	credential.ExpiresIn = time.Now().Add(time.Duration(expires) * time.Second).Unix()
 	client.Credential = credential
 
-	// 更新存储策略的 RefreshToken
+	// 更新儲存策略的 RefreshToken
 	client.Policy.AccessKey = credential.RefreshToken
 	client.Policy.SaveAndClearCache()
 
-	// 更新缓存
+	// 更新快取
 	cache.Set("onedrive_"+client.ClientID, *credential, int(expires))
 
 	return nil

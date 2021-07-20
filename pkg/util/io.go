@@ -16,13 +16,13 @@ func Exists(name string) bool {
 	return true
 }
 
-// CreatNestedFile 给定path创建文件，如果目录不存在就递归创建
+// CreatNestedFile 給定path建立文件，如果目錄不存在就遞迴建立
 func CreatNestedFile(path string) (*os.File, error) {
 	basePath := filepath.Dir(path)
 	if !Exists(basePath) {
 		err := os.MkdirAll(basePath, 0700)
 		if err != nil {
-			Log().Warning("无法创建目录，%s", err)
+			Log().Warning("無法建立目錄，%s", err)
 			return nil, err
 		}
 	}
@@ -30,7 +30,7 @@ func CreatNestedFile(path string) (*os.File, error) {
 	return os.Create(path)
 }
 
-// IsEmpty 返回给定目录是否为空目录
+// IsEmpty 返回給定目錄是否為空目錄
 func IsEmpty(name string) (bool, error) {
 	f, err := os.Open(name)
 	if err != nil {

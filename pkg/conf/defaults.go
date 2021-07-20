@@ -2,7 +2,7 @@ package conf
 
 import "github.com/mojocn/base64Captcha"
 
-// RedisConfig Redis服务器配置
+// RedisConfig Redis伺服器配置
 var RedisConfig = &redis{
 	Network:  "tcp",
 	Server:   "",
@@ -10,7 +10,7 @@ var RedisConfig = &redis{
 	DB:       "0",
 }
 
-// DatabaseConfig 数据库配置
+// DatabaseConfig 資料庫配置
 var DatabaseConfig = &database{
 	Type:    "UNSET",
 	Charset: "utf8",
@@ -18,14 +18,14 @@ var DatabaseConfig = &database{
 	Port:    3306,
 }
 
-// SystemConfig 系统公用配置
+// SystemConfig 系統公用配置
 var SystemConfig = &system{
 	Debug:  false,
 	Mode:   "master",
 	Listen: ":5212",
 }
 
-// CaptchaConfig 验证码配置
+// CaptchaConfig 驗證碼配置
 var CaptchaConfig = &captcha{
 	Height:             60,
 	Width:              240,
@@ -49,14 +49,14 @@ var CORSConfig = &cors{
 	ExposeHeaders:    nil,
 }
 
-// ThumbConfig 缩略图配置
+// ThumbConfig 縮圖配置
 var ThumbConfig = &thumb{
 	MaxWidth:   400,
 	MaxHeight:  300,
 	FileSuffix: "._thumb",
 }
 
-// SlaveConfig 从机配置
+// SlaveConfig 從機配置
 var SlaveConfig = &slave{
 	CallbackTimeout: 20,
 	SignatureTTL:    60,

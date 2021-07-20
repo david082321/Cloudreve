@@ -62,7 +62,7 @@ func TestDecompressTask_Do(t *testing.T) {
 		},
 	}
 
-	// 无法创建文件系统
+	// 無法建立文件系統
 	{
 		task.User = &model.User{
 			Policy: model.Policy{
@@ -78,7 +78,7 @@ func TestDecompressTask_Do(t *testing.T) {
 		asserts.NotEmpty(task.GetError().Msg)
 	}
 
-	// 压缩文件不存在
+	// 壓縮文件不存在
 	{
 		task.User = &model.User{
 			Policy: model.Policy{
@@ -105,7 +105,7 @@ func TestNewDecompressTask(t *testing.T) {
 		asserts.NoError(err)
 	}
 
-	// 失败
+	// 失敗
 	{
 		mock.ExpectBegin()
 		mock.ExpectExec("INSERT(.+)").WillReturnError(errors.New("error"))
@@ -129,7 +129,7 @@ func TestNewDecompressTaskFromModel(t *testing.T) {
 		asserts.NotNil(job)
 	}
 
-	// JSON解析失败
+	// JSON解析失敗
 	{
 		mock.ExpectQuery("SELECT(.+)").WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 		job, err := NewDecompressTaskFromModel(&model.Task{Props: ""})

@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// HashID 将给定对象的HashID转换为真实ID
+// HashID 將給定物件的HashID轉換為真實ID
 func HashID(IDType int) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if c.Param("id") != "" {
@@ -17,7 +17,7 @@ func HashID(IDType int) gin.HandlerFunc {
 				c.Next()
 				return
 			}
-			c.JSON(200, serializer.ParamErr("无法解析对象ID", nil))
+			c.JSON(200, serializer.ParamErr("無法解析物件ID", nil))
 			c.Abort()
 			return
 
@@ -26,11 +26,11 @@ func HashID(IDType int) gin.HandlerFunc {
 	}
 }
 
-// IsFunctionEnabled 当功能未开启时阻止访问
+// IsFunctionEnabled 當功能未開啟時阻止訪問
 func IsFunctionEnabled(key string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if !model.IsTrueVal(model.GetSettingByName(key)) {
-			c.JSON(200, serializer.Err(serializer.CodeNoPermissionErr, "未开启此功能", nil))
+			c.JSON(200, serializer.Err(serializer.CodeNoPermissionErr, "未開啟此功能", nil))
 			c.Abort()
 			return
 		}

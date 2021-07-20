@@ -59,7 +59,7 @@ func TestHandler_Source(t *testing.T) {
 	asserts := assert.New(t)
 	auth.General = auth.HMACAuth{SecretKey: []byte("test")}
 
-	// 无法获取上下文
+	// 無法獲取上下文
 	{
 		handler := Driver{
 			Policy:       &model.Policy{Server: "/"},
@@ -86,7 +86,7 @@ func TestHandler_Source(t *testing.T) {
 		asserts.Contains(res, "api/v3/slave/download/0")
 	}
 
-	// 成功 自定义CDN
+	// 成功 自訂CDN
 	{
 		handler := Driver{
 			Policy:       &model.Policy{Server: "/", BaseURL: "https://cqu.edu.cn"},
@@ -102,7 +102,7 @@ func TestHandler_Source(t *testing.T) {
 		asserts.Contains(res, "https://cqu.edu.cn")
 	}
 
-	// 解析失败 自定义CDN
+	// 解析失敗 自訂CDN
 	{
 		handler := Driver{
 			Policy:       &model.Policy{Server: "/", BaseURL: string(0x7f)},
@@ -117,7 +117,7 @@ func TestHandler_Source(t *testing.T) {
 		asserts.Empty(res)
 	}
 
-	// 成功 预览
+	// 成功 預覽
 	{
 		handler := Driver{
 			Policy:       &model.Policy{Server: "/"},
@@ -178,7 +178,7 @@ func TestHandler_Delete(t *testing.T) {
 
 	}
 
-	// 结果解析失败
+	// 結果解析失敗
 	{
 		clientMock := ClientMock{}
 		clientMock.On(
@@ -201,7 +201,7 @@ func TestHandler_Delete(t *testing.T) {
 		asserts.Len(failed, 2)
 	}
 
-	// 一个失败
+	// 一個失敗
 	{
 		clientMock := ClientMock{}
 		clientMock.On(
@@ -261,7 +261,7 @@ func TestDriver_List(t *testing.T) {
 
 	}
 
-	// 响应解析失败
+	// 響應解析失敗
 	{
 		clientMock := ClientMock{}
 		clientMock.On(
@@ -284,7 +284,7 @@ func TestDriver_List(t *testing.T) {
 		asserts.Len(res, 0)
 	}
 
-	// 从机返回错误
+	// 從機返回錯誤
 	{
 		clientMock := ClientMock{}
 		clientMock.On(
@@ -343,7 +343,7 @@ func TestHandler_Get(t *testing.T) {
 		asserts.NoError(err)
 	}
 
-	// 请求失败
+	// 請求失敗
 	{
 		ctx = context.WithValue(ctx, fsctx.UserCtx, model.User{})
 		clientMock := ClientMock{}
@@ -404,7 +404,7 @@ func TestHandler_Put(t *testing.T) {
 		asserts.NoError(err)
 	}
 
-	// 请求失败
+	// 請求失敗
 	{
 		ctx = context.WithValue(ctx, fsctx.UserCtx, model.User{})
 		clientMock := ClientMock{}
@@ -427,7 +427,7 @@ func TestHandler_Put(t *testing.T) {
 		asserts.Error(err)
 	}
 
-	// 返回错误
+	// 返回錯誤
 	{
 		ctx = context.WithValue(ctx, fsctx.UserCtx, model.User{})
 		clientMock := ClientMock{}

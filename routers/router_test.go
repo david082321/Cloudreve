@@ -47,7 +47,7 @@ func TestCaptcha(t *testing.T) {
 //	router := InitMasterRouter()
 //	w := httptest.NewRecorder()
 //
-//	// 创建测试用验证码
+//	// 建立測試用驗證碼
 //	var configD = base64Captcha.ConfigDigit{
 //		Height:     80,
 //		Width:      240,
@@ -67,7 +67,7 @@ func TestCaptcha(t *testing.T) {
 //		reqBody     string
 //		expected    interface{}
 //	}{
-//		// 登录信息正确，不需要验证码
+//		// 登入訊息正確，不需要驗證碼
 //		{
 //			settingRows: sqlmock.NewRows([]string{"name", "value", "type"}).
 //				AddRow("login_captcha", "0", "login"),
@@ -82,42 +82,42 @@ func TestCaptcha(t *testing.T) {
 //				},
 //			}),
 //		},
-//		// 登录信息正确，需要验证码,验证码错误
+//		// 登入訊息正確，需要驗證碼,驗證碼錯誤
 //		{
 //			settingRows: sqlmock.NewRows([]string{"name", "value", "type"}).
 //				AddRow("login_captcha", "1", "login"),
 //			userRows: sqlmock.NewRows([]string{"email", "nick", "password", "options"}).
 //				AddRow("admin@cloudreve.org", "admin", "CKLmDKa1C9SD64vU:76adadd4fd4bad86959155f6f7bc8993c94e7adf", "{}"),
-//			expected: serializer.ParamErr("验证码错误", nil),
+//			expected: serializer.ParamErr("驗證碼錯誤", nil),
 //		},
-//		// 邮箱正确密码错误
+//		// 信箱正確密碼錯誤
 //		{
 //			settingRows: sqlmock.NewRows([]string{"name", "value", "type"}).
 //				AddRow("login_captcha", "0", "login"),
 //			userRows: sqlmock.NewRows([]string{"email", "nick", "password", "options"}).
 //				AddRow("admin@cloudreve.org", "admin", "CKLmDKa1C9SD64vU:76adadd4fd4bad86959155f6f7bc8993c94e7adf", "{}"),
-//			expected: serializer.Err(401, "用户邮箱或密码错误", nil),
+//			expected: serializer.Err(401, "使用者信箱或密碼錯誤", nil),
 //		},
-//		//邮箱格式不正确
+//		//信箱格式不正確
 //		{
 //			reqBody:  `{"userName":"admin@cloudreve","captchaCode":"captchaCode","Password":"admin123"}`,
-//			expected: serializer.Err(40001, "邮箱格式不正确", errors.New("Key: 'UserLoginService.UserName' Error:Field validation for 'UserName' failed on the 'email' tag")),
+//			expected: serializer.Err(40001, "信箱格式不正確", errors.New("Key: 'UserLoginService.UserName' Error:Field validation for 'UserName' failed on the 'email' tag")),
 //		},
-//		// 用户被Ban
+//		// 使用者被Ban
 //		{
 //			settingRows: sqlmock.NewRows([]string{"name", "value", "type"}).
 //				AddRow("login_captcha", "0", "login"),
 //			userRows: sqlmock.NewRows([]string{"email", "nick", "password", "options", "status"}).
 //				AddRow("admin@cloudreve.org", "admin", "CKLmDKa1C9SD64vU:76adadd4fd4bad86959155f6f7bc8993c94e7adf", "{}", model.Baned),
-//			expected: serializer.Err(403, "该账号已被封禁", nil),
+//			expected: serializer.Err(403, "該帳號已被封禁", nil),
 //		},
-//		// 用户未激活
+//		// 使用者未啟動
 //		{
 //			settingRows: sqlmock.NewRows([]string{"name", "value", "type"}).
 //				AddRow("login_captcha", "0", "login"),
 //			userRows: sqlmock.NewRows([]string{"email", "nick", "password", "options", "status"}).
 //				AddRow("admin@cloudreve.org", "admin", "CKLmDKa1C9SD64vU:76adadd4fd4bad86959155f6f7bc8993c94e7adf", "{}", model.NotActivicated),
-//			expected: serializer.Err(403, "该账号未激活", nil),
+//			expected: serializer.Err(403, "該帳號未啟動", nil),
 //		},
 //	}
 //
@@ -140,7 +140,7 @@ func TestCaptcha(t *testing.T) {
 //
 //		asserts.Equal(200, w.Code)
 //		expectedJSON, _ := json.Marshal(testCase.expected)
-//		asserts.JSONEq(string(expectedJSON), w.Body.String(), "测试用例：%d", k)
+//		asserts.JSONEq(string(expectedJSON), w.Body.String(), "測試用例：%d", k)
 //
 //		w.Body.Reset()
 //		asserts.NoError(mock.ExpectationsWereMet())
@@ -167,11 +167,11 @@ func TestCaptcha(t *testing.T) {
 //		contextMock map[string]interface{}
 //		expected    interface{}
 //	}{
-//		// 未登录
+//		// 未登入
 //		{
 //			expected: serializer.CheckLogin(),
 //		},
-//		// 登录正常
+//		// 登入正常
 //		{
 //			userRows: sqlmock.NewRows([]string{"email", "nick", "password", "options"}).
 //				AddRow("admin@cloudreve.org", "admin", "CKLmDKa1C9SD64vU:76adadd4fd4bad86959155f6f7bc8993c94e7adf", "{}"),
@@ -226,7 +226,7 @@ func TestSiteConfigRoute(t *testing.T) {
 
 	w.Body.Reset()
 
-	// 消除无效值
+	// 消除無效值
 	model.DB.Model(&model.Setting{
 		Model: gorm.Model{
 			ID: 2,

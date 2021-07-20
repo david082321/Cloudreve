@@ -133,7 +133,7 @@ func TestGenericAfterUpload(t *testing.T) {
 	asserts.NoError(err)
 	asserts.NoError(mock.ExpectationsWereMet())
 
-	// 路径不存在
+	// 路徑不存在
 	mock.ExpectQuery("SELECT(.+)folders(.+)").WillReturnRows(
 		mock.NewRows([]string{"name"}),
 	)
@@ -156,7 +156,7 @@ func TestGenericAfterUpload(t *testing.T) {
 	asserts.Equal(ErrFileExisted, err)
 	asserts.NoError(mock.ExpectationsWereMet())
 
-	// 插入失败
+	// 插入失敗
 	mock.ExpectQuery("SELECT(.+)").
 		WithArgs(1).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "owner_id"}).AddRow(1, 1))
@@ -184,11 +184,11 @@ func TestFileSystem_Use(t *testing.T) {
 		return nil
 	}
 
-	// 添加一个
+	// 添加一個
 	fs.Use("BeforeUpload", hook)
 	asserts.Len(fs.Hooks["BeforeUpload"], 1)
 
-	// 添加一个
+	// 添加一個
 	fs.Use("BeforeUpload", hook)
 	asserts.Len(fs.Hooks["BeforeUpload"], 2)
 
@@ -220,13 +220,13 @@ func TestFileSystem_Trigger(t *testing.T) {
 		return nil
 	}
 
-	// 一个
+	// 一個
 	fs.Use("BeforeUpload", hook)
 	err := fs.Trigger(ctx, "BeforeUpload")
 	asserts.NoError(err)
 	asserts.Equal(uint64(1), fs.User.Storage)
 
-	// 多个
+	// 多個
 	fs.Use("BeforeUpload", hook)
 	fs.Use("BeforeUpload", hook)
 	err = fs.Trigger(ctx, "BeforeUpload")
@@ -319,7 +319,7 @@ func TestHookChangeCapacity(t *testing.T) {
 	asserts := assert.New(t)
 	cache.Set("pack_size_1", uint64(0), 0)
 
-	// 容量增加 失败
+	// 容量增加 失敗
 	{
 		fs := &FileSystem{User: &model.User{
 			Model: gorm.Model{ID: 1},
@@ -352,7 +352,7 @@ func TestHookChangeCapacity(t *testing.T) {
 		asserts.Equal(uint64(1), fs.User.Storage)
 	}
 
-	// 容量减少
+	// 容量減少
 	{
 		fs := &FileSystem{User: &model.User{
 			Model:   gorm.Model{ID: 1},
@@ -407,7 +407,7 @@ func TestHookClearFileSize(t *testing.T) {
 		asserts.NoError(err)
 	}
 
-	// 上下文对象不存在
+	// 上下文物件不存在
 	{
 		ctx := context.Background()
 		err := HookClearFileSize(ctx, fs)
@@ -437,7 +437,7 @@ func TestHookUpdateSourceName(t *testing.T) {
 		asserts.NoError(err)
 	}
 
-	// 上下文错误
+	// 上下文錯誤
 	{
 		ctx := context.Background()
 		err := HookUpdateSourceName(ctx, fs)
@@ -451,7 +451,7 @@ func TestGenericAfterUpdate(t *testing.T) {
 		Model: gorm.Model{ID: 1},
 	}}
 
-	// 成功 是图像文件
+	// 成功 是圖像文件
 	{
 		originFile := model.File{
 			Model:   gorm.Model{ID: 1},
@@ -495,8 +495,8 @@ func TestGenericAfterUpdate(t *testing.T) {
 		asserts.Error(err)
 	}
 
-	// 无法更新数据库容量
-	// 成功 是图像文件
+	// 無法更新資料庫容量
+	// 成功 是圖像文件
 	{
 		originFile := model.File{
 			Model:   gorm.Model{ID: 1},
@@ -552,7 +552,7 @@ func TestHookSlaveUploadValidate(t *testing.T) {
 		asserts.Equal(ErrFileSizeTooBig, HookSlaveUploadValidate(ctx, fs))
 	}
 
-	// 文件名非法
+	// 檔案名非法
 	{
 		policy := serializer.UploadPolicy{
 			SavePath:         "",
@@ -565,7 +565,7 @@ func TestHookSlaveUploadValidate(t *testing.T) {
 		asserts.Equal(ErrIllegalObjectName, HookSlaveUploadValidate(ctx, fs))
 	}
 
-	// 扩展名非法
+	// 副檔名非法
 	{
 		policy := serializer.UploadPolicy{
 			SavePath:         "",
@@ -641,7 +641,7 @@ func TestFileSystem_CleanHooks(t *testing.T) {
 		},
 	}
 
-	// 清理一个
+	// 清理一個
 	{
 		fs.CleanHooks("hook2")
 		asserts.Len(fs.Hooks, 2)

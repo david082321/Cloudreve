@@ -9,7 +9,7 @@ func init() {
 	gob.Register(ObjectProps{})
 }
 
-// ObjectProps 文件、目录对象的详细属性信息
+// ObjectProps 文件、目錄物件的詳細屬性訊息
 type ObjectProps struct {
 	CreatedAt      time.Time `json:"created_at"`
 	UpdatedAt      time.Time `json:"updated_at"`

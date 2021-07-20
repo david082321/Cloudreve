@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// SiteConfig 站点全局设置序列
+// SiteConfig 站點全域設定序列
 type SiteConfig struct {
 	SiteName             string `json:"title"`
 	SiteICPId            string `json:"siteICPId"`
@@ -33,7 +33,7 @@ type task struct {
 	Error      string    `json:"error"`
 }
 
-// BuildTaskList 构建任务列表响应
+// BuildTaskList 構建任務列表響應
 func BuildTaskList(tasks []model.Task, total int) Response {
 	res := make([]task, 0, len(tasks))
 	for _, t := range tasks {
@@ -59,7 +59,7 @@ func checkSettingValue(setting map[string]string, key string) string {
 	return ""
 }
 
-// BuildSiteConfig 站点全局设置
+// BuildSiteConfig 站點全域設定
 func BuildSiteConfig(settings map[string]string, user *model.User) Response {
 	var userRes User
 	if user != nil {

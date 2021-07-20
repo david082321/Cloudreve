@@ -17,7 +17,7 @@ import (
 func TestRemoteCallback(t *testing.T) {
 	asserts := assert.New(t)
 
-	// 回调成功
+	// 回調成功
 	{
 		clientMock := ClientMock{}
 		mockResp, _ := json.Marshal(serializer.Response{Code: 0})
@@ -42,7 +42,7 @@ func TestRemoteCallback(t *testing.T) {
 		clientMock.AssertExpectations(t)
 	}
 
-	// 服务端返回业务错误
+	// 服務端返回業務錯誤
 	{
 		clientMock := ClientMock{}
 		mockResp, _ := json.Marshal(serializer.Response{Code: 401})
@@ -67,7 +67,7 @@ func TestRemoteCallback(t *testing.T) {
 		clientMock.AssertExpectations(t)
 	}
 
-	// 无法解析回调响应
+	// 無法解析回調響應
 	{
 		clientMock := ClientMock{}
 		clientMock.On(
@@ -91,7 +91,7 @@ func TestRemoteCallback(t *testing.T) {
 		clientMock.AssertExpectations(t)
 	}
 
-	// HTTP状态码非200
+	// HTTP狀態碼非200
 	{
 		clientMock := ClientMock{}
 		clientMock.On(
@@ -115,7 +115,7 @@ func TestRemoteCallback(t *testing.T) {
 		clientMock.AssertExpectations(t)
 	}
 
-	// 无法发起回调
+	// 無法發起回調
 	{
 		clientMock := ClientMock{}
 		clientMock.On(

@@ -15,39 +15,39 @@ import (
 )
 
 var (
-	ErrAuthFailed = serializer.NewError(serializer.CodeNoPermissionErr, "鉴权失败", nil)
-	ErrExpired    = serializer.NewError(serializer.CodeSignExpired, "签名已过期", nil)
+	ErrAuthFailed = serializer.NewError(serializer.CodeNoPermissionErr, "鑒權失敗", nil)
+	ErrExpired    = serializer.NewError(serializer.CodeSignExpired, "簽名已過期", nil)
 )
 
-// General 通用的认证接口
+// General 通用的認證介面
 var General Auth
 
-// Auth 鉴权认证
+// Auth 鑒權認證
 type Auth interface {
-	// 对给定Body进行签名,expires为0表示永不过期
+	// 對給定Body進行簽名,expires為0表示永不過期
 	Sign(body string, expires int64) string
-	// 对给定Body和Sign进行检查
+	// 對給定Body和Sign進行檢查
 	Check(body string, sign string) error
 }
 
-// SignRequest 对PUT\POST等复杂HTTP请求签名，如果请求Header中
-// 包含 X-Policy， 则此请求会被认定为上传请求，只会对URI部分和
-// Policy部分进行签名。其他请求则会对URI和Body部分进行签名。
+// SignRequest 對PUT\POST等複雜HTTP請求簽名，如果請求Header中
+// 包含 X-Policy， 則此請求會被認定為上傳請求，只會對URI部分和
+// Policy部分進行簽名。其他請求則會對URI和Body部分進行簽名。
 func SignRequest(instance Auth, r *http.Request, expires int64) *http.Request {
-	// 处理有效期
+	// 處理有效期
 	if expires > 0 {
 		expires += time.Now().Unix()
 	}
 
-	// 生成签名
+	// 生成簽名
 	sign := instance.Sign(getSignContent(r), expires)
 
-	// 将签名加到请求Header中
+	// 將簽名加到請求Header中
 	r.Header["Authorization"] = []string{"Bearer " + sign}
 	return r
 }
 
-// CheckRequest 对复杂请求进行签名验证
+// CheckRequest 對複雜請求進行簽名驗證
 func CheckRequest(instance Auth, r *http.Request) error {
 	var (
 		sign []string
@@ -61,8 +61,8 @@ func CheckRequest(instance Auth, r *http.Request) error {
 	return instance.Check(getSignContent(r), sign[0])
 }
 
-// getSignContent 根据请求Header中是否包含X-Policy判断是否为上传请求，
-// 返回待签名/验证的字符串
+// getSignContent 根據請求Header中是否包含X-Policy判斷是否為上傳請求，
+// 返回待簽名/驗證的字串
 func getSignContent(r *http.Request) (rawSignString string) {
 	if policy, ok := r.Header["X-Policy"]; ok {
 		rawSignString = serializer.NewRequestSignString(r.URL.Path, policy[0], "")
@@ -78,9 +78,9 @@ func getSignContent(r *http.Request) (rawSignString string) {
 	return rawSignString
 }
 
-// SignURI 对URI进行签名,签名只针对Path部分，query部分不做验证
+// SignURI 對URI進行簽名,簽名只針對Path部分，query部分不做驗證
 func SignURI(instance Auth, uri string, expires int64) (*url.URL, error) {
-	// 处理有效期
+	// 處理有效期
 	if expires != 0 {
 		expires += time.Now().Unix()
 	}
@@ -90,10 +90,10 @@ func SignURI(instance Auth, uri string, expires int64) (*url.URL, error) {
 		return nil, err
 	}
 
-	// 生成签名
+	// 生成簽名
 	sign := instance.Sign(base.Path, expires)
 
-	// 将签名加到URI中
+	// 將簽名加到URI中
 	queries := base.Query()
 	queries.Set("sign", sign)
 	base.RawQuery = queries.Encode()
@@ -101,9 +101,9 @@ func SignURI(instance Auth, uri string, expires int64) (*url.URL, error) {
 	return base, nil
 }
 
-// CheckURI 对URI进行鉴权
+// CheckURI 對URI進行鑒權
 func CheckURI(instance Auth, url *url.URL) error {
-	//获取待验证的签名正文
+	//獲取待驗證的簽名正文
 	queries := url.Query()
 	sign := queries.Get("sign")
 	queries.Del("sign")
@@ -112,7 +112,7 @@ func CheckURI(instance Auth, url *url.URL) error {
 	return instance.Check(url.Path, sign)
 }
 
-// Init 初始化通用鉴权器
+// Init 初始化通用鑒權器
 func Init() {
 	var secretKey string
 	if conf.SystemConfig.Mode == "master" {
@@ -120,7 +120,7 @@ func Init() {
 	} else {
 		secretKey = conf.SlaveConfig.Secret
 		if secretKey == "" {
-			util.Log().Panic("未指定 SlaveSecret，请前往配置文件中指定")
+			util.Log().Panic("未指定 SlaveSecret，請前往配置檔案中指定")
 		}
 	}
 	General = HMACAuth{

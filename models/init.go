@@ -15,12 +15,12 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
-// DB 数据库链接单例
+// DB 資料庫連結單例
 var DB *gorm.DB
 
-// Init 初始化 MySQL 链接
+// Init 初始化 MySQL 連結
 func Init() {
-	util.Log().Info("初始化数据库连接")
+	util.Log().Info("初始化資料庫連接")
 
 	var (
 		db  *gorm.DB
@@ -28,12 +28,12 @@ func Init() {
 	)
 
 	if gin.Mode() == gin.TestMode {
-		// 测试模式下，使用内存数据库
+		// 測試模式下，使用記憶體資料庫
 		db, err = gorm.Open("sqlite3", ":memory:")
 	} else {
 		switch conf.DatabaseConfig.Type {
 		case "UNSET", "sqlite", "sqlite3":
-			// 未指定数据库或者明确指定为 sqlite 时，使用 SQLite3 数据库
+			// 未指定資料庫或者明確指定為 sqlite 時，使用 SQLite3 資料庫
 			db, err = gorm.Open("sqlite3", util.RelativePath(conf.DatabaseConfig.DBFile))
 		case "mysql", "postgres", "mssql":
 			db, err = gorm.Open(conf.DatabaseConfig.Type, fmt.Sprintf("%s:%s@(%s:%d)/%s?charset=%s&parseTime=True&loc=Local",
@@ -44,37 +44,37 @@ func Init() {
 				conf.DatabaseConfig.Name,
 				conf.DatabaseConfig.Charset))
 		default:
-			util.Log().Panic("不支持数据库类型: %s", conf.DatabaseConfig.Type)
+			util.Log().Panic("不支援資料庫類型: %s", conf.DatabaseConfig.Type)
 		}
 	}
 
 	//db.SetLogger(util.Log())
 	if err != nil {
-		util.Log().Panic("连接数据库不成功, %s", err)
+		util.Log().Panic("連接資料庫不成功, %s", err)
 	}
 
-	// 处理表前缀
+	// 處理表前綴
 	gorm.DefaultTableNameHandler = func(db *gorm.DB, defaultTableName string) string {
 		return conf.DatabaseConfig.TablePrefix + defaultTableName
 	}
 
-	// Debug模式下，输出所有 SQL 日志
+	// Debug模式下，輸出所有 SQL 日誌
 	if conf.SystemConfig.Debug {
 		db.LogMode(true)
 	} else {
 		db.LogMode(false)
 	}
 
-	//设置连接池
-	//空闲
+	//設定連接池
+	//空閒
 	db.DB().SetMaxIdleConns(50)
-	//打开
+	//打開
 	db.DB().SetMaxOpenConns(100)
-	//超时
+	//超時
 	db.DB().SetConnMaxLifetime(time.Second * 30)
 
 	DB = db
 
-	//执行迁移
+	//執行遷移
 	migration()
 }

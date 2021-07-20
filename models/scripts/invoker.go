@@ -17,7 +17,7 @@ func RunDBScript(name string, ctx context.Context) error {
 		return nil
 	}
 
-	return fmt.Errorf("数据库脚本 [%s] 不存在", name)
+	return fmt.Errorf("資料庫脚本 [%s] 不存在", name)
 }
 
 func register(name string, script DBScript) {

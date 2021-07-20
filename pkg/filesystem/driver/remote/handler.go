@@ -21,7 +21,7 @@ import (
 	"github.com/cloudreve/Cloudreve/v3/pkg/serializer"
 )
 
-// Driver 远程存储策略适配器
+// Driver 遠端儲存策略適配器
 type Driver struct {
 	Client       request.Client
 	Policy       *model.Policy
@@ -41,7 +41,7 @@ func (handler Driver) List(ctx context.Context, path string, recursive bool) ([]
 		return res, err
 	}
 
-	// 发送列表请求
+	// 發送列表請求
 	bodyReader := strings.NewReader(string(reqBodyEncoded))
 	signTTL := model.GetIntSetting("slave_api_timeout", 60)
 	resp, err := handler.Client.Request(
@@ -54,7 +54,7 @@ func (handler Driver) List(ctx context.Context, path string, recursive bool) ([]
 		return res, err
 	}
 
-	// 处理列取结果
+	// 處理列取結果
 	if resp.Code != 0 {
 		return res, errors.New(resp.Error)
 	}
@@ -69,7 +69,7 @@ func (handler Driver) List(ctx context.Context, path string, recursive bool) ([]
 	return res, nil
 }
 
-// getAPIUrl 获取接口请求地址
+// getAPIUrl 獲取介面請求地址
 func (handler Driver) getAPIUrl(scope string, routes ...string) string {
 	serverURL, err := url.Parse(handler.Policy.Server)
 	if err != nil {
@@ -95,21 +95,21 @@ func (handler Driver) getAPIUrl(scope string, routes ...string) string {
 	return serverURL.ResolveReference(controller).String()
 }
 
-// Get 获取文件内容
+// Get 獲取文件內容
 func (handler Driver) Get(ctx context.Context, path string) (response.RSCloser, error) {
-	// 尝试获取速度限制 TODO 是否需要在这里限制？
+	// 嘗試獲取速度限制 TODO 是否需要在這裡限制？
 	speedLimit := 0
 	if user, ok := ctx.Value(fsctx.UserCtx).(model.User); ok {
 		speedLimit = user.Group.SpeedLimit
 	}
 
-	// 获取文件源地址
+	// 獲取文件源地址
 	downloadURL, err := handler.Source(ctx, path, url.URL{}, 0, true, speedLimit)
 	if err != nil {
 		return nil, err
 	}
 
-	// 获取文件数据流
+	// 獲取文件資料流
 	resp, err := handler.Client.Request(
 		"GET",
 		downloadURL,
@@ -123,7 +123,7 @@ func (handler Driver) Get(ctx context.Context, path string) (response.RSCloser, 
 
 	resp.SetFirstFakeChunk()
 
-	// 尝试获取文件大小
+	// 嘗試獲取檔案大小
 	if file, ok := ctx.Value(fsctx.FileModelCtx).(model.File); ok {
 		resp.SetContentLength(int64(file.Size))
 	}
@@ -131,14 +131,14 @@ func (handler Driver) Get(ctx context.Context, path string) (response.RSCloser, 
 	return resp, nil
 }
 
-// Put 将文件流保存到指定目录
+// Put 將文件流儲存到指定目錄
 func (handler Driver) Put(ctx context.Context, file io.ReadCloser, dst string, size uint64) error {
 	defer file.Close()
 
-	// 凭证有效期
+	// 憑證有效期
 	credentialTTL := model.GetIntSetting("upload_credential_timeout", 3600)
 
-	// 生成上传策略
+	// 生成上傳策略
 	policy := serializer.UploadPolicy{
 		SavePath:   path.Dir(dst),
 		FileName:   path.Base(dst),
@@ -150,19 +150,19 @@ func (handler Driver) Put(ctx context.Context, file io.ReadCloser, dst string, s
 		return err
 	}
 
-	// 对文件名进行URLEncode
+	// 對檔案名進行URLEncode
 	fileName, err := url.QueryUnescape(path.Base(dst))
 	if err != nil {
 		return err
 	}
 
-	// 决定是否要禁用文件覆盖
+	// 決定是否要禁用文件覆蓋
 	overwrite := "true"
 	if ctx.Value(fsctx.DisableOverwrite) != nil {
 		overwrite = "false"
 	}
 
-	// 上传文件
+	// 上傳文件
 	resp, err := handler.Client.Request(
 		"POST",
 		handler.Policy.GetUploadURL(),
@@ -186,10 +186,10 @@ func (handler Driver) Put(ctx context.Context, file io.ReadCloser, dst string, s
 	return nil
 }
 
-// Delete 删除一个或多个文件，
-// 返回未删除的文件，及遇到的最后一个错误
+// Delete 刪除一個或多個文件，
+// 返回未刪除的文件，及遇到的最後一個錯誤
 func (handler Driver) Delete(ctx context.Context, files []string) ([]string, error) {
-	// 封装接口请求正文
+	// 封裝介面請求正文
 	reqBody := serializer.RemoteDeleteRequest{
 		Files: files,
 	}
@@ -198,7 +198,7 @@ func (handler Driver) Delete(ctx context.Context, files []string) ([]string, err
 		return files, err
 	}
 
-	// 发送删除请求
+	// 發送刪除請求
 	bodyReader := strings.NewReader(string(reqBodyEncoded))
 	signTTL := model.GetIntSetting("slave_api_timeout", 60)
 	resp, err := handler.Client.Request(
@@ -211,7 +211,7 @@ func (handler Driver) Delete(ctx context.Context, files []string) ([]string, err
 		return files, err
 	}
 
-	// 处理删除结果
+	// 處理刪除結果
 	var reqResp serializer.Response
 	err = json.Unmarshal([]byte(resp), &reqResp)
 	if err != nil {
@@ -225,13 +225,13 @@ func (handler Driver) Delete(ctx context.Context, files []string) ([]string, err
 				return failedResp.Files, errors.New(reqResp.Error)
 			}
 		}
-		return files, errors.New("未知的返回结果格式")
+		return files, errors.New("未知的返回結果格式")
 	}
 
 	return []string{}, nil
 }
 
-// Thumb 获取文件缩略图
+// Thumb 獲取文件縮圖
 func (handler Driver) Thumb(ctx context.Context, path string) (*response.ContentResponse, error) {
 	sourcePath := base64.RawURLEncoding.EncodeToString([]byte(path))
 	thumbURL := handler.getAPIUrl("thumb") + "/" + sourcePath
@@ -247,7 +247,7 @@ func (handler Driver) Thumb(ctx context.Context, path string) (*response.Content
 	}, nil
 }
 
-// Source 获取外链URL
+// Source 獲取外鏈URL
 func (handler Driver) Source(
 	ctx context.Context,
 	path string,
@@ -256,7 +256,7 @@ func (handler Driver) Source(
 	isDownload bool,
 	speed int,
 ) (string, error) {
-	// 尝试从上下文获取文件名
+	// 嘗試從上下文獲取檔案名
 	fileName := "file"
 	if file, ok := ctx.Value(fsctx.FileModelCtx).(model.File); ok {
 		fileName = file.Name
@@ -264,10 +264,10 @@ func (handler Driver) Source(
 
 	serverURL, err := url.Parse(handler.Policy.Server)
 	if err != nil {
-		return "", errors.New("无法解析远程服务端地址")
+		return "", errors.New("無法解析遠端服務端地址")
 	}
 
-	// 是否启用了CDN
+	// 是否啟用了CDN
 	if handler.Policy.BaseURL != "" {
 		cdnURL, err := url.Parse(handler.Policy.BaseURL)
 		if err != nil {
@@ -284,7 +284,7 @@ func (handler Driver) Source(
 		controller = "/api/v3/slave/source"
 	}
 
-	// 签名下载地址
+	// 簽名下載網址
 	sourcePath := base64.RawURLEncoding.EncodeToString([]byte(path))
 	signedURI, err = auth.SignURI(
 		handler.AuthInstance,
@@ -293,7 +293,7 @@ func (handler Driver) Source(
 	)
 
 	if err != nil {
-		return "", serializer.NewError(serializer.CodeEncryptError, "无法对URL进行签名", err)
+		return "", serializer.NewError(serializer.CodeEncryptError, "無法對URL進行簽名", err)
 	}
 
 	finalURL := serverURL.ResolveReference(signedURI).String()
@@ -301,14 +301,14 @@ func (handler Driver) Source(
 
 }
 
-// Token 获取上传策略和认证Token
+// Token 獲取上傳策略和認證Token
 func (handler Driver) Token(ctx context.Context, TTL int64, key string) (serializer.UploadCredential, error) {
-	// 生成回调地址
+	// 生成回調地址
 	siteURL := model.GetSiteURL()
 	apiBaseURI, _ := url.Parse("/api/v3/callback/remote/" + key)
 	apiURL := siteURL.ResolveReference(apiBaseURI)
 
-	// 生成上传策略
+	// 生成上傳策略
 	policy := serializer.UploadPolicy{
 		SavePath:         handler.Policy.DirNameRule,
 		FileName:         handler.Policy.FileNameRule,
@@ -326,7 +326,7 @@ func (handler Driver) getUploadCredential(ctx context.Context, policy serializer
 		return serializer.UploadCredential{}, err
 	}
 
-	// 签名上传策略
+	// 簽名上傳策略
 	uploadRequest, _ := http.NewRequest("POST", "/api/v3/slave/upload", nil)
 	uploadRequest.Header = map[string][]string{
 		"X-Policy":    {policyEncoded},
@@ -340,5 +340,5 @@ func (handler Driver) getUploadCredential(ctx context.Context, policy serializer
 			Policy: policyEncoded,
 		}, nil
 	}
-	return serializer.UploadCredential{}, errors.New("无法签名上传策略")
+	return serializer.UploadCredential{}, errors.New("無法簽名上傳策略")
 }

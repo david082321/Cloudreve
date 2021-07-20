@@ -23,12 +23,12 @@ func TestNewFileSystem(t *testing.T) {
 		},
 	}
 
-	// 本地 成功
+	// 本機 成功
 	fs, err := NewFileSystem(&user)
 	asserts.NoError(err)
 	asserts.NotNil(fs.Handler)
 	asserts.IsType(local.Driver{}, fs.Handler)
-	// 远程
+	// 遠端
 	user.Policy.Type = "remote"
 	fs, err = NewFileSystem(&user)
 	asserts.NoError(err)
@@ -66,12 +66,12 @@ func TestDispatchHandler(t *testing.T) {
 		}},
 	}
 
-	// 未指定，使用用户默认
+	// 未指定，使用使用者預設
 	err := fs.DispatchHandler()
 	asserts.NoError(err)
 	asserts.IsType(local.Driver{}, fs.Handler)
 
-	// 已指定，发生错误
+	// 已指定，發生錯誤
 	fs.Policy = &model.Policy{Type: "unknown"}
 	err = fs.DispatchHandler()
 	asserts.Error(err)
@@ -112,7 +112,7 @@ func TestDispatchHandler(t *testing.T) {
 func TestNewFileSystemFromCallback(t *testing.T) {
 	asserts := assert.New(t)
 
-	// 用户上下文不存在
+	// 使用者上下文不存在
 	{
 		c, _ := gin.CreateTestContext(httptest.NewRecorder())
 		fs, err := NewFileSystemFromCallback(c)
@@ -120,7 +120,7 @@ func TestNewFileSystemFromCallback(t *testing.T) {
 		asserts.Error(err)
 	}
 
-	// 找不到回调会话
+	// 找不到回調工作階段
 	{
 		c, _ := gin.CreateTestContext(httptest.NewRecorder())
 		c.Set("user", &model.User{
@@ -133,7 +133,7 @@ func TestNewFileSystemFromCallback(t *testing.T) {
 		asserts.Error(err)
 	}
 
-	// 找不到上传策略
+	// 找不到上傳策略
 	{
 		c, _ := gin.CreateTestContext(httptest.NewRecorder())
 		c.Set("user", &model.User{
@@ -212,14 +212,14 @@ func TestNewAnonymousFileSystem(t *testing.T) {
 
 	// 正常
 	{
-		mock.ExpectQuery("SELECT(.+)").WillReturnRows(sqlmock.NewRows([]string{"id", "name", "policies"}).AddRow(3, "游客", "[]"))
+		mock.ExpectQuery("SELECT(.+)").WillReturnRows(sqlmock.NewRows([]string{"id", "name", "policies"}).AddRow(3, "遊客", "[]"))
 		fs, err := NewAnonymousFileSystem()
 		asserts.NoError(mock.ExpectationsWereMet())
 		asserts.NoError(err)
-		asserts.Equal("游客", fs.User.Group.Name)
+		asserts.Equal("遊客", fs.User.Group.Name)
 	}
 
-	// 游客用户组不存在
+	// 遊客使用者群組不存在
 	{
 		mock.ExpectQuery("SELECT(.+)").WillReturnRows(sqlmock.NewRows([]string{"id", "name", "policies"}))
 		fs, err := NewAnonymousFileSystem()
@@ -240,7 +240,7 @@ func TestFileSystem_Recycle(t *testing.T) {
 	fs.Recycle()
 	newFS := getEmptyFS()
 	if fs != newFS {
-		t.Error("指针不一致")
+		t.Error("指標不一致")
 	}
 }
 
@@ -248,7 +248,7 @@ func TestFileSystem_SetTargetByInterface(t *testing.T) {
 	asserts := assert.New(t)
 	fs := FileSystem{}
 
-	// 目录
+	// 目錄
 	{
 		asserts.NoError(fs.SetTargetByInterface(&model.Folder{}))
 		asserts.Len(fs.DirTarget, 1)

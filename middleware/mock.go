@@ -5,16 +5,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// SessionMock 测试时模拟Session
+// SessionMock 測試時模擬Session
 var SessionMock = make(map[string]interface{})
 
-// ContextMock 测试时模拟Context
+// ContextMock 測試時模擬Context
 var ContextMock = make(map[string]interface{})
 
-// MockHelper 单元测试助手中间件
+// MockHelper 單元測試助手中間件
 func MockHelper() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// 将SessionMock写入会话
+		// 將SessionMock寫入工作階段
 		util.SetSession(c, SessionMock)
 		for key, value := range ContextMock {
 			c.Set(key, value)

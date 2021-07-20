@@ -4,7 +4,7 @@ import (
 	"io"
 )
 
-// FileStream 用户传来的文件
+// FileStream 使用者傳來的文件
 type FileStream struct {
 	File        io.ReadCloser
 	Size        uint64

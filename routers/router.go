@@ -14,21 +14,21 @@ import (
 // InitRouter 初始化路由
 func InitRouter() *gin.Engine {
 	if conf.SystemConfig.Mode == "master" {
-		util.Log().Info("当前运行模式：Master")
+		util.Log().Info("目前執行模式：Master")
 		return InitMasterRouter()
 	}
-	util.Log().Info("当前运行模式：Slave")
+	util.Log().Info("目前執行模式：Slave")
 	return InitSlaveRouter()
 
 }
 
-// InitSlaveRouter 初始化从机模式路由
+// InitSlaveRouter 初始化從機模式路由
 func InitSlaveRouter() *gin.Engine {
 	r := gin.Default()
-	// 跨域相关
+	// 跨域相關
 	InitCORS(r)
 	v3 := r.Group("/api/v3/slave")
-	// 鉴权中间件
+	// 鑒權中間件
 	v3.Use(middleware.SignRequired())
 
 	/*
@@ -37,15 +37,15 @@ func InitSlaveRouter() *gin.Engine {
 	{
 		// Ping
 		v3.POST("ping", controllers.SlavePing)
-		// 上传
+		// 上傳
 		v3.POST("upload", controllers.SlaveUpload)
-		// 下载
+		// 下載
 		v3.GET("download/:speed/:path/:name", controllers.SlaveDownload)
-		// 预览 / 外链
+		// 預覽 / 外鏈
 		v3.GET("source/:speed/:path/:name", controllers.SlavePreview)
-		// 缩略图
+		// 縮圖
 		v3.GET("thumb/:path", controllers.SlaveThumb)
-		// 删除文件
+		// 刪除文件
 		v3.POST("delete", controllers.SlaveDelete)
 		// 列出文件
 		v3.POST("list", controllers.SlaveList)
@@ -66,18 +66,18 @@ func InitCORS(router *gin.Engine) {
 		return
 	}
 
-	// slave模式下未启动跨域的警告
+	// slave模式下未啟動跨域的警告
 	if conf.SystemConfig.Mode == "slave" {
-		util.Log().Warning("当前作为存储端（Slave）运行，但未启用跨域配置，可能会导致 Master 端无法正常上传文件")
+		util.Log().Warning("目前作為儲存端（Slave）執行，但未啟用跨域配置，可能會導致 Master 端無法正常上傳文件")
 	}
 }
 
-// InitMasterRouter 初始化主机模式路由
+// InitMasterRouter 初始化主機模式路由
 func InitMasterRouter() *gin.Engine {
 	r := gin.Default()
 
 	/*
-		静态资源
+		靜態資源
 	*/
 	r.Use(gzip.Gzip(gzip.DefaultCompression, gzip.WithExcludedPaths([]string{"/api/"})))
 	r.Use(middleware.FrontendFileHandler())
@@ -86,12 +86,12 @@ func InitMasterRouter() *gin.Engine {
 	v3 := r.Group("/api/v3")
 
 	/*
-		中间件
+		中間件
 	*/
 	v3.Use(middleware.Session(conf.SystemConfig.SessionSecret))
-	// 跨域相关
+	// 跨域相關
 	InitCORS(r)
-	// 测试模式加入Mock助手中间件
+	// 測試模式加入Mock助手中間件
 	if gin.Mode() == gin.TestMode {
 		v3.Use(middleware.MockHelper())
 	}
@@ -101,101 +101,101 @@ func InitMasterRouter() *gin.Engine {
 		路由
 	*/
 	{
-		// 全局设置相关
+		// 全域設定相關
 		site := v3.Group("site")
 		{
-			// 测试用路由
+			// 測試用路由
 			site.GET("ping", controllers.Ping)
-			// 验证码
+			// 驗證碼
 			site.GET("captcha", controllers.Captcha)
-			// 站点全局配置
+			// 站點全域配置
 			site.GET("config", middleware.CSRFInit(), controllers.SiteConfig)
 		}
 
-		// 用户相关路由
+		// 使用者相關路由
 		user := v3.Group("user")
 		{
-			// 用户登录
+			// 使用者登入
 			user.POST("session", middleware.CaptchaRequired("login_captcha"), controllers.UserLogin)
-			// 用户注册
+			// 使用者註冊
 			user.POST("",
 				middleware.IsFunctionEnabled("register_enabled"),
 				middleware.CaptchaRequired("reg_captcha"),
 				controllers.UserRegister,
 			)
-			// 用二步验证户登录
+			// 用二步驗證戶登入
 			user.POST("2fa", controllers.User2FALogin)
-			// 发送密码重设邮件
+			// 發送密碼重設郵件
 			user.POST("reset", middleware.CaptchaRequired("forget_captcha"), controllers.UserSendReset)
-			// 通过邮件里的链接重设密码
+			// 透過郵件裡的連結重設密碼
 			user.PATCH("reset", controllers.UserReset)
-			// 邮件激活
+			// 郵件啟動
 			user.GET("activate/:id",
 				middleware.SignRequired(),
 				middleware.HashID(hashid.UserID),
 				controllers.UserActivate,
 			)
-			// WebAuthn登陆初始化
+			// WebAuthn登入初始化
 			user.GET("authn/:username",
 				middleware.IsFunctionEnabled("authn_enabled"),
 				controllers.StartLoginAuthn,
 			)
-			// WebAuthn登陆
+			// WebAuthn登入
 			user.POST("authn/finish/:username",
 				middleware.IsFunctionEnabled("authn_enabled"),
 				controllers.FinishLoginAuthn,
 			)
-			// 获取用户主页展示用分享
+			// 獲取使用者首頁展示用分享
 			user.GET("profile/:id",
 				middleware.HashID(hashid.UserID),
 				controllers.GetUserShare,
 			)
-			// 获取用户头像
+			// 獲取使用者大頭貼
 			user.GET("avatar/:id/:size",
 				middleware.HashID(hashid.UserID),
 				controllers.GetUserAvatar,
 			)
 		}
 
-		// 需要携带签名验证的
+		// 需要攜帶簽名驗證的
 		sign := v3.Group("")
 		sign.Use(middleware.SignRequired())
 		{
 			file := sign.Group("file")
 			{
-				// 文件外链（直接输出文件数据）
+				// 文件外鏈（直接輸出文件資料）
 				file.GET("get/:id/:name", controllers.AnonymousGetContent)
-				// 文件外链(301跳转)
+				// 文件外鏈(301跳轉)
 				file.GET("source/:id/:name", controllers.AnonymousPermLink)
-				// 下載已经打包好的文件
+				// 下載已經打包好的文件
 				file.GET("archive/:id/archive.zip", controllers.DownloadArchive)
-				// 下载文件
+				// 下載文件
 				file.GET("download/:id", controllers.Download)
 			}
 		}
 
-		// 回调接口
+		// 回調介面
 		callback := v3.Group("callback")
 		{
-			// 远程策略上传回调
+			// 遠端策略上傳回調
 			callback.POST(
 				"remote/:key",
 				middleware.RemoteCallbackAuth(),
 				controllers.RemoteCallback,
 			)
-			// 七牛策略上传回调
+			// 七牛策略上傳回調
 			callback.POST(
 				"qiniu/:key",
 				middleware.QiniuCallbackAuth(),
 				controllers.QiniuCallback,
 			)
-			// 阿里云OSS策略上传回调
+			// 阿里雲OSS策略上傳回調
 			callback.POST(
 				"oss/:key",
 				middleware.OSSCallbackAuth(),
 				controllers.OSSCallback,
 			)
-			// 又拍云策略上传回调
+			// 又拍雲策略上傳回調
 			callback.POST(
 				"upyun/:key",
 				middleware.UpyunCallbackAuth(),
@@ -203,25 +203,25 @@ func InitMasterRouter() *gin.Engine {
 			)
 			onedrive := callback.Group("onedrive")
 			{
-				// 文件上传完成
+				// 文件上傳完成
 				onedrive.POST(
 					"finish/:key",
 					middleware.OneDriveCallbackAuth(),
 					controllers.OneDriveCallback,
 				)
-				// 文件上传完成
+				// 文件上傳完成
 				onedrive.GET(
 					"auth",
 					controllers.OneDriveOAuth,
 				)
 			}
-			// 腾讯云COS策略上传回调
+			// 騰訊雲COS策略上傳回調
 			callback.GET(
 				"cos/:key",
 				middleware.COSCallbackAuth(),
 				controllers.COSCallback,
 			)
-			// AWS S3策略上传回调
+			// AWS S3策略上傳回調
 			callback.GET(
 				"s3/:key",
 				middleware.S3CallbackAuth(),
@@ -229,18 +229,18 @@ func InitMasterRouter() *gin.Engine {
 			)
 		}
 
-		// 分享相关
+		// 分享相關
 		share := v3.Group("share", middleware.ShareAvailable())
 		{
-			// 获取分享
+			// 獲取分享
 			share.GET("info/:id", controllers.GetShare)
-			// 创建文件下载会话
+			// 建立文件下載工作階段
 			share.PUT("download/:id",
 				middleware.CheckShareUnlocked(),
 				middleware.BeforeShareDownload(),
 				controllers.GetShareDownload,
 			)
-			// 预览分享文件
+			// 預覽分享文件
 			share.GET("preview/:id",
 				middleware.CSRFCheck(),
 				middleware.CheckShareUnlocked(),
@@ -248,121 +248,121 @@ func InitMasterRouter() *gin.Engine {
 				middleware.BeforeShareDownload(),
 				controllers.PreviewShare,
 			)
-			// 取得Office文档预览地址
+			// 取得Office文件預覽地址
 			share.GET("doc/:id",
 				middleware.CheckShareUnlocked(),
 				middleware.ShareCanPreview(),
 				middleware.BeforeShareDownload(),
 				controllers.GetShareDocPreview,
 			)
-			// 获取文本文件内容
+			// 獲取文字文件內容
 			share.GET("content/:id",
 				middleware.CheckShareUnlocked(),
 				middleware.BeforeShareDownload(),
 				controllers.PreviewShareText,
 			)
-			// 分享目录列文件
+			// 分享目錄列文件
 			share.GET("list/:id/*path",
 				middleware.CheckShareUnlocked(),
 				controllers.ListSharedFolder,
 			)
-			// 归档打包下载
+			// 歸檔打包下載
 			share.POST("archive/:id",
 				middleware.CheckShareUnlocked(),
 				middleware.BeforeShareDownload(),
 				controllers.ArchiveShare,
 			)
-			// 获取README文本文件内容
+			// 獲取README文字文件內容
 			share.GET("readme/:id",
 				middleware.CheckShareUnlocked(),
 				controllers.PreviewShareReadme,
 			)
-			// 获取缩略图
+			// 獲取縮圖
 			share.GET("thumb/:id/:file",
 				middleware.CheckShareUnlocked(),
 				middleware.ShareCanPreview(),
 				controllers.ShareThumb,
 			)
-			// 搜索公共分享
+			// 搜尋公共分享
 			v3.Group("share").GET("search", controllers.SearchShare)
 		}
 
-		// 需要登录保护的
+		// 需要登入保護的
 		auth := v3.Group("")
 		auth.Use(middleware.AuthRequired())
 		{
 			// 管理
 			admin := auth.Group("admin", middleware.IsAdmin())
 			{
-				// 获取站点概况
+				// 獲取站點概況
 				admin.GET("summary", controllers.AdminSummary)
-				// 获取社区新闻
+				// 獲取社群新聞
 				admin.GET("news", controllers.AdminNews)
-				// 更改设置
+				// 更改設定
 				admin.PATCH("setting", controllers.AdminChangeSetting)
-				// 获取设置
+				// 獲取設定
 				admin.POST("setting", controllers.AdminGetSetting)
-				// 获取用户组列表
+				// 獲取使用者群組列表
 				admin.GET("groups", controllers.AdminGetGroups)
-				// 重新加载子服务
+				// 重新載入子服務
 				admin.GET("reload/:service", controllers.AdminReloadService)
-				// 重新加载子服务
+				// 重新載入子服務
 				admin.POST("mailTest", controllers.AdminSendTestMail)
 
-				// 离线下载相关
+				// 離線下載相關
 				aria2 := admin.Group("aria2")
 				{
-					// 测试连接配置
+					// 測試連接配置
 					aria2.POST("test", controllers.AdminTestAria2)
 				}
 
-				// 存储策略管理
+				// 儲存策略管理
 				policy := admin.Group("policy")
 				{
-					// 列出存储策略
+					// 列出儲存策略
 					policy.POST("list", controllers.AdminListPolicy)
-					// 测试本地路径可用性
+					// 測試本機路徑可用性
 					policy.POST("test/path", controllers.AdminTestPath)
-					// 测试从机通信
+					// 測試從機通信
 					policy.POST("test/slave", controllers.AdminTestSlave)
-					// 创建存储策略
+					// 建立儲存策略
 					policy.POST("", controllers.AdminAddPolicy)
-					// 创建跨域策略
+					// 建立跨域策略
 					policy.POST("cors", controllers.AdminAddCORS)
-					// 创建COS回调函数
+					// 建立COS回調函數
 					policy.POST("scf", controllers.AdminAddSCF)
-					// 获取 OneDrive OAuth URL
+					// 獲取 OneDrive OAuth URL
 					policy.GET(":id/oauth", controllers.AdminOneDriveOAuth)
-					// 获取 存储策略
+					// 獲取 儲存策略
 					policy.GET(":id", controllers.AdminGetPolicy)
-					// 删除 存储策略
+					// 刪除 儲存策略
 					policy.DELETE(":id", controllers.AdminDeletePolicy)
 				}
 
-				// 用户组管理
+				// 使用者群組管理
 				group := admin.Group("group")
 				{
-					// 列出用户组
+					// 列出使用者群組
 					group.POST("list", controllers.AdminListGroup)
-					// 获取用户组
+					// 獲取使用者群組
 					group.GET(":id", controllers.AdminGetGroup)
-					// 创建/保存用户组
+					// 建立/儲存使用者群組
 					group.POST("", controllers.AdminAddGroup)
-					// 删除
+					// 刪除
 					group.DELETE(":id", controllers.AdminDeleteGroup)
 				}
 
 				user := admin.Group("user")
 				{
-					// 列出用户
+					// 列出使用者
 					user.POST("list", controllers.AdminListUser)
-					// 获取用户
+					// 獲取使用者
 					user.GET(":id", controllers.AdminGetUser)
-					// 创建/保存用户
+					// 建立/儲存使用者
 					user.POST("", controllers.AdminAddUser)
-					// 删除
+					// 刪除
 					user.POST("delete", controllers.AdminDeleteUser)
-					// 封禁/解封用户
+					// 封禁/解封使用者
 					user.PATCH("ban/:id", controllers.AdminBanUser)
 				}
 
@@ -370,11 +370,11 @@ func InitMasterRouter() *gin.Engine {
 				{
 					// 列出文件
 					file.POST("list", controllers.AdminListFile)
-					// 预览文件
+					// 預覽文件
 					file.GET("preview/:id", controllers.AdminGetFile)
-					// 删除
+					// 刪除
 					file.POST("delete", controllers.AdminDeleteFile)
-					// 列出用户或外部文件系统目录
+					// 列出使用者或外部文件系統目錄
 					file.GET("folders/:type/:id/*path",
 						controllers.AdminListFolders)
 				}
@@ -383,41 +383,41 @@ func InitMasterRouter() *gin.Engine {
 				{
 					// 列出分享
 					share.POST("list", controllers.AdminListShare)
-					// 删除
+					// 刪除
 					share.POST("delete", controllers.AdminDeleteShare)
 				}
 
 				download := admin.Group("download")
 				{
-					// 列出任务
+					// 列出任務
 					download.POST("list", controllers.AdminListDownload)
-					// 删除
+					// 刪除
 					download.POST("delete", controllers.AdminDeleteDownload)
 				}
 
 				task := admin.Group("task")
 				{
-					// 列出任务
+					// 列出任務
 					task.POST("list", controllers.AdminListTask)
-					// 删除
+					// 刪除
 					task.POST("delete", controllers.AdminDeleteTask)
-					// 新建文件导入任务
+					// 建立文件匯入任務
 					task.POST("import", controllers.AdminCreateImportTask)
 				}
 
 			}
 
-			// 用户
+			// 使用者
 			user := auth.Group("user")
 			{
-				// 当前登录用户信息
+				// 目前登入使用者訊息
 				user.GET("me", controllers.UserMe)
-				// 存储信息
+				// 儲存訊息
 				user.GET("storage", controllers.UserStorage)
-				// 退出登录
+				// 退出登入
 				user.DELETE("session", controllers.UserSignOut)
 
-				// WebAuthn 注册相关
+				// WebAuthn 註冊相關
 				authn := user.Group("authn",
 					middleware.IsFunctionEnabled("authn_enabled"))
 				{
@@ -425,20 +425,20 @@ func InitMasterRouter() *gin.Engine {
 					authn.PUT("finish", controllers.FinishRegAuthn)
 				}
 
-				// 用户设置
+				// 使用者設定
 				setting := user.Group("setting")
 				{
-					// 任务队列
+					// 任務佇列
 					setting.GET("tasks", controllers.UserTasks)
-					// 获取当前用户设定
+					// 獲取目前使用者設定
 					setting.GET("", controllers.UserSetting)
-					// 从文件上传头像
+					// 從文件上傳大頭貼
 					setting.POST("avatar", controllers.UploadAvatar)
-					// 设定为Gravatar头像
+					// 設定為Gravatar大頭貼
 					setting.PUT("avatar", controllers.UseGravatar)
-					// 更改用户设定
+					// 更改使用者設定
 					setting.PATCH(":option", controllers.UpdateOption)
-					// 获得二步验证初始化信息
+					// 獲得二步驗證初始化訊息
 					setting.GET("2fa", controllers.UserInit2FA)
 				}
 			}
@@ -446,115 +446,115 @@ func InitMasterRouter() *gin.Engine {
 			// 文件
 			file := auth.Group("file", middleware.HashID(hashid.FileID))
 			{
-				// 文件上传
+				// 文件上傳
 				file.POST("upload", controllers.FileUploadStream)
-				// 获取上传凭证
+				// 獲取上傳憑證
 				file.GET("upload/credential", controllers.GetUploadCredential)
 				// 更新文件
 				file.PUT("update/:id", controllers.PutContent)
-				// 创建空白文件
+				// 建立空白文件
 				file.POST("create", controllers.CreateFile)
-				// 创建文件下载会话
+				// 建立文件下載工作階段
 				file.PUT("download/:id", controllers.CreateDownloadSession)
-				// 预览文件
+				// 預覽文件
 				file.GET("preview/:id", controllers.Preview)
-				// 获取文本文件内容
+				// 獲取文字文件內容
 				file.GET("content/:id", controllers.PreviewText)
-				// 取得Office文档预览地址
+				// 取得Office文件預覽地址
 				file.GET("doc/:id", controllers.GetDocPreview)
-				// 获取缩略图
+				// 獲取縮圖
 				file.GET("thumb/:id", controllers.Thumb)
-				// 取得文件外链
+				// 取得文件外鏈
 				file.GET("source/:id", controllers.GetSource)
-				// 打包要下载的文件
+				// 打包要下載的文件
 				file.POST("archive", controllers.Archive)
-				// 创建文件压缩任务
+				// 建立文件壓縮任務
 				file.POST("compress", controllers.Compress)
-				// 创建文件解压缩任务
+				// 建立文件解壓縮任務
 				file.POST("decompress", controllers.Decompress)
-				// 创建文件解压缩任务
+				// 建立文件解壓縮任務
 				file.GET("search/:type/:keywords", controllers.SearchFile)
 			}
 
-			// 离线下载任务
+			// 離線下載任務
 			aria2 := auth.Group("aria2")
 			{
-				// 创建URL下载任务
+				// 建立URL下載任務
 				aria2.POST("url", controllers.AddAria2URL)
-				// 创建种子下载任务
+				// 建立種子下載任務
 				aria2.POST("torrent/:id", middleware.HashID(hashid.FileID), controllers.AddAria2Torrent)
-				// 重新选择要下载的文件
+				// 重新選擇要下載的文件
 				aria2.PUT("select/:gid", controllers.SelectAria2File)
-				// 取消或删除下载任务
+				// 取消或刪除下載任務
 				aria2.DELETE("task/:gid", controllers.CancelAria2Download)
-				// 获取正在下载中的任务
+				// 獲取正在下載中的任務
 				aria2.GET("downloading", controllers.ListDownloading)
-				// 获取已完成的任务
+				// 獲取已完成的任務
 				aria2.GET("finished", controllers.ListFinished)
 			}
 
-			// 目录
+			// 目錄
 			directory := auth.Group("directory")
 			{
-				// 创建目录
+				// 建立目錄
 				directory.PUT("", controllers.CreateDirectory)
-				// 列出目录下内容
+				// 列出目錄下內容
 				directory.GET("*path", controllers.ListDirectory)
 			}
 
-			// 对象，文件和目录的抽象
+			// 物件，文件和目錄的抽象
 			object := auth.Group("object")
 			{
-				// 删除对象
+				// 刪除物件
 				object.DELETE("", controllers.Delete)
-				// 移动对象
+				// 移動物件
 				object.PATCH("", controllers.Move)
-				// 复制对象
+				// 複製物件
 				object.POST("copy", controllers.Copy)
-				// 重命名对象
+				// 重新命名物件
 				object.POST("rename", controllers.Rename)
-				// 获取对象属性
+				// 獲取物件屬性
 				object.GET("property/:id", controllers.GetProperty)
 			}
 
 			// 分享
 			share := auth.Group("share")
 			{
-				// 创建新分享
+				// 建立新分享
 				share.POST("", controllers.CreateShare)
 				// 列出我的分享
 				share.GET("", controllers.ListShare)
-				// 更新分享属性
+				// 更新分享屬性
 				share.PATCH(":id",
 					middleware.ShareAvailable(),
 					middleware.ShareOwner(),
 					controllers.UpdateShare,
 				)
-				// 删除分享
+				// 刪除分享
 				share.DELETE(":id",
 					controllers.DeleteShare,
 				)
 			}
 
-			// 用户标签
+			// 使用者標籤
 			tag := auth.Group("tag")
 			{
-				// 创建文件分类标签
+				// 建立文件分類標籤
 				tag.POST("filter", controllers.CreateFilterTag)
-				// 创建目录快捷方式标签
+				// 建立目錄捷徑標籤
 				tag.POST("link", controllers.CreateLinkTag)
-				// 删除标签
+				// 刪除標籤
 				tag.DELETE(":id", middleware.HashID(hashid.TagID), controllers.DeleteTag)
 			}
 
-			// WebDAV管理相关
+			// WebDAV管理相關
 			webdav := auth.Group("webdav")
 			{
-				// 获取账号信息
+				// 獲取帳號訊息
 				webdav.GET("accounts", controllers.GetWebDAVAccounts)
-				// 新建账号
+				// 建立帳號
 				webdav.POST("accounts", controllers.CreateWebDAVAccounts)
-				// 删除账号
+				// 刪除帳號
 				webdav.DELETE("accounts/:id", controllers.DeleteWebDAVAccounts)
 			}
 
@@ -562,12 +562,12 @@ func InitMasterRouter() *gin.Engine {
 
 	}
 
-	// 初始化WebDAV相关路由
+	// 初始化WebDAV相關路由
 	initWebDAV(r.Group("dav"))
 	return r
 }
 
-// initWebDAV 初始化WebDAV相关路由
+// initWebDAV 初始化WebDAV相關路由
 func initWebDAV(group *gin.RouterGroup) {
 	{
 		group.Use(middleware.WebDAVAuth())

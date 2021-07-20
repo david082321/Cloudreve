@@ -2,7 +2,7 @@ package onedrive
 
 import "time"
 
-// Option 发送请求的额外设置
+// Option 發送請求的額外設定
 type Option interface {
 	apply(*options)
 }
@@ -18,28 +18,28 @@ type options struct {
 
 type optionFunc func(*options)
 
-// WithCode 设置接口Code
+// WithCode 設定介面Code
 func WithCode(t string) Option {
 	return optionFunc(func(o *options) {
 		o.code = t
 	})
 }
 
-// WithRefreshToken 设置接口RefreshToken
+// WithRefreshToken 設定介面RefreshToken
 func WithRefreshToken(t string) Option {
 	return optionFunc(func(o *options) {
 		o.refreshToken = t
 	})
 }
 
-// WithConflictBehavior 设置文件重名后的处理方式
+// WithConflictBehavior 設定檔案重名後的處理方式
 func WithConflictBehavior(t string) Option {
 	return optionFunc(func(o *options) {
 		o.conflictBehavior = t
 	})
 }
 
-// WithConflictBehavior 设置文件重名后的处理方式
+// WithConflictBehavior 設定檔案重名後的處理方式
 func WithDriverResource(t bool) Option {
 	return optionFunc(func(o *options) {
 		o.useDriverResource = t

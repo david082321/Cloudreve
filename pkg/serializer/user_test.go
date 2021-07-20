@@ -14,7 +14,7 @@ import (
 
 var mock sqlmock.Sqlmock
 
-// TestMain 初始化数据库Mock
+// TestMain 初始化資料庫Mock
 func TestMain(m *testing.M) {
 	var db *sql.DB
 	var err error

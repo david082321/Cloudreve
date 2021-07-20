@@ -13,13 +13,13 @@ func TestNotifier_Notify(t *testing.T) {
 	notifyChan := make(chan StatusEvent, 10)
 	notifier2.Subscribe(notifyChan, "1")
 
-	// 未订阅
+	// 未訂閱
 	{
 		notifier2.Notify([]rpc.Event{rpc.Event{Gid: ""}}, 1)
 		asserts.Len(notifyChan, 0)
 	}
 
-	// 订阅
+	// 訂閱
 	{
 		notifier2.Notify([]rpc.Event{{Gid: "1"}}, 1)
 		asserts.Len(notifyChan, 1)

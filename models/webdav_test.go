@@ -21,7 +21,7 @@ func TestWebdav_Create(t *testing.T) {
 		asserts.EqualValues(1, id)
 	}
 
-	// 失败
+	// 失敗
 	{
 		mock.ExpectBegin()
 		mock.ExpectExec("INSERT(.+)").WillReturnError(errors.New("error"))

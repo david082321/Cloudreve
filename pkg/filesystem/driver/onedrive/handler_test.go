@@ -33,7 +33,7 @@ func TestDriver_Token(t *testing.T) {
 		},
 	}
 
-	// 无法获取文件路径
+	// 無法獲取文件路徑
 	{
 		ctx := context.WithValue(context.Background(), fsctx.FileSizeCtx, uint64(10))
 		res, err := handler.Token(ctx, 10, "key")
@@ -41,7 +41,7 @@ func TestDriver_Token(t *testing.T) {
 		asserts.Equal(serializer.UploadCredential{}, res)
 	}
 
-	// 无法获取文件大小
+	// 無法獲取檔案大小
 	{
 		ctx := context.WithValue(context.Background(), fsctx.SavePathCtx, "/123")
 		res, err := handler.Token(ctx, 10, "key")
@@ -58,7 +58,7 @@ func TestDriver_Token(t *testing.T) {
 		asserts.Equal(serializer.UploadCredential{}, res)
 	}
 
-	// 分片上传 失败
+	// 分片上傳 失敗
 	{
 		cache.Set("setting_siteURL", "http://test.cloudreve.org", 0)
 		handler.Client, _ = NewClient(&model.Policy{})
@@ -85,7 +85,7 @@ func TestDriver_Token(t *testing.T) {
 		asserts.Equal(serializer.UploadCredential{}, res)
 	}
 
-	// 分片上传 成功
+	// 分片上傳 成功
 	{
 		cache.Set("setting_siteURL", "http://test.cloudreve.org", 0)
 		cache.Set("setting_onedrive_monitor_timeout", "600", 0)
@@ -134,14 +134,14 @@ func TestDriver_Source(t *testing.T) {
 	handler.Client.Credential.ExpiresIn = time.Now().Add(time.Duration(100) * time.Hour).Unix()
 	cache.Set("setting_onedrive_source_timeout", "1800", 0)
 
-	// 失败
+	// 失敗
 	{
 		res, err := handler.Source(context.Background(), "123.jpg", url.URL{}, 1, true, 0)
 		asserts.Error(err)
 		asserts.Empty(res)
 	}
 
-	// 命中缓存 成功
+	// 命中快取 成功
 	{
 		handler.Client.Credential.ExpiresIn = time.Now().Add(time.Duration(100) * time.Hour).Unix()
 		handler.Client.Credential.AccessToken = "1"
@@ -152,7 +152,7 @@ func TestDriver_Source(t *testing.T) {
 		asserts.Equal("res", res)
 	}
 
-	// 命中缓存 上下文存在文件 成功
+	// 命中快取 上下文存在文件 成功
 	{
 		file := model.File{}
 		file.ID = 1
@@ -191,7 +191,7 @@ func TestDriver_Source(t *testing.T) {
 		asserts.Equal("123321", res)
 	}
 
-	// 成功 永久直链
+	// 成功 永久直鏈
 	{
 		file := model.File{}
 		file.ID = 1
@@ -221,7 +221,7 @@ func TestDriver_List(t *testing.T) {
 	handler.Client.Credential.AccessToken = "AccessToken"
 	handler.Client.Credential.ExpiresIn = time.Now().Add(time.Duration(100) * time.Hour).Unix()
 
-	// 非递归
+	// 非遞迴
 	{
 		clientMock := ClientMock{}
 		clientMock.On(
@@ -243,7 +243,7 @@ func TestDriver_List(t *testing.T) {
 		asserts.Len(res, 1)
 	}
 
-	// 递归一次
+	// 遞迴一次
 	{
 		clientMock := ClientMock{}
 		clientMock.On(
@@ -292,7 +292,7 @@ func TestDriver_Thumb(t *testing.T) {
 	handler.Client, _ = NewClient(&model.Policy{})
 	handler.Client.Credential.ExpiresIn = time.Now().Add(time.Duration(100) * time.Hour).Unix()
 
-	// 失败
+	// 失敗
 	{
 		ctx := context.WithValue(context.Background(), fsctx.ThumbSizeCtx, [2]uint{10, 20})
 		ctx = context.WithValue(ctx, fsctx.FileModelCtx, model.File{})
@@ -305,7 +305,7 @@ func TestDriver_Thumb(t *testing.T) {
 		asserts.Empty(res.URL)
 	}
 
-	// 上下文错误
+	// 上下文錯誤
 	{
 		_, err := handler.Thumb(context.Background(), "123.jpg")
 		asserts.NoError(mock.ExpectationsWereMet())
@@ -326,7 +326,7 @@ func TestDriver_Delete(t *testing.T) {
 	handler.Client, _ = NewClient(&model.Policy{})
 	handler.Client.Credential.ExpiresIn = time.Now().Add(time.Duration(100) * time.Hour).Unix()
 
-	// 失败
+	// 失敗
 	{
 		_, err := handler.Delete(context.Background(), []string{"1"})
 		asserts.NoError(mock.ExpectationsWereMet())
@@ -348,7 +348,7 @@ func TestDriver_Put(t *testing.T) {
 	handler.Client, _ = NewClient(&model.Policy{})
 	handler.Client.Credential.ExpiresIn = time.Now().Add(time.Duration(100) * time.Hour).Unix()
 
-	// 失败
+	// 失敗
 	{
 		err := handler.Put(context.Background(), ioutil.NopCloser(strings.NewReader("")), "dst", 0)
 		asserts.Error(err)
@@ -368,7 +368,7 @@ func TestDriver_Get(t *testing.T) {
 	handler.Client, _ = NewClient(&model.Policy{})
 	handler.Client.Credential.ExpiresIn = time.Now().Add(time.Duration(100) * time.Hour).Unix()
 
-	// 无法获取source
+	// 無法獲取source
 	{
 		res, err := handler.Get(context.Background(), "123.txt")
 		asserts.Error(err)

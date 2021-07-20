@@ -9,7 +9,7 @@ import (
 	"github.com/mojocn/base64Captcha"
 )
 
-// SiteConfig 获取站点全局配置
+// SiteConfig 獲取站點全域配置
 func SiteConfig(c *gin.Context) {
 	siteConfig := model.GetSettingByNames(
 		"siteName",
@@ -30,7 +30,7 @@ func SiteConfig(c *gin.Context) {
 		"register_enabled",
 	)
 
-	// 如果已登录，则同时返回用户信息和标签
+	// 如果已登入，則同時返回使用者訊息和標籤
 	user, _ := c.Get("user")
 	if user, ok := user.(*model.User); ok {
 		c.JSON(200, serializer.BuildSiteConfig(siteConfig, user))
@@ -40,7 +40,7 @@ func SiteConfig(c *gin.Context) {
 	c.JSON(200, serializer.BuildSiteConfig(siteConfig, nil))
 }
 
-// Ping 状态检查页面
+// Ping 狀態檢查頁面
 func Ping(c *gin.Context) {
 	c.JSON(200, serializer.Response{
 		Code: 0,
@@ -48,7 +48,7 @@ func Ping(c *gin.Context) {
 	})
 }
 
-// Captcha 获取验证码
+// Captcha 獲取驗證碼
 func Captcha(c *gin.Context) {
 	options := model.GetSettingByNames(
 		"captcha_IsShowHollowLine",
@@ -57,11 +57,11 @@ func Captcha(c *gin.Context) {
 		"captcha_IsShowSlimeLine",
 		"captcha_IsShowSineLine",
 	)
-	// 验证码配置
+	// 驗證碼配置
 	var configD = base64Captcha.ConfigCharacter{
 		Height: model.GetIntSetting("captcha_height", 60),
 		Width:  model.GetIntSetting("captcha_width", 240),
-		//const CaptchaModeNumber:数字,CaptchaModeAlphabet:字母,CaptchaModeArithmetic:算术,CaptchaModeNumberAlphabet:数字字母混合.
+		//const CaptchaModeNumber:數字,CaptchaModeAlphabet:字母,CaptchaModeArithmetic:算術,CaptchaModeNumberAlphabet:數字字母混合.
 		Mode:               model.GetIntSetting("captcha_mode", 3),
 		ComplexOfNoiseText: model.GetIntSetting("captcha_ComplexOfNoiseText", 0),
 		ComplexOfNoiseDot:  model.GetIntSetting("captcha_ComplexOfNoiseDot", 0),
@@ -73,14 +73,14 @@ func Captcha(c *gin.Context) {
 		CaptchaLen:         model.GetIntSetting("captcha_CaptchaLen", 6),
 	}
 
-	// 生成验证码
+	// 生成驗證碼
 	idKeyD, capD := base64Captcha.GenerateCaptcha("", configD)
-	// 将验证码UID存入Session以便后续验证
+	// 將驗證碼UID存入Session以便後續驗證
 	util.SetSession(c, map[string]interface{}{
 		"captchaID": idKeyD,
 	})
 
-	// 将验证码图像编码为Base64
+	// 將驗證碼圖像編碼為Base64
 	base64stringD := base64Captcha.CaptchaWriteToBase64Encoding(capD)
 
 	c.JSON(200, serializer.Response{
@@ -89,7 +89,7 @@ func Captcha(c *gin.Context) {
 	})
 }
 
-// Manifest 获取manifest.json
+// Manifest 獲取manifest.json
 func Manifest(c *gin.Context) {
 	options := model.GetSettingByNames(
 		"siteName",

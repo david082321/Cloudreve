@@ -12,11 +12,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Init 初始化启动
+// Init 初始化啟動
 func Init(path string) {
 	InitApplication()
 	conf.Init(path)
-	// Debug 关闭时，切换为生产模式
+	// Debug 關閉時，切換為生產模式
 	if !conf.SystemConfig.Debug {
 		gin.SetMode(gin.ReleaseMode)
 	}

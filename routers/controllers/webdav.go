@@ -18,18 +18,18 @@ func init() {
 	}
 }
 
-// ServeWebDAV 处理WebDAV相关请求
+// ServeWebDAV 處理WebDAV相關請求
 func ServeWebDAV(c *gin.Context) {
 	fs, err := filesystem.NewFileSystemFromContext(c)
 	if err != nil {
-		util.Log().Warning("无法为WebDAV初始化文件系统，%s", err)
+		util.Log().Warning("無法為WebDAV初始化文件系統，%s", err)
 		return
 	}
 
 	if webdavCtx, ok := c.Get("webdav"); ok {
 		application := webdavCtx.(*model.Webdav)
 
-		// 重定根目录
+		// 重定根目錄
 		if application.Root != "/" {
 			if exist, root := fs.IsPathExist(application.Root); exist {
 				root.Position = ""
@@ -42,7 +42,7 @@ func ServeWebDAV(c *gin.Context) {
 	handler.ServeHTTP(c.Writer, c.Request, fs)
 }
 
-// GetWebDAVAccounts 获取webdav账号列表
+// GetWebDAVAccounts 獲取webdav帳號列表
 func GetWebDAVAccounts(c *gin.Context) {
 	var service setting.WebDAVListService
 	if err := c.ShouldBindUri(&service); err == nil {
@@ -53,7 +53,7 @@ func GetWebDAVAccounts(c *gin.Context) {
 	}
 }
 
-// DeleteWebDAVAccounts 删除WebDAV账户
+// DeleteWebDAVAccounts 刪除WebDAV帳戶
 func DeleteWebDAVAccounts(c *gin.Context) {
 	var service setting.WebDAVAccountService
 	if err := c.ShouldBindUri(&service); err == nil {
@@ -64,7 +64,7 @@ func DeleteWebDAVAccounts(c *gin.Context) {
 	}
 }
 
-// CreateWebDAVAccounts 创建WebDAV账户
+// CreateWebDAVAccounts 建立WebDAV帳戶
 func CreateWebDAVAccounts(c *gin.Context) {
 	var service setting.WebDAVAccountCreateService
 	if err := c.ShouldBindJSON(&service); err == nil {

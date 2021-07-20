@@ -30,7 +30,7 @@ func TestRequest(t *testing.T) {
 		},
 	}
 
-	// 请求发送失败
+	// 請求發送失敗
 	{
 		clientMock := ClientMock{}
 		clientMock.On(
@@ -50,7 +50,7 @@ func TestRequest(t *testing.T) {
 		asserts.Equal("error", err.Error())
 	}
 
-	// 无法更新凭证
+	// 無法更新憑證
 	{
 		client.Credential.RefreshToken = ""
 		client.Credential.AccessToken = ""
@@ -61,7 +61,7 @@ func TestRequest(t *testing.T) {
 		client.Credential.AccessToken = "AccessToken"
 	}
 
-	// 无法获取响应正文
+	// 無法獲取響應正文
 	{
 		clientMock := ClientMock{}
 		clientMock.On(
@@ -84,7 +84,7 @@ func TestRequest(t *testing.T) {
 		asserts.Empty(res)
 	}
 
-	// OneDrive返回错误
+	// OneDrive返回錯誤
 	{
 		clientMock := ClientMock{}
 		clientMock.On(
@@ -108,7 +108,7 @@ func TestRequest(t *testing.T) {
 		asserts.Equal("error msg", err.Error())
 	}
 
-	// OneDrive返回未知响应
+	// OneDrive返回未知響應
 	{
 		clientMock := ClientMock{}
 		clientMock.On(
@@ -143,10 +143,10 @@ func TestFileInfo_GetSourcePath(t *testing.T) {
 				Path: "/drive/root:/123/321",
 			},
 		}
-		asserts.Equal("123/321/文件名.jpg", fileInfo.GetSourcePath())
+		asserts.Equal("123/321/檔案名.jpg", fileInfo.GetSourcePath())
 	}
 
-	// 失败
+	// 失敗
 	{
 		fileInfo := FileInfo{
 			Name: "%e6%96%87%e4%bb%b6%e5%90%8g.jpg",
@@ -162,7 +162,7 @@ func TestClient_GetRequestURL(t *testing.T) {
 	asserts := assert.New(t)
 	client, _ := NewClient(&model.Policy{})
 
-	// 出错
+	// 出錯
 	{
 		client.Endpoints.EndpointURL = string([]byte{0x7f})
 		asserts.Equal("", client.getRequestURL("123"))
@@ -186,7 +186,7 @@ func TestClient_GetSiteIDByURL(t *testing.T) {
 	client, _ := NewClient(&model.Policy{})
 	client.Credential.AccessToken = "AccessToken"
 
-	// 请求失败
+	// 請求失敗
 	{
 		client.Credential.ExpiresIn = 0
 		res, err := client.GetSiteIDByURL(context.Background(), "https://cquedu.sharepoint.com")
@@ -195,7 +195,7 @@ func TestClient_GetSiteIDByURL(t *testing.T) {
 
 	}
 
-	// 返回未知响应
+	// 返回未知響應
 	{
 		client.Credential.ExpiresIn = time.Now().Add(time.Duration(100) * time.Hour).Unix()
 		clientMock := ClientMock{}
@@ -250,7 +250,7 @@ func TestClient_Meta(t *testing.T) {
 	client, _ := NewClient(&model.Policy{})
 	client.Credential.AccessToken = "AccessToken"
 
-	// 请求失败
+	// 請求失敗
 	{
 		client.Credential.ExpiresIn = 0
 		res, err := client.Meta(context.Background(), "", "123")
@@ -259,7 +259,7 @@ func TestClient_Meta(t *testing.T) {
 
 	}
 
-	// 返回未知响应
+	// 返回未知響應
 	{
 		client.Credential.ExpiresIn = time.Now().Add(time.Duration(100) * time.Hour).Unix()
 		clientMock := ClientMock{}
@@ -314,7 +314,7 @@ func TestClient_CreateUploadSession(t *testing.T) {
 	client, _ := NewClient(&model.Policy{})
 	client.Credential.AccessToken = "AccessToken"
 
-	// 请求失败
+	// 請求失敗
 	{
 		client.Credential.ExpiresIn = 0
 		res, err := client.CreateUploadSession(context.Background(), "123.jpg")
@@ -323,7 +323,7 @@ func TestClient_CreateUploadSession(t *testing.T) {
 
 	}
 
-	// 返回未知响应
+	// 返回未知響應
 	{
 		client.Credential.ExpiresIn = time.Now().Add(time.Duration(100) * time.Hour).Unix()
 		clientMock := ClientMock{}
@@ -378,7 +378,7 @@ func TestClient_GetUploadSessionStatus(t *testing.T) {
 	client, _ := NewClient(&model.Policy{})
 	client.Credential.AccessToken = "AccessToken"
 
-	// 请求失败
+	// 請求失敗
 	{
 		client.Credential.ExpiresIn = 0
 		res, err := client.GetUploadSessionStatus(context.Background(), "http://dev.com")
@@ -387,7 +387,7 @@ func TestClient_GetUploadSessionStatus(t *testing.T) {
 
 	}
 
-	// 返回未知响应
+	// 返回未知響應
 	{
 		client.Credential.ExpiresIn = time.Now().Add(time.Duration(100) * time.Hour).Unix()
 		clientMock := ClientMock{}
@@ -443,7 +443,7 @@ func TestClient_UploadChunk(t *testing.T) {
 	client.Credential.AccessToken = "AccessToken"
 	client.Credential.ExpiresIn = time.Now().Add(time.Duration(100) * time.Hour).Unix()
 
-	// 非最后分片，正常
+	// 非最後分片，正常
 	{
 		client.Credential.ExpiresIn = time.Now().Add(time.Duration(100) * time.Hour).Unix()
 		clientMock := ClientMock{}
@@ -473,7 +473,7 @@ func TestClient_UploadChunk(t *testing.T) {
 		asserts.Equal("http://dev.com/2", res.UploadURL)
 	}
 
-	// 非最后分片，异常响应
+	// 非最後分片，異常響應
 	{
 		client.Credential.ExpiresIn = time.Now().Add(time.Duration(100) * time.Hour).Unix()
 		clientMock := ClientMock{}
@@ -503,7 +503,7 @@ func TestClient_UploadChunk(t *testing.T) {
 		asserts.Nil(res)
 	}
 
-	// 最后分片，正常
+	// 最後分片，正常
 	{
 		client.Credential.ExpiresIn = time.Now().Add(time.Duration(100) * time.Hour).Unix()
 		clientMock := ClientMock{}
@@ -533,7 +533,7 @@ func TestClient_UploadChunk(t *testing.T) {
 		asserts.Nil(res)
 	}
 
-	// 最后分片，第一次失败，重试后成功
+	// 最後分片，第一次失敗，重試後成功
 	{
 		cache.Set("setting_onedrive_chunk_retries", "1", 0)
 		client.Credential.ExpiresIn = 0
@@ -578,7 +578,7 @@ func TestClient_Upload(t *testing.T) {
 	client.Credential.ExpiresIn = time.Now().Add(time.Duration(100) * time.Hour).Unix()
 	ctx := context.WithValue(context.Background(), fsctx.DisableOverwrite, true)
 
-	// 小文件，简单上传，失败
+	// 小文件，簡單上傳，失敗
 	{
 		client.Credential.ExpiresIn = 0
 		err := client.Upload(ctx, "123.jpg", 3, strings.NewReader("123"))
@@ -611,7 +611,7 @@ func TestClient_Upload(t *testing.T) {
 		asserts.Equal(ErrClientCanceled, err)
 	}
 
-	// 无法创建分片会话
+	// 無法建立分片工作階段
 	{
 		client.Credential.ExpiresIn = time.Now().Add(time.Duration(100) * time.Hour).Unix()
 		clientMock := ClientMock{}
@@ -643,7 +643,7 @@ func TestClient_SimpleUpload(t *testing.T) {
 	client.Credential.ExpiresIn = time.Now().Add(time.Duration(100) * time.Hour).Unix()
 	cache.Set("setting_onedrive_chunk_retries", "1", 0)
 
-	// 请求失败，并重试
+	// 請求失敗，並重試
 	{
 		client.Credential.ExpiresIn = 0
 		res, err := client.SimpleUpload(context.Background(), "123.jpg", strings.NewReader("123"), 3)
@@ -652,7 +652,7 @@ func TestClient_SimpleUpload(t *testing.T) {
 	}
 
 	cache.Set("setting_onedrive_chunk_retries", "0", 0)
-	// 返回未知响应
+	// 返回未知響應
 	{
 		client.Credential.ExpiresIn = time.Now().Add(time.Duration(100) * time.Hour).Unix()
 		clientMock := ClientMock{}
@@ -707,7 +707,7 @@ func TestClient_DeleteUploadSession(t *testing.T) {
 	client, _ := NewClient(&model.Policy{})
 	client.Credential.AccessToken = "AccessToken"
 
-	// 请求失败
+	// 請求失敗
 	{
 		client.Credential.ExpiresIn = 0
 		err := client.DeleteUploadSession(context.Background(), "123.jpg")
@@ -744,7 +744,7 @@ func TestClient_BatchDelete(t *testing.T) {
 	client, _ := NewClient(&model.Policy{})
 	client.Credential.AccessToken = "AccessToken"
 
-	// 小于20个，失败1个
+	// 小於20個，失敗1個
 	{
 		client.Credential.ExpiresIn = time.Now().Add(time.Duration(100) * time.Hour).Unix()
 		clientMock := ClientMock{}
@@ -774,7 +774,7 @@ func TestClient_Delete(t *testing.T) {
 	client, _ := NewClient(&model.Policy{})
 	client.Credential.AccessToken = "AccessToken"
 
-	// 请求失败
+	// 請求失敗
 	{
 		client.Credential.ExpiresIn = 0
 		res, err := client.Delete(context.Background(), []string{"1", "2", "3"})
@@ -782,7 +782,7 @@ func TestClient_Delete(t *testing.T) {
 		asserts.Len(res, 3)
 	}
 
-	// 返回未知响应
+	// 返回未知響應
 	{
 		client.Credential.ExpiresIn = time.Now().Add(time.Duration(100) * time.Hour).Unix()
 		clientMock := ClientMock{}
@@ -806,7 +806,7 @@ func TestClient_Delete(t *testing.T) {
 		asserts.Len(res, 3)
 	}
 
-	// 成功2两个文件
+	// 成功2兩個文件
 	{
 		client.Credential.ExpiresIn = time.Now().Add(time.Duration(100) * time.Hour).Unix()
 		clientMock := ClientMock{}
@@ -836,7 +836,7 @@ func TestClient_ListChildren(t *testing.T) {
 	client, _ := NewClient(&model.Policy{})
 	client.Credential.AccessToken = "AccessToken"
 
-	// 根目录，请求失败,重测试
+	// 根目錄，請求失敗,重測試
 	{
 		client.Credential.ExpiresIn = 0
 		res, err := client.ListChildren(context.Background(), "/")
@@ -844,7 +844,7 @@ func TestClient_ListChildren(t *testing.T) {
 		asserts.Empty(res)
 	}
 
-	// 非根目录，未知响应
+	// 非根目錄，未知響應
 	{
 		client.Credential.ExpiresIn = time.Now().Add(time.Duration(100) * time.Hour).Unix()
 		clientMock := ClientMock{}
@@ -867,7 +867,7 @@ func TestClient_ListChildren(t *testing.T) {
 		asserts.Empty(res)
 	}
 
-	// 非根目录，成功
+	// 非根目錄，成功
 	{
 		client.Credential.ExpiresIn = time.Now().Add(time.Duration(100) * time.Hour).Unix()
 		clientMock := ClientMock{}
@@ -896,7 +896,7 @@ func TestClient_GetThumbURL(t *testing.T) {
 	client, _ := NewClient(&model.Policy{})
 	client.Credential.AccessToken = "AccessToken"
 
-	// 请求失败
+	// 請求失敗
 	{
 		client.Credential.ExpiresIn = 0
 		res, err := client.GetThumbURL(context.Background(), "123,jpg", 1, 1)
@@ -904,7 +904,7 @@ func TestClient_GetThumbURL(t *testing.T) {
 		asserts.Empty(res)
 	}
 
-	// 未知响应
+	// 未知響應
 	{
 		client.Credential.ExpiresIn = time.Now().Add(time.Duration(100) * time.Hour).Unix()
 		clientMock := ClientMock{}
@@ -927,7 +927,7 @@ func TestClient_GetThumbURL(t *testing.T) {
 		asserts.Empty(res)
 	}
 
-	// 世纪互联 成功
+	// 世紀互聯 成功
 	{
 		client.Credential.ExpiresIn = time.Now().Add(time.Duration(100) * time.Hour).Unix()
 		client.Endpoints.isInChina = true
@@ -951,7 +951,7 @@ func TestClient_GetThumbURL(t *testing.T) {
 		asserts.Equal("thumb", res)
 	}
 
-	// 非世纪互联 成功
+	// 非世紀互聯 成功
 	{
 		client.Credential.ExpiresIn = time.Now().Add(time.Duration(100) * time.Hour).Unix()
 		client.Endpoints.isInChina = false
@@ -981,7 +981,7 @@ func TestClient_MonitorUpload(t *testing.T) {
 	client, _ := NewClient(&model.Policy{})
 	client.Credential.ExpiresIn = time.Now().Add(time.Duration(100) * time.Hour).Unix()
 
-	// 客户端完成回调
+	// 用戶端完成回調
 	{
 		cache.Set("setting_onedrive_monitor_timeout", "600", 0)
 		cache.Set("setting_onedrive_callback_check", "20", 0)
@@ -994,7 +994,7 @@ func TestClient_MonitorUpload(t *testing.T) {
 		})
 	}
 
-	// 上传会话到期，仍未完成上传，创建占位符
+	// 上傳工作階段到期，仍未完成上傳，建立占位符
 	{
 		cache.Set("setting_onedrive_monitor_timeout", "600", 0)
 		cache.Set("setting_onedrive_callback_check", "20", 0)
@@ -1003,8 +1003,8 @@ func TestClient_MonitorUpload(t *testing.T) {
 		})
 	}
 
-	fmt.Println("测试:上传已完成，未发送回调")
-	// 上传已完成，未发送回调
+	fmt.Println("測試:上傳已完成，未發送回調")
+	// 上傳已完成，未發送回調
 	{
 		cache.Set("setting_onedrive_monitor_timeout", "0", 0)
 		cache.Set("setting_onedrive_callback_check", "0", 0)
@@ -1048,8 +1048,8 @@ func TestClient_MonitorUpload(t *testing.T) {
 		clientMock.AssertExpectations(t)
 	}
 
-	fmt.Println("测试:上传仍未开始")
-	// 上传仍未开始
+	fmt.Println("測試:上傳仍未開始")
+	// 上傳仍未開始
 	{
 		cache.Set("setting_onedrive_monitor_timeout", "0", 0)
 		cache.Set("setting_onedrive_callback_check", "0", 0)

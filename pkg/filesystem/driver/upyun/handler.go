@@ -26,7 +26,7 @@ import (
 	"github.com/upyun/go-sdk/upyun"
 )
 
-// UploadPolicy 又拍云上传策略
+// UploadPolicy 又拍雲上傳策略
 type UploadPolicy struct {
 	Bucket             string `json:"bucket"`
 	SaveKey            string `json:"save-key"`
@@ -37,7 +37,7 @@ type UploadPolicy struct {
 	AllowFileType      string `json:"allow-file-type,omitempty"`
 }
 
-// Driver 又拍云策略适配器
+// Driver 又拍雲策略適配器
 type Driver struct {
 	Policy *model.Policy
 }
@@ -45,7 +45,7 @@ type Driver struct {
 func (handler Driver) List(ctx context.Context, base string, recursive bool) ([]response.Object, error) {
 	base = strings.TrimPrefix(base, "/")
 
-	// 用于接受SDK返回对象的chan
+	// 用於接受SDK返回物件的chan
 	objChan := make(chan *upyun.FileInfo)
 	objects := []*upyun.FileInfo{}
 
@@ -55,12 +55,12 @@ func (handler Driver) List(ctx context.Context, base string, recursive bool) ([]
 		ObjectsChan:  objChan,
 		MaxListTries: 1,
 	}
-	// 递归列取时不限制递归次数
+	// 遞迴列取時不限制遞迴次數
 	if recursive {
 		listConf.MaxListLevel = -1
 	}
 
-	// 启动一个goroutine收集列取的对象信
+	// 啟動一個goroutine收集列取的物件信
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	go func(input chan *upyun.FileInfo, output *[]*upyun.FileInfo, wg *sync.WaitGroup) {
@@ -87,7 +87,7 @@ func (handler Driver) List(ctx context.Context, base string, recursive bool) ([]
 
 	wg.Wait()
 
-	// 汇总处理列取结果
+	// 匯總處理列取結果
 	res := make([]response.Object, 0, len(objects))
 	for _, object := range objects {
 		res = append(res, response.Object{
@@ -103,9 +103,9 @@ func (handler Driver) List(ctx context.Context, base string, recursive bool) ([]
 	return res, nil
 }
 
-// Get 获取文件
+// Get 獲取文件
 func (handler Driver) Get(ctx context.Context, path string) (response.RSCloser, error) {
-	// 获取文件源地址
+	// 獲取文件源地址
 	downloadURL, err := handler.Source(
 		ctx,
 		path,
@@ -118,7 +118,7 @@ func (handler Driver) Get(ctx context.Context, path string) (response.RSCloser, 
 		return nil, err
 	}
 
-	// 获取文件数据流
+	// 獲取文件資料流
 	client := request.HTTPClient{}
 	resp, err := client.Request(
 		"GET",
@@ -136,7 +136,7 @@ func (handler Driver) Get(ctx context.Context, path string) (response.RSCloser, 
 
 	resp.SetFirstFakeChunk()
 
-	// 尝试自主获取文件大小
+	// 嘗試自主獲取檔案大小
 	if file, ok := ctx.Value(fsctx.FileModelCtx).(model.File); ok {
 		resp.SetContentLength(int64(file.Size))
 	}
@@ -145,7 +145,7 @@ func (handler Driver) Get(ctx context.Context, path string) (response.RSCloser, 
 
 }
 
-// Put 将文件流保存到指定目录
+// Put 將文件流儲存到指定目錄
 func (handler Driver) Put(ctx context.Context, file io.ReadCloser, dst string, size uint64) error {
 	defer file.Close()
 
@@ -162,8 +162,8 @@ func (handler Driver) Put(ctx context.Context, file io.ReadCloser, dst string, s
 	return err
 }
 
-// Delete 删除一个或多个文件，
-// 返回未删除的文件，及遇到的最后一个错误
+// Delete 刪除一個或多個文件，
+// 返回未刪除的文件，及遇到的最後一個錯誤
 func (handler Driver) Delete(ctx context.Context, files []string) ([]string, error) {
 	up := upyun.NewUpYun(&upyun.UpYunConfig{
 		Bucket:   handler.Policy.BucketName,
@@ -182,14 +182,14 @@ func (handler Driver) Delete(ctx context.Context, files []string) ([]string, err
 	)
 	wg.Add(routineNum)
 
-	// upyun不支持批量操作，这里开四个协程并行操作
+	// upyun不支援批次操作，這裡開四個協程並行操作
 	for i := 0; i < routineNum; i++ {
 		go func() {
 			for {
-				// 取得待删除文件
+				// 取得待刪除文件
 				indexLock.Lock()
 				if currentIndex >= len(files) {
-					// 所有文件处理完成
+					// 所有文件處理完成
 					wg.Done()
 					indexLock.Unlock()
 					return
@@ -198,13 +198,13 @@ func (handler Driver) Delete(ctx context.Context, files []string) ([]string, err
 				currentIndex++
 				indexLock.Unlock()
 
-				// 发送异步删除请求
+				// 發送非同步刪除請求
 				err := up.Delete(&upyun.DeleteObjectConfig{
 					Path:  path,
 					Async: true,
 				})
 
-				// 处理错误
+				// 處理錯誤
 				if err != nil {
 					failedLock.Lock()
 					lastErr = err
@@ -220,14 +220,14 @@ func (handler Driver) Delete(ctx context.Context, files []string) ([]string, err
 	return failed, lastErr
 }
 
-// Thumb 获取文件缩略图
+// Thumb 獲取文件縮圖
 func (handler Driver) Thumb(ctx context.Context, path string) (*response.ContentResponse, error) {
 	var (
 		thumbSize = [2]uint{400, 300}
 		ok        = false
 	)
 	if thumbSize, ok = ctx.Value(fsctx.ThumbSizeCtx).([2]uint); !ok {
-		return nil, errors.New("无法获取缩略图尺寸设置")
+		return nil, errors.New("無法獲取縮圖尺寸設定")
 	}
 
 	thumbParam := fmt.Sprintf("!/fwfh/%dx%d", thumbSize[0], thumbSize[1])
@@ -249,7 +249,7 @@ func (handler Driver) Thumb(ctx context.Context, path string) (*response.Content
 	}, nil
 }
 
-// Source 获取外链URL
+// Source 獲取外鏈URL
 func (handler Driver) Source(
 	ctx context.Context,
 	path string,
@@ -258,7 +258,7 @@ func (handler Driver) Source(
 	isDownload bool,
 	speed int,
 ) (string, error) {
-	// 尝试从上下文获取文件名
+	// 嘗試從上下文獲取檔案名
 	fileName := ""
 	if file, ok := ctx.Value(fsctx.FileModelCtx).(model.File); ok {
 		fileName = file.Name
@@ -276,7 +276,7 @@ func (handler Driver) Source(
 
 	sourceURL = sourceURL.ResolveReference(fileKey)
 
-	// 如果是下载文件URL
+	// 如果是下載文件URL
 	if isDownload {
 		query := sourceURL.Query()
 		query.Add("_upd", fileName)
@@ -288,7 +288,7 @@ func (handler Driver) Source(
 
 func (handler Driver) signURL(ctx context.Context, path *url.URL, TTL int64) (string, error) {
 	if !handler.Policy.IsPrivate {
-		// 未开启Token防盗链时，直接返回
+		// 未開啟Token防盜鏈時，直接返回
 		return path.String(), nil
 	}
 
@@ -302,7 +302,7 @@ func (handler Driver) signURL(ctx context.Context, path *url.URL, TTL int64) (st
 	signMd5 := fmt.Sprintf("%x", md5.Sum([]byte(signStr)))
 	finalSign := signMd5[12:20] + strconv.FormatInt(etime, 10)
 
-	// 将签名添加到URL中
+	// 將簽名添加到URL中
 	query := path.Query()
 	query.Add("_upt", finalSign)
 	path.RawQuery = query.Encode()
@@ -310,26 +310,26 @@ func (handler Driver) signURL(ctx context.Context, path *url.URL, TTL int64) (st
 	return path.String(), nil
 }
 
-// Token 获取上传策略和认证Token
+// Token 獲取上傳策略和認證Token
 func (handler Driver) Token(ctx context.Context, TTL int64, key string) (serializer.UploadCredential, error) {
-	// 读取上下文中生成的存储路径和文件大小
+	// 讀取上下文中生成的儲存路徑和檔案大小
 	savePath, ok := ctx.Value(fsctx.SavePathCtx).(string)
 	if !ok {
-		return serializer.UploadCredential{}, errors.New("无法获取存储路径")
+		return serializer.UploadCredential{}, errors.New("無法獲取儲存路徑")
 	}
 	fileSize, ok := ctx.Value(fsctx.FileSizeCtx).(uint64)
 	if !ok {
-		return serializer.UploadCredential{}, errors.New("无法获取文件大小")
+		return serializer.UploadCredential{}, errors.New("無法獲取檔案大小")
 	}
 
-	// 检查文件大小
+	// 檢查檔案大小
 
-	// 生成回调地址
+	// 生成回調地址
 	siteURL := model.GetSiteURL()
 	apiBaseURI, _ := url.Parse("/api/v3/callback/upyun/" + key)
 	apiURL := siteURL.ResolveReference(apiBaseURI)
 
-	// 上传策略
+	// 上傳策略
 	putPolicy := UploadPolicy{
 		Bucket: handler.Policy.BucketName,
 		// TODO escape
@@ -341,19 +341,19 @@ func (handler Driver) Token(ctx context.Context, TTL int64, key string) (seriali
 		AllowFileType:      strings.Join(handler.Policy.OptionsSerialized.FileType, ","),
 	}
 
-	// 生成上传凭证
+	// 生成上傳憑證
 	return handler.getUploadCredential(ctx, putPolicy)
 }
 
 func (handler Driver) getUploadCredential(ctx context.Context, policy UploadPolicy) (serializer.UploadCredential, error) {
-	// 生成上传策略
+	// 生成上傳策略
 	policyJSON, err := json.Marshal(policy)
 	if err != nil {
 		return serializer.UploadCredential{}, err
 	}
 	policyEncoded := base64.StdEncoding.EncodeToString(policyJSON)
 
-	// 生成签名
+	// 生成簽名
 	elements := []string{"POST", "/" + handler.Policy.BucketName, policyEncoded}
 	signStr := handler.Sign(ctx, elements)
 
@@ -363,7 +363,7 @@ func (handler Driver) getUploadCredential(ctx context.Context, policy UploadPoli
 	}, nil
 }
 
-// Sign 计算又拍云的签名头
+// Sign 計算又拍雲的簽名頭
 func (handler Driver) Sign(ctx context.Context, elements []string) string {
 	password := fmt.Sprintf("%x", md5.Sum([]byte(handler.Policy.SecretKey)))
 	mac := hmac.New(sha1.New, []byte(password))

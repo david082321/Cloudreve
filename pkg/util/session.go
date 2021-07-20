@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// SetSession 设置session
+// SetSession 設定session
 func SetSession(c *gin.Context, list map[string]interface{}) {
 	s := sessions.Default(c)
 	for key, value := range list {
@@ -14,17 +14,17 @@ func SetSession(c *gin.Context, list map[string]interface{}) {
 
 	err := s.Save()
 	if err != nil {
-		Log().Warning("无法设置 Session 值：%s", err)
+		Log().Warning("無法設定 Session 值：%s", err)
 	}
 }
 
-// GetSession 获取session
+// GetSession 獲取session
 func GetSession(c *gin.Context, key string) interface{} {
 	s := sessions.Default(c)
 	return s.Get(key)
 }
 
-// DeleteSession 删除session
+// DeleteSession 刪除session
 func DeleteSession(c *gin.Context, key string) {
 	s := sessions.Default(c)
 	s.Delete(key)

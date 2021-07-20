@@ -9,8 +9,8 @@ func TestDotPathToStandardPath(t *testing.T) {
 	asserts := assert.New(t)
 
 	asserts.Equal("/", DotPathToStandardPath(""))
-	asserts.Equal("/目录", DotPathToStandardPath("目录"))
-	asserts.Equal("/目录/目录2", DotPathToStandardPath("目录,目录2"))
+	asserts.Equal("/目錄", DotPathToStandardPath("目錄"))
+	asserts.Equal("/目錄/目錄2", DotPathToStandardPath("目錄,目錄2"))
 }
 
 func TestFillSlash(t *testing.T) {

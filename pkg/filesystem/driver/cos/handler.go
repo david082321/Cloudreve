@@ -25,13 +25,13 @@ import (
 	cossdk "github.com/tencentyun/cos-go-sdk-v5"
 )
 
-// UploadPolicy 腾讯云COS上传策略
+// UploadPolicy 騰訊雲COS上傳策略
 type UploadPolicy struct {
 	Expiration string        `json:"expiration"`
 	Conditions []interface{} `json:"conditions"`
 }
 
-// MetaData 文件元信息
+// MetaData 文件元訊息
 type MetaData struct {
 	Size        uint64
 	CallbackKey string
@@ -43,7 +43,7 @@ type urlOption struct {
 	ContentDescription string `url:"response-content-disposition,omitempty"`
 }
 
-// Driver 腾讯云COS适配器模板
+// Driver 騰訊雲COS適配器模板
 type Driver struct {
 	Policy     *model.Policy
 	Client     *cossdk.Client
@@ -52,17 +52,17 @@ type Driver struct {
 
 // List 列出COS文件
 func (handler Driver) List(ctx context.Context, base string, recursive bool) ([]response.Object, error) {
-	// 初始化列目录参数
+	// 初始化列目錄參數
 	opt := &cossdk.BucketGetOptions{
 		Prefix:       strings.TrimPrefix(base, "/"),
 		EncodingType: "",
 		MaxKeys:      1000,
 	}
-	// 是否为递归列出
+	// 是否為遞迴列出
 	if !recursive {
 		opt.Delimiter = "/"
 	}
-	// 手动补齐结尾的slash
+	// 手動補齊結尾的slash
 	if opt.Prefix != "" {
 		opt.Prefix += "/"
 	}
@@ -80,17 +80,17 @@ func (handler Driver) List(ctx context.Context, base string, recursive bool) ([]
 		}
 		objects = append(objects, res.Contents...)
 		commons = append(commons, res.CommonPrefixes...)
-		// 如果本次未列取完，则继续使用marker获取结果
+		// 如果本次未列取完，則繼續使用marker獲取結果
 		marker = res.NextMarker
-		// marker 为空时结果列取完毕，跳出
+		// marker 為空時結果列取完畢，跳出
 		if marker == "" {
 			break
 		}
 	}
 
-	// 处理列取结果
+	// 處理列取結果
 	res := make([]response.Object, 0, len(objects)+len(commons))
-	// 处理目录
+	// 處理目錄
 	for _, object := range commons {
 		rel, err := filepath.Rel(opt.Prefix, object)
 		if err != nil {
@@ -104,7 +104,7 @@ func (handler Driver) List(ctx context.Context, base string, recursive bool) ([]
 			LastModify:   time.Now(),
 		})
 	}
-	// 处理文件
+	// 處理文件
 	for _, object := range objects {
 		rel, err := filepath.Rel(opt.Prefix, object.Key)
 		if err != nil {
@@ -124,7 +124,7 @@ func (handler Driver) List(ctx context.Context, base string, recursive bool) ([]
 
 }
 
-// CORS 创建跨域策略
+// CORS 建立跨域策略
 func (handler Driver) CORS() error {
 	_, err := handler.Client.Bucket.PutCORS(context.Background(), &cossdk.BucketPutCORSOptions{
 		Rules: []cossdk.BucketCORSRule{{
@@ -145,9 +145,9 @@ func (handler Driver) CORS() error {
 	return err
 }
 
-// Get 获取文件
+// Get 獲取文件
 func (handler Driver) Get(ctx context.Context, path string) (response.RSCloser, error) {
-	// 获取文件源地址
+	// 獲取文件源地址
 	downloadURL, err := handler.Source(
 		ctx,
 		path,
@@ -160,7 +160,7 @@ func (handler Driver) Get(ctx context.Context, path string) (response.RSCloser, 
 		return nil, err
 	}
 
-	// 获取文件数据流
+	// 獲取文件資料流
 	resp, err := handler.HTTPClient.Request(
 		"GET",
 		downloadURL,
@@ -174,7 +174,7 @@ func (handler Driver) Get(ctx context.Context, path string) (response.RSCloser, 
 
 	resp.SetFirstFakeChunk()
 
-	// 尝试自主获取文件大小
+	// 嘗試自主獲取檔案大小
 	if file, ok := ctx.Value(fsctx.FileModelCtx).(model.File); ok {
 		resp.SetContentLength(int64(file.Size))
 	}
@@ -182,15 +182,15 @@ func (handler Driver) Get(ctx context.Context, path string) (response.RSCloser, 
 	return resp, nil
 }
 
-// Put 将文件流保存到指定目录
+// Put 將文件流儲存到指定目錄
 func (handler Driver) Put(ctx context.Context, file io.ReadCloser, dst string, size uint64) error {
 	opt := &cossdk.ObjectPutOptions{}
 	_, err := handler.Client.Object.Put(ctx, dst, file, opt)
 	return err
 }
 
-// Delete 删除一个或多个文件，
-// 返回未删除的文件，及遇到的最后一个错误
+// Delete 刪除一個或多個文件，
+// 返回未刪除的文件，及遇到的最後一個錯誤
 func (handler Driver) Delete(ctx context.Context, files []string) ([]string, error) {
 	obs := []cossdk.Object{}
 	for _, v := range files {
@@ -206,7 +206,7 @@ func (handler Driver) Delete(ctx context.Context, files []string) ([]string, err
 		return files, err
 	}
 
-	// 整理删除结果
+	// 整理刪除結果
 	failed := make([]string, 0, len(files))
 	for _, v := range res.Errors {
 		failed = append(failed, v.Key)
@@ -216,17 +216,17 @@ func (handler Driver) Delete(ctx context.Context, files []string) ([]string, err
 		return failed, nil
 	}
 
-	return failed, errors.New("删除失败")
+	return failed, errors.New("刪除失敗")
 }
 
-// Thumb 获取文件缩略图
+// Thumb 獲取文件縮圖
 func (handler Driver) Thumb(ctx context.Context, path string) (*response.ContentResponse, error) {
 	var (
 		thumbSize = [2]uint{400, 300}
 		ok        = false
 	)
 	if thumbSize, ok = ctx.Value(fsctx.ThumbSizeCtx).([2]uint); !ok {
-		return nil, errors.New("无法获取缩略图尺寸设置")
+		return nil, errors.New("無法獲取縮圖尺寸設定")
 	}
 	thumbParam := fmt.Sprintf("imageMogr2/thumbnail/%dx%d", thumbSize[0], thumbSize[1])
 
@@ -251,7 +251,7 @@ func (handler Driver) Thumb(ctx context.Context, path string) (*response.Content
 	}, nil
 }
 
-// Source 获取外链URL
+// Source 獲取外鏈URL
 func (handler Driver) Source(
 	ctx context.Context,
 	path string,
@@ -260,13 +260,13 @@ func (handler Driver) Source(
 	isDownload bool,
 	speed int,
 ) (string, error) {
-	// 尝试从上下文获取文件名
+	// 嘗試從上下文獲取檔案名
 	fileName := ""
 	if file, ok := ctx.Value(fsctx.FileModelCtx).(model.File); ok {
 		fileName = file.Name
 	}
 
-	// 添加各项设置
+	// 添加各項設定
 	options := urlOption{}
 	if speed > 0 {
 		if speed < 819200 {
@@ -290,14 +290,14 @@ func (handler Driver) signSourceURL(ctx context.Context, path string, ttl int64,
 		return "", err
 	}
 
-	// 公有空间不需要签名
+	// 公有空間不需要簽名
 	if !handler.Policy.IsPrivate {
 		file, err := url.Parse(path)
 		if err != nil {
 			return "", err
 		}
 
-		// 非签名URL不支持设置响应header
+		// 非簽名URL不支援設定響應header
 		options.ContentDescription = ""
 
 		optionQuery, err := query.Values(*options)
@@ -316,27 +316,27 @@ func (handler Driver) signSourceURL(ctx context.Context, path string, ttl int64,
 		return "", err
 	}
 
-	// 将最终生成的签名URL域名换成用户自定义的加速域名（如果有）
+	// 將最終生成的簽名URL域名換成使用者自訂的加速域名（如果有）
 	presignedURL.Host = cdnURL.Host
 	presignedURL.Scheme = cdnURL.Scheme
 
 	return presignedURL.String(), nil
 }
 
-// Token 获取上传策略和认证Token
+// Token 獲取上傳策略和認證Token
 func (handler Driver) Token(ctx context.Context, TTL int64, key string) (serializer.UploadCredential, error) {
-	// 读取上下文中生成的存储路径
+	// 讀取上下文中生成的儲存路徑
 	savePath, ok := ctx.Value(fsctx.SavePathCtx).(string)
 	if !ok {
-		return serializer.UploadCredential{}, errors.New("无法获取存储路径")
+		return serializer.UploadCredential{}, errors.New("無法獲取儲存路徑")
 	}
 
-	// 生成回调地址
+	// 生成回調地址
 	siteURL := model.GetSiteURL()
 	apiBaseURI, _ := url.Parse("/api/v3/callback/cos/" + key)
 	apiURL := siteURL.ResolveReference(apiBaseURI).String()
 
-	// 上传策略
+	// 上傳策略
 	startTime := time.Now()
 	endTime := startTime.Add(time.Duration(TTL) * time.Second)
 	keyTime := fmt.Sprintf("%d;%d", startTime.Unix(), endTime.Unix())
@@ -368,7 +368,7 @@ func (handler Driver) Token(ctx context.Context, TTL int64, key string) (seriali
 
 }
 
-// Meta 获取文件信息
+// Meta 獲取文件訊息
 func (handler Driver) Meta(ctx context.Context, path string) (*MetaData, error) {
 	res, err := handler.Client.Object.Head(ctx, path, &cossdk.ObjectHeadOptions{})
 	if err != nil {
@@ -382,20 +382,20 @@ func (handler Driver) Meta(ctx context.Context, path string) (*MetaData, error) 
 }
 
 func (handler Driver) getUploadCredential(ctx context.Context, policy UploadPolicy, keyTime string) (serializer.UploadCredential, error) {
-	// 读取上下文中生成的存储路径
+	// 讀取上下文中生成的儲存路徑
 	savePath, ok := ctx.Value(fsctx.SavePathCtx).(string)
 	if !ok {
-		return serializer.UploadCredential{}, errors.New("无法获取存储路径")
+		return serializer.UploadCredential{}, errors.New("無法獲取儲存路徑")
 	}
 
-	// 编码上传策略
+	// 編碼上傳策略
 	policyJSON, err := json.Marshal(policy)
 	if err != nil {
 		return serializer.UploadCredential{}, err
 	}
 	policyEncoded := base64.StdEncoding.EncodeToString(policyJSON)
 
-	// 签名上传策略
+	// 簽名上傳策略
 	hmacSign := hmac.New(sha1.New, []byte(handler.Policy.SecretKey))
 	_, err = io.WriteString(hmacSign, keyTime)
 	if err != nil {
@@ -410,7 +410,7 @@ func (handler Driver) getUploadCredential(ctx context.Context, policy UploadPoli
 	}
 	stringToSign := fmt.Sprintf("%x", sha1Sign.Sum(nil))
 
-	// 最终签名
+	// 最終簽名
 	hmacFinalSign := hmac.New(sha1.New, []byte(signKey))
 	_, err = hmacFinalSign.Write([]byte(stringToSign))
 	if err != nil {

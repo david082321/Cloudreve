@@ -24,7 +24,7 @@ func TestRecord(t *testing.T) {
 func TestResume(t *testing.T) {
 	asserts := assert.New(t)
 
-	// 没有任务
+	// 沒有任務
 	{
 		mock.ExpectQuery("SELECT(.+)").WithArgs(Queued).WillReturnRows(sqlmock.NewRows([]string{"type"}))
 		Resume()

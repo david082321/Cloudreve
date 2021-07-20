@@ -10,9 +10,9 @@ func RunScript(name string) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	if err := scripts.RunDBScript(name, ctx); err != nil {
-		util.Log().Error("数据库脚本执行失败: %s", err)
+		util.Log().Error("資料庫脚本執行失敗: %s", err)
 		return
 	}
 
-	util.Log().Info("数据库脚本 [%s] 执行完毕", name)
+	util.Log().Info("資料庫脚本 [%s] 執行完畢", name)
 }

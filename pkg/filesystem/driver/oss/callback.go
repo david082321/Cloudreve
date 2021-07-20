@@ -19,29 +19,29 @@ import (
 	"github.com/cloudreve/Cloudreve/v3/pkg/request"
 )
 
-// GetPublicKey 从回调请求或缓存中获取OSS的回调签名公钥
+// GetPublicKey 從回調請求或快取中獲取OSS的回調簽名公鑰
 func GetPublicKey(r *http.Request) ([]byte, error) {
 	var pubKey []byte
 
-	// 尝试从缓存中获取
+	// 嘗試從快取中獲取
 	pub, exist := cache.Get("oss_public_key")
 	if exist {
 		return pub.([]byte), nil
 	}
 
-	// 从请求中获取
+	// 從請求中獲取
 	pubURL, err := base64.StdEncoding.DecodeString(r.Header.Get("x-oss-pub-key-url"))
 	if err != nil {
 		return pubKey, err
 	}
 
-	// 确保这个 public key 是由 OSS 颁发的
+	// 確保這個 public key 是由 OSS 頒發的
 	if !strings.HasPrefix(string(pubURL), "http://gosspublic.alicdn.com/") &&
 		!strings.HasPrefix(string(pubURL), "https://gosspublic.alicdn.com/") {
-		return pubKey, errors.New("公钥URL无效")
+		return pubKey, errors.New("公鑰URL無效")
 	}
 
-	// 获取公钥
+	// 獲取公鑰
 	client := request.HTTPClient{}
 	body, err := client.Request("GET", string(pubURL), nil).
 		CheckHTTPResponse(200).
@@ -50,7 +50,7 @@ func GetPublicKey(r *http.Request) ([]byte, error) {
 		return pubKey, err
 	}
 
-	// 写入缓存
+	// 寫入快取
 	_ = cache.Set("oss_public_key", []byte(body), 86400*7)
 
 	return []byte(body), nil
@@ -59,7 +59,7 @@ func GetPublicKey(r *http.Request) ([]byte, error) {
 func getRequestMD5(r *http.Request) ([]byte, error) {
 	var byteMD5 []byte
 
-	// 获取请求正文
+	// 獲取請求正文
 	body, err := ioutil.ReadAll(r.Body)
 	r.Body.Close()
 	if err != nil {
@@ -80,7 +80,7 @@ func getRequestMD5(r *http.Request) ([]byte, error) {
 	return byteMD5, nil
 }
 
-// VerifyCallbackSignature 验证OSS回调请求
+// VerifyCallbackSignature 驗證OSS回調請求
 func VerifyCallbackSignature(r *http.Request) error {
 	bytePublicKey, err := GetPublicKey(r)
 	if err != nil {

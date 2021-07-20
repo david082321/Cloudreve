@@ -23,7 +23,7 @@ func TestDownload_Create(t *testing.T) {
 		asserts.EqualValues(1, id)
 	}
 
-	// 失败
+	// 失敗
 	{
 		mock.ExpectBegin()
 		mock.ExpectExec("INSERT(.+)").WillReturnError(errors.New("error"))
@@ -55,7 +55,7 @@ func TestDownload_AfterFind(t *testing.T) {
 		asserts.Equal("", download.StatusInfo.Gid)
 	}
 
-	// 解析失败
+	// 解析失敗
 	{
 		download := Download{Attrs: `?`}
 		err := download.BeforeSave()
@@ -85,7 +85,7 @@ func TestDownload_Save(t *testing.T) {
 		asserts.Equal("123", download.StatusInfo.Gid)
 	}
 
-	// 失败
+	// 失敗
 	{
 		mock.ExpectBegin()
 		mock.ExpectExec("UPDATE(.+)").WillReturnError(errors.New("error"))
@@ -123,7 +123,7 @@ func TestGetDownloadByGid(t *testing.T) {
 func TestDownload_GetOwner(t *testing.T) {
 	asserts := assert.New(t)
 
-	// 已经有User对象
+	// 已經有User物件
 	{
 		download := &Download{User: &User{Nick: "nick"}}
 		user := download.GetOwner()
@@ -131,7 +131,7 @@ func TestDownload_GetOwner(t *testing.T) {
 		asserts.Equal("nick", user.Nick)
 	}
 
-	// 无User对象
+	// 無User物件
 	{
 		download := &Download{UserID: 3}
 		mock.ExpectQuery("SELECT(.+)").WillReturnRows(sqlmock.NewRows([]string{"nick"}).AddRow("nick"))
@@ -153,7 +153,7 @@ func TestGetDownloadsByStatusAndUser(t *testing.T) {
 		asserts.Len(res, 2)
 	}
 
-	// 列出全部,分页
+	// 列出全部,分頁
 	{
 		mock.ExpectQuery("SELECT(.+)DESC(.+)").WithArgs(1, 1, 2).WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(2).AddRow(3))
 		res := GetDownloadsByStatusAndUser(2, 1, 1, 2)

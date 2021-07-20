@@ -20,7 +20,7 @@ func TestFileSystem_IsFileExist(t *testing.T) {
 	// 存在
 	{
 		path := "/1.txt"
-		// 根目录
+		// 根目錄
 		mock.ExpectQuery("SELECT(.+)").
 			WithArgs(1).
 			WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
@@ -34,7 +34,7 @@ func TestFileSystem_IsFileExist(t *testing.T) {
 	// 文件不存在
 	{
 		path := "/1.txt"
-		// 根目录
+		// 根目錄
 		mock.ExpectQuery("SELECT(.+)").
 			WithArgs(1).
 			WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
@@ -44,10 +44,10 @@ func TestFileSystem_IsFileExist(t *testing.T) {
 		asserts.False(exist)
 	}
 
-	// 父目录不存在
+	// 父目錄不存在
 	{
 		path := "/1.txt"
-		// 根目录
+		// 根目錄
 		mock.ExpectQuery("SELECT(.+)").
 			WithArgs(1).
 			WillReturnRows(sqlmock.NewRows([]string{"id"}))
@@ -65,10 +65,10 @@ func TestFileSystem_IsPathExist(t *testing.T) {
 		},
 	}}
 
-	// 查询根目录
+	// 查詢根目錄
 	{
 		path := "/"
-		// 根目录
+		// 根目錄
 		mock.ExpectQuery("SELECT(.+)").
 			WithArgs(1).
 			WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
@@ -78,10 +78,10 @@ func TestFileSystem_IsPathExist(t *testing.T) {
 		asserts.Equal(uint(1), folder.ID)
 	}
 
-	// 深层路径
+	// 深層路徑
 	{
 		path := "/1/2/3"
-		// 根目录
+		// 根目錄
 		mock.ExpectQuery("SELECT(.+)").
 			WithArgs(1).
 			WillReturnRows(sqlmock.NewRows([]string{"id", "owner_id"}).AddRow(1, 1))
@@ -103,7 +103,7 @@ func TestFileSystem_IsPathExist(t *testing.T) {
 		asserts.Equal(uint(4), folder.ID)
 	}
 
-	// 深层路径 重设根目录为/1
+	// 深層路徑 重設根目錄為/1
 	{
 		path := "/2/3"
 		fs.Root = &model.Folder{Name: "1", Model: gorm.Model{ID: 2}, OwnerID: 1}
@@ -122,10 +122,10 @@ func TestFileSystem_IsPathExist(t *testing.T) {
 		fs.Root = nil
 	}
 
-	// 深层 不存在
+	// 深層 不存在
 	{
 		path := "/1/2/3"
-		// 根目录
+		// 根目錄
 		mock.ExpectQuery("SELECT(.+)").
 			WithArgs(1).
 			WillReturnRows(sqlmock.NewRows([]string{"id", "owner_id"}).AddRow(1, 1))

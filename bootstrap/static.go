@@ -25,10 +25,10 @@ type staticVersion struct {
 	Version string `json:"version"`
 }
 
-// StaticFS 内置静态文件资源
+// StaticFS 內建靜態文件資源
 var StaticFS static.ServeFileSystem
 
-// Open 打开文件
+// Open 打開文件
 func (b *GinFS) Open(name string) (http.File, error) {
 	return b.FS.Open(name)
 }
@@ -43,30 +43,30 @@ func (b *GinFS) Exists(prefix string, filepath string) bool {
 
 }
 
-// InitStatic 初始化静态资源文件
+// InitStatic 初始化靜態資來源文件
 func InitStatic() {
 	var err error
 
 	if util.Exists(util.RelativePath(StaticFolder)) {
-		util.Log().Info("检测到 statics 目录存在，将使用此目录下的静态资源文件")
+		util.Log().Info("檢測到 statics 目錄存在，將使用此目錄下的靜態資來源文件")
 		StaticFS = static.LocalFile(util.RelativePath("statics"), false)
 
-		// 检查静态资源的版本
+		// 檢查靜態資源的版本
 		f, err := StaticFS.Open("version.json")
 		if err != nil {
-			util.Log().Warning("静态资源版本标识文件不存在，请重新构建或删除 statics 目录")
+			util.Log().Warning("靜態資源版本標識文件不存在，請重新構建或刪除 statics 目錄")
 			return
 		}
 
 		b, err := ioutil.ReadAll(f)
 		if err != nil {
-			util.Log().Warning("无法读取静态资源文件版本，请重新构建或删除 statics 目录")
+			util.Log().Warning("無法讀取靜態資來源文件版本，請重新構建或刪除 statics 目錄")
 			return
 		}
 
 		var v staticVersion
 		if err := json.Unmarshal(b, &v); err != nil {
-			util.Log().Warning("无法解析静态资源文件版本, %s", err)
+			util.Log().Warning("無法解析靜態資來源文件版本, %s", err)
 			return
 		}
 
@@ -76,12 +76,12 @@ func InitStatic() {
 		}
 
 		if v.Name != staticName {
-			util.Log().Warning("静态资源版本不匹配，请重新构建或删除 statics 目录")
+			util.Log().Warning("靜態資源版本不匹配，請重新構建或刪除 statics 目錄")
 			return
 		}
 
 		if v.Version != conf.RequiredStaticVersion {
-			util.Log().Warning("静态资源版本不匹配 [当前 %s, 需要: %s]，请重新构建或删除 statics 目录", v.Version, conf.RequiredStaticVersion)
+			util.Log().Warning("靜態資源版本不匹配 [目前 %s, 需要: %s]，請重新構建或刪除 statics 目錄", v.Version, conf.RequiredStaticVersion)
 			return
 		}
 
@@ -89,61 +89,61 @@ func InitStatic() {
 		StaticFS = &GinFS{}
 		StaticFS.(*GinFS).FS, err = fs.New()
 		if err != nil {
-			util.Log().Panic("无法初始化静态资源, %s", err)
+			util.Log().Panic("無法初始化靜態資源, %s", err)
 		}
 	}
 
 }
 
-// Eject 抽离内置静态资源
+// Eject 抽離內建靜態資源
 func Eject() {
 	staticFS, err := fs.New()
 	if err != nil {
-		util.Log().Panic("无法初始化静态资源, %s", err)
+		util.Log().Panic("無法初始化靜態資源, %s", err)
 	}
 
 	root, err := staticFS.Open("/")
 	if err != nil {
-		util.Log().Panic("根目录不存在, %s", err)
+		util.Log().Panic("根目錄不存在, %s", err)
 	}
 
 	var walk func(relPath string, object http.File)
 	walk = func(relPath string, object http.File) {
 		stat, err := object.Stat()
 		if err != nil {
-			util.Log().Error("无法获取[%s]的信息, %s, 跳过...", relPath, err)
+			util.Log().Error("無法獲取[%s]的訊息, %s, 跳過...", relPath, err)
 			return
 		}
 
 		if !stat.IsDir() {
-			// 写入文件
+			// 寫入檔案
 			out, err := util.CreatNestedFile(util.RelativePath(StaticFolder + relPath))
 			defer out.Close()
 
 			if err != nil {
-				util.Log().Error("无法创建文件[%s], %s, 跳过...", relPath, err)
+				util.Log().Error("無法建立文件[%s], %s, 跳過...", relPath, err)
 				return
 			}
 
-			util.Log().Info("导出 [%s]...", relPath)
+			util.Log().Info("匯出 [%s]...", relPath)
 			if _, err := io.Copy(out, object); err != nil {
-				util.Log().Error("无法写入文件[%s], %s, 跳过...", relPath, err)
+				util.Log().Error("無法寫入檔案[%s], %s, 跳過...", relPath, err)
 				return
 			}
 		} else {
-			// 列出目录
+			// 列出目錄
 			objects, err := object.Readdir(0)
 			if err != nil {
-				util.Log().Error("无法步入子目录[%s], %s, 跳过...", relPath, err)
+				util.Log().Error("無法步入子目錄[%s], %s, 跳過...", relPath, err)
 				return
 			}
 
-			// 递归遍历子目录
+			// 遞迴遍歷子目錄
 			for _, newObject := range objects {
 				newPath := path.Join(relPath, newObject.Name())
 				newRoot, err := staticFS.Open(newPath)
 				if err != nil {
-					util.Log().Error("无法打开对象[%s], %s, 跳过...", newPath, err)
+					util.Log().Error("無法打開物件[%s], %s, 跳過...", newPath, err)
 					continue
 				}
 				walk(newPath, newRoot)
@@ -152,7 +152,7 @@ func Eject() {
 		}
 	}
 
-	util.Log().Info("开始导出内置静态资源...")
+	util.Log().Info("開始匯出內建靜態資源...")
 	walk("/", root)
-	util.Log().Info("内置静态资源导出完成")
+	util.Log().Info("內建靜態資源匯出完成")
 }

@@ -9,11 +9,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// 测试Init日志路径错误
+// 測試Init日誌路徑錯誤
 func TestInitPanic(t *testing.T) {
 	asserts := assert.New(t)
 
-	// 日志路径不存在时
+	// 日誌路徑不存在時
 	asserts.NotPanics(func() {
 		Init("not/exist/path/conf.ini")
 	})
@@ -22,7 +22,7 @@ func TestInitPanic(t *testing.T) {
 
 }
 
-// TestInitDelimiterNotFound 日志路径存在但 Key 格式错误时
+// TestInitDelimiterNotFound 日誌路徑存在但 Key 格式錯誤時
 func TestInitDelimiterNotFound(t *testing.T) {
 	asserts := assert.New(t)
 	testCase := `[Database]
@@ -42,7 +42,7 @@ TablePrefix = v3_`
 	})
 }
 
-// TestInitNoPanic 日志路径存在且合法时
+// TestInitNoPanic 日誌路徑存在且合法時
 func TestInitNoPanic(t *testing.T) {
 	asserts := assert.New(t)
 	testCase := `
@@ -70,7 +70,7 @@ TablePrefix = v3_`
 func TestMapSection(t *testing.T) {
 	asserts := assert.New(t)
 
-	//正常情况
+	//正常情況
 	testCase := `
 [System]
 Listen = 3000

@@ -48,9 +48,9 @@ func (h *Handler) stripPrefix(p string, uid uint) (string, int, error) {
 	return p, http.StatusNotFound, errPrefixMismatch
 }
 
-// isPathExist 路径是否存在
+// isPathExist 路徑是否存在
 func isPathExist(ctx context.Context, fs *filesystem.FileSystem, path string) (bool, FileInfo) {
-	// 尝试目录
+	// 嘗試目錄
 	if ok, folder := fs.IsPathExist(path); ok {
 		return ok, folder
 	}
@@ -65,7 +65,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request, fs *filesyst
 	if h.LockSystem == nil {
 		status, err = http.StatusInternalServerError, errNoLockSystem
 	} else {
-		// 检查并新建LockSystem
+		// 檢查並建立LockSystem
 		if _, ok := h.LockSystem[fs.User.ID]; !ok {
 			h.LockSystem[fs.User.ID] = NewMemLS()
 		}
@@ -255,7 +255,7 @@ func (h *Handler) handleGetHeadPost(w http.ResponseWriter, r *http.Request, fs *
 
 	if !rs.Redirect {
 		defer rs.Content.Close()
-		// 获取文件内容
+		// 獲取文件內容
 		http.ServeContent(w, r, reqPath, fs.FileTarget[0].UpdatedAt, rs.Content)
 		return 0, nil
 	}
@@ -281,7 +281,7 @@ func (h *Handler) handleDelete(w http.ResponseWriter, r *http.Request, fs *files
 
 	ctx := r.Context()
 
-	// 尝试作为文件删除
+	// 嘗試作為文件刪除
 	if ok, file := fs.IsFileExist(reqPath); ok {
 		if err := fs.Delete(ctx, []uint{}, []uint{file.ID}, false); err != nil {
 			return http.StatusMethodNotAllowed, err
@@ -289,7 +289,7 @@ func (h *Handler) handleDelete(w http.ResponseWriter, r *http.Request, fs *files
 		return http.StatusNoContent, nil
 	}
 
-	// 尝试作为目录删除
+	// 嘗試作為目錄刪除
 	if ok, folder := fs.IsPathExist(reqPath); ok {
 		if err := fs.Delete(ctx, []uint{folder.ID}, []uint{}, false); err != nil {
 			return http.StatusMethodNotAllowed, err
@@ -333,15 +333,15 @@ func (h *Handler) handlePut(w http.ResponseWriter, r *http.Request, fs *filesyst
 		VirtualPath: filePath,
 	}
 
-	// 判断文件是否已存在
+	// 判斷文件是否已存在
 	exist, originFile := fs.IsFileExist(reqPath)
 	if exist {
-		// 已存在，为更新操作
+		// 已存在，為更新操作
 
-		// 检查此文件是否有软链接
+		// 檢查此文件是否有軟連結
 		fileList, err := model.RemoveFilesWithSoftLinks([]model.File{*originFile})
 		if err == nil && len(fileList) == 0 {
-			// 如果包含软连接，应重新生成新文件副本，并更新source_name
+			// 如果包含軟連接，應重新生成新文件副本，並更新source_name
 			originFile.SourceName = fs.GenerateSavePath(ctx, fileData)
 			fs.Use("AfterUpload", filesystem.HookUpdateSourceName)
 			fs.Use("AfterUploadCanceled", filesystem.HookUpdateSourceName)
@@ -361,7 +361,7 @@ func (h *Handler) handlePut(w http.ResponseWriter, r *http.Request, fs *filesyst
 		fs.Use("AfterValidateFailed", filesystem.HookGiveBackCapacity)
 		ctx = context.WithValue(ctx, fsctx.FileModelCtx, *originFile)
 	} else {
-		// 给文件系统分配钩子
+		// 給文件系統分配鉤子
 		fs.Use("BeforeUpload", filesystem.HookValidateFile)
 		fs.Use("BeforeUpload", filesystem.HookValidateCapacity)
 		fs.Use("AfterUploadCanceled", filesystem.HookDeleteTempFile)
@@ -372,11 +372,11 @@ func (h *Handler) handlePut(w http.ResponseWriter, r *http.Request, fs *filesyst
 		fs.Use("AfterValidateFailed", filesystem.HookGiveBackCapacity)
 		fs.Use("AfterUploadFailed", filesystem.HookGiveBackCapacity)
 
-		// 禁止覆盖
+		// 禁止覆蓋
 		ctx = context.WithValue(ctx, fsctx.DisableOverwrite, true)
 	}
 
-	// 执行上传
+	// 執行上傳
 	err = fs.Upload(ctx, fileData)
 	if err != nil {
 		return http.StatusMethodNotAllowed, err
@@ -487,8 +487,8 @@ func (h *Handler) handleCopyMove(w http.ResponseWriter, r *http.Request, fs *fil
 		return copyFiles(ctx, fs, target, dst, r.Header.Get("Overwrite") != "F", depth, 0)
 	}
 
-	// windows下，某些情况下（网盘根目录下）Office保存文件时附带的锁token只包含源文件，
-	// 此处暂时去除了对dst锁的检查
+	// windows下，某些情況下（網路硬碟根目錄下）Office儲存文件時附帶的鎖token只包含來源文件，
+	// 此處暫時去除了對dst鎖的檢查
 	release, status, err := h.confirmLocks(r, src, "", fs)
 	if err != nil {
 		return status, err

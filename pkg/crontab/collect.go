@@ -12,19 +12,19 @@ import (
 )
 
 func garbageCollect() {
-	// 清理打包下载产生的临时文件
+	// 清理打包下載產生的暫存檔
 	collectArchiveFile()
 
-	// 清理过期的内置内存缓存
+	// 清理過期的內建記憶體快取
 	if store, ok := cache.Store.(*cache.MemoStore); ok {
 		collectCache(store)
 	}
 
-	util.Log().Info("定时任务 [cron_garbage_collect] 执行完毕")
+	util.Log().Info("定時任務 [cron_garbage_collect] 執行完畢")
 }
 
 func collectArchiveFile() {
-	// 读取有效期、目录设置
+	// 讀取有效期、目錄設定
 	tempPath := util.RelativePath(model.GetSettingByName("temp_path"))
 	expires := model.GetIntSetting("download_timeout", 30)
 
@@ -34,22 +34,22 @@ func collectArchiveFile() {
 		if err == nil && !info.IsDir() &&
 			strings.HasPrefix(filepath.Base(path), "archive_") &&
 			time.Now().Sub(info.ModTime()).Seconds() > float64(expires) {
-			util.Log().Debug("删除过期打包下载临时文件 [%s]", path)
-			// 删除符合条件的文件
+			util.Log().Debug("刪除過期打包下載暫存檔 [%s]", path)
+			// 刪除符合條件的文件
 			if err := os.Remove(path); err != nil {
-				util.Log().Debug("临时文件 [%s] 删除失败 , %s", path, err)
+				util.Log().Debug("暫存檔 [%s] 刪除失敗 , %s", path, err)
 			}
 		}
 		return nil
 	})
 
 	if err != nil {
-		util.Log().Debug("[定时任务] 无法列取临时打包目录")
+		util.Log().Debug("[定時任務] 無法列取臨時打包目錄")
 	}
 
 }
 
 func collectCache(store *cache.MemoStore) {
-	util.Log().Debug("清理内存缓存")
+	util.Log().Debug("清理記憶體快取")
 	store.GarbageCollect()
 }

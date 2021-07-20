@@ -26,14 +26,14 @@ import (
 	cossdk "github.com/tencentyun/cos-go-sdk-v5"
 )
 
-// FSPool 文件系统资源池
+// FSPool 文件系統資源池
 var FSPool = sync.Pool{
 	New: func() interface{} {
 		return &FileSystem{}
 	},
 }
 
-// FileHeader 上传来的文件数据处理器
+// FileHeader 上傳來的文件資料處理器
 type FileHeader interface {
 	io.Reader
 	io.Closer
@@ -43,79 +43,79 @@ type FileHeader interface {
 	GetVirtualPath() string
 }
 
-// Handler 存储策略适配器
+// Handler 儲存策略適配器
 type Handler interface {
-	// 上传文件, dst为文件存储路径，size 为文件大小。上下文关闭
-	// 时，应取消上传并清理临时文件
+	// 上傳文件, dst為文件儲存路徑，size 為檔案大小。上下文關閉
+	// 時，應取消上傳並清理暫存檔
 	Put(ctx context.Context, file io.ReadCloser, dst string, size uint64) error
 
-	// 删除一个或多个给定路径的文件，返回删除失败的文件路径列表及错误
+	// 刪除一個或多個給定路徑的文件，返回刪除失敗的文件路徑列表及錯誤
 	Delete(ctx context.Context, files []string) ([]string, error)
 
-	// 获取文件内容
+	// 獲取文件內容
 	Get(ctx context.Context, path string) (response.RSCloser, error)
 
-	// 获取缩略图，可直接在ContentResponse中返回文件数据流，也可指
-	// 定为重定向
+	// 獲取縮圖，可直接在ContentResponse中返回文件資料流，也可指
+	// 定為重定向
 	Thumb(ctx context.Context, path string) (*response.ContentResponse, error)
 
-	// 获取外链/下载地址，
-	// url - 站点本身地址,
-	// isDownload - 是否直接下载
+	// 獲取外鏈/下載網址，
+	// url - 站點本身地址,
+	// isDownload - 是否直接下載
 	Source(ctx context.Context, path string, url url.URL, ttl int64, isDownload bool, speed int) (string, error)
 
-	// Token 获取有效期为ttl的上传凭证和签名，同时回调会话有效期为sessionTTL
+	// Token 獲取有效期為ttl的上傳憑證和簽名，同時回調工作階段有效期為sessionTTL
 	Token(ctx context.Context, ttl int64, callbackKey string) (serializer.UploadCredential, error)
 
-	// List 递归列取远程端path路径下文件、目录，不包含path本身，
-	// 返回的对象路径以path作为起始根目录.
-	// recursive - 是否递归列出
+	// List 遞迴列取遠端端path路徑下文件、目錄，不包含path本身，
+	// 返回的物件路徑以path作為起始根目錄.
+	// recursive - 是否遞迴列出
 	List(ctx context.Context, path string, recursive bool) ([]response.Object, error)
 }
 
-// FileSystem 管理文件的文件系统
+// FileSystem 管理文件的文件系統
 type FileSystem struct {
-	// 文件系统所有者
+	// 文件系統所有者
 	User *model.User
-	// 操作文件使用的存储策略
+	// 操作文件使用的儲存策略
 	Policy *model.Policy
-	// 当前正在处理的文件对象
+	// 目前正在處理的文件物件
 	FileTarget []model.File
-	// 当前正在处理的目录对象
+	// 目前正在處理的目錄物件
 	DirTarget []model.Folder
-	// 相对根目录
+	// 相對根目錄
 	Root *model.Folder
-	// 互斥锁
+	// 互斥鎖
 	Lock sync.Mutex
 
 	/*
-	   钩子函数
+	   鉤子函數
 	*/
 	Hooks map[string][]Hook
 
 	/*
-	   文件系统处理适配器
+	   文件系統處理適配器
 	*/
 	Handler Handler
 
-	// 回收锁
+	// 回收鎖
 	recycleLock sync.Mutex
 }
 
-// getEmptyFS 从pool中获取新的FileSystem
+// getEmptyFS 從pool中獲取新的FileSystem
 func getEmptyFS() *FileSystem {
 	fs := FSPool.Get().(*FileSystem)
 	return fs
 }
 
-// Recycle 回收FileSystem资源
+// Recycle 回收FileSystem資源
 func (fs *FileSystem) Recycle() {
 	fs.recycleLock.Lock()
 	fs.reset()
 	FSPool.Put(fs)
 }
 
-// reset 重设文件系统，以便回收使用
+// reset 重設文件系統，以便回收使用
 func (fs *FileSystem) reset() {
 	fs.User = nil
 	fs.CleanTargets()
@@ -127,23 +127,23 @@ func (fs *FileSystem) reset() {
 	fs.recycleLock = sync.Mutex{}
 }
 
-// NewFileSystem 初始化一个文件系统
+// NewFileSystem 初始化一個文件系統
 func NewFileSystem(user *model.User) (*FileSystem, error) {
 	fs := getEmptyFS()
 	fs.User = user
-	// 分配存储策略适配器
+	// 分配儲存策略適配器
 	err := fs.DispatchHandler()
 
-	// TODO 分配默认钩子
+	// TODO 分配預設鉤子
 	return fs, err
 }
 
-// NewAnonymousFileSystem 初始化匿名文件系统
+// NewAnonymousFileSystem 初始化匿名文件系統
 func NewAnonymousFileSystem() (*FileSystem, error) {
 	fs := getEmptyFS()
 	fs.User = &model.User{}
 
-	// 如果是主机模式下，则为匿名文件系统分配游客用户组
+	// 如果是主機模式下，則為匿名文件系統分配遊客使用者群組
 	if conf.SystemConfig.Mode == "master" {
 		anonymousGroup, err := model.GetGroupByID(3)
 		if err != nil {
@@ -151,21 +151,21 @@ func NewAnonymousFileSystem() (*FileSystem, error) {
 		}
 		fs.User.Group = anonymousGroup
 	} else {
-		// 从机模式下，分配本地策略处理器
+		// 從機模式下，分配本機策略處理器
 		fs.Handler = local.Driver{}
 	}
 
 	return fs, nil
 }
 
-// DispatchHandler 根据存储策略分配文件适配器
-// TODO 完善测试
+// DispatchHandler 根據儲存策略分配文件適配器
+// TODO 完善測試
 func (fs *FileSystem) DispatchHandler() error {
 	var policyType string
 	var currentPolicy *model.Policy
 
 	if fs.Policy == nil {
-		// 如果没有具体指定，就是用用户当前存储策略
+		// 如果沒有具體指定，就是用使用者目前儲存策略
 		policyType = fs.User.Policy.Type
 		currentPolicy = &fs.User.Policy
 	} else {
@@ -236,7 +236,7 @@ func (fs *FileSystem) DispatchHandler() error {
 	}
 }
 
-// NewFileSystemFromContext 从gin.Context创建文件系统
+// NewFileSystemFromContext 從gin.Context建立文件系統
 func NewFileSystemFromContext(c *gin.Context) (*FileSystem, error) {
 	user, exist := c.Get("user")
 	if !exist {
@@ -246,21 +246,21 @@ func NewFileSystemFromContext(c *gin.Context) (*FileSystem, error) {
 	return fs, err
 }
 
-// NewFileSystemFromCallback 从gin.Context创建回调用文件系统
+// NewFileSystemFromCallback 從gin.Context建立回呼叫文件系統
 func NewFileSystemFromCallback(c *gin.Context) (*FileSystem, error) {
 	fs, err := NewFileSystemFromContext(c)
 	if err != nil {
 		return nil, err
 	}
 
-	// 获取回调会话
+	// 獲取回調工作階段
 	callbackSessionRaw, ok := c.Get("callbackSession")
 	if !ok {
-		return nil, errors.New("找不到回调会话")
+		return nil, errors.New("找不到回調工作階段")
 	}
 	callbackSession := callbackSessionRaw.(*serializer.UploadSession)
 
-	// 重新指向上传策略
+	// 重新指向上傳策略
 	policy, err := model.GetPolicyByID(callbackSession.PolicyID)
 	if err != nil {
 		return nil, err
@@ -272,7 +272,7 @@ func NewFileSystemFromCallback(c *gin.Context) (*FileSystem, error) {
 	return fs, err
 }
 
-// SetTargetFile 设置当前处理的目标文件
+// SetTargetFile 設定目前處理的目標文件
 func (fs *FileSystem) SetTargetFile(files *[]model.File) {
 	if len(fs.FileTarget) == 0 {
 		fs.FileTarget = *files
@@ -282,7 +282,7 @@ func (fs *FileSystem) SetTargetFile(files *[]model.File) {
 
 }
 
-// SetTargetDir 设置当前处理的目标目录
+// SetTargetDir 設定目前處理的目標目錄
 func (fs *FileSystem) SetTargetDir(dirs *[]model.Folder) {
 	if len(fs.DirTarget) == 0 {
 		fs.DirTarget = *dirs
@@ -292,7 +292,7 @@ func (fs *FileSystem) SetTargetDir(dirs *[]model.Folder) {
 
 }
 
-// SetTargetFileByIDs 根据文件ID设置目标文件，忽略用户ID
+// SetTargetFileByIDs 根據文件ID設定目標文件，忽略使用者ID
 func (fs *FileSystem) SetTargetFileByIDs(ids []uint) error {
 	files, err := model.GetFilesByIDs(ids, 0)
 	if err != nil || len(files) == 0 {
@@ -302,8 +302,8 @@ func (fs *FileSystem) SetTargetFileByIDs(ids []uint) error {
 	return nil
 }
 
-// SetTargetByInterface 根据 model.File 或者 model.Folder 设置目标对象
-// TODO 测试
+// SetTargetByInterface 根據 model.File 或者 model.Folder 設定目標物件
+// TODO 測試
 func (fs *FileSystem) SetTargetByInterface(target interface{}) error {
 	if file, ok := target.(*model.File); ok {
 		fs.SetTargetFile(&[]model.File{*file})
@@ -317,7 +317,7 @@ func (fs *FileSystem) SetTargetByInterface(target interface{}) error {
 	return ErrObjectNotExist
 }
 
-// CleanTargets 清空目标
+// CleanTargets 清空目標
 func (fs *FileSystem) CleanTargets() {
 	fs.FileTarget = fs.FileTarget[:0]
 	fs.DirTarget = fs.DirTarget[:0]

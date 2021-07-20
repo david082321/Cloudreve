@@ -11,7 +11,7 @@ func TestUserStorageCalibration_Run(t *testing.T) {
 	asserts := assert.New(t)
 	script := UserStorageCalibration(0)
 
-	// 容量异常
+	// 容量異常
 	{
 		mock.ExpectQuery("SELECT(.+)users(.+)").
 			WillReturnRows(sqlmock.NewRows([]string{"id", "email", "storage"}).AddRow(1, "a@a.com", 10))

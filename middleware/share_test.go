@@ -27,10 +27,10 @@ func TestShareAvailable(t *testing.T) {
 		asserts.True(c.IsAborted())
 	}
 
-	// 通过
+	// 通過
 	{
 		conf.SystemConfig.HashIDSalt = ""
-		// 用户组
+		// 使用者群組
 		mock.ExpectQuery("SELECT(.+)groups(.+)").WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(3))
 		mock.ExpectQuery("SELECT(.+)shares(.+)").
 			WillReturnRows(
@@ -56,14 +56,14 @@ func TestShareCanPreview(t *testing.T) {
 	rec := httptest.NewRecorder()
 	testFunc := ShareCanPreview()
 
-	// 无分享上下文
+	// 無分享上下文
 	{
 		c, _ := gin.CreateTestContext(rec)
 		testFunc(c)
 		asserts.True(c.IsAborted())
 	}
 
-	// 可以预览
+	// 可以預覽
 	{
 		c, _ := gin.CreateTestContext(rec)
 		c.Set("share", &model.Share{PreviewEnabled: true})
@@ -71,7 +71,7 @@ func TestShareCanPreview(t *testing.T) {
 		asserts.False(c.IsAborted())
 	}
 
-	// 未开启预览
+	// 未開啟預覽
 	{
 		c, _ := gin.CreateTestContext(rec)
 		c.Set("share", &model.Share{PreviewEnabled: false})
@@ -85,14 +85,14 @@ func TestCheckShareUnlocked(t *testing.T) {
 	rec := httptest.NewRecorder()
 	testFunc := CheckShareUnlocked()
 
-	// 无分享上下文
+	// 無分享上下文
 	{
 		c, _ := gin.CreateTestContext(rec)
 		testFunc(c)
 		asserts.True(c.IsAborted())
 	}
 
-	// 无密码
+	// 無密碼
 	{
 		c, _ := gin.CreateTestContext(rec)
 		c.Set("share", &model.Share{})
@@ -107,7 +107,7 @@ func TestBeforeShareDownload(t *testing.T) {
 	rec := httptest.NewRecorder()
 	testFunc := BeforeShareDownload()
 
-	// 无分享上下文
+	// 無分享上下文
 	{
 		c, _ := gin.CreateTestContext(rec)
 		testFunc(c)
@@ -119,7 +119,7 @@ func TestBeforeShareDownload(t *testing.T) {
 		asserts.True(c.IsAborted())
 	}
 
-	// 用户不能下载
+	// 使用者不能下載
 	{
 		c, _ := gin.CreateTestContext(rec)
 		c.Set("share", &model.Share{})
@@ -130,7 +130,7 @@ func TestBeforeShareDownload(t *testing.T) {
 		asserts.True(c.IsAborted())
 	}
 
-	// 可以下载
+	// 可以下載
 	{
 		c, _ := gin.CreateTestContext(rec)
 		c.Set("share", &model.Share{})
@@ -150,7 +150,7 @@ func TestShareOwner(t *testing.T) {
 	rec := httptest.NewRecorder()
 	testFunc := ShareOwner()
 
-	// 未登录
+	// 未登入
 	{
 		c, _ := gin.CreateTestContext(rec)
 		testFunc(c)
@@ -162,7 +162,7 @@ func TestShareOwner(t *testing.T) {
 		asserts.True(c.IsAborted())
 	}
 
-	// 非用户所创建分享
+	// 非使用者所建立分享
 	{
 		c, _ := gin.CreateTestContext(rec)
 		testFunc(c)

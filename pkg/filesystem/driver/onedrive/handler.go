@@ -20,20 +20,20 @@ import (
 	"github.com/cloudreve/Cloudreve/v3/pkg/serializer"
 )
 
-// Driver OneDrive 适配器
+// Driver OneDrive 適配器
 type Driver struct {
 	Policy     *model.Policy
 	Client     *Client
 	HTTPClient request.Client
 }
 
-// List 列取项目
+// List 列取項目
 func (handler Driver) List(ctx context.Context, base string, recursive bool) ([]response.Object, error) {
 	base = strings.TrimPrefix(base, "/")
-	// 列取子项目
+	// 列取子項目
 	objects, _ := handler.Client.ListChildren(ctx, base)
 
-	// 获取真实的列取起始根目录
+	// 獲取真實的列取起始根目錄
 	rootPath := base
 	if realBase, ok := ctx.Value(fsctx.PathCtx).(string); ok {
 		rootPath = realBase
@@ -41,7 +41,7 @@ func (handler Driver) List(ctx context.Context, base string, recursive bool) ([]
 		ctx = context.WithValue(ctx, fsctx.PathCtx, base)
 	}
 
-	// 整理结果
+	// 整理結果
 	res := make([]response.Object, 0, len(objects))
 	for _, object := range objects {
 		source := path.Join(base, object.Name)
@@ -59,7 +59,7 @@ func (handler Driver) List(ctx context.Context, base string, recursive bool) ([]
 		})
 	}
 
-	// 递归列取子目录
+	// 遞迴列取子目錄
 	if recursive {
 		for _, object := range objects {
 			if object.Folder != nil {
@@ -72,9 +72,9 @@ func (handler Driver) List(ctx context.Context, base string, recursive bool) ([]
 	return res, nil
 }
 
-// Get 获取文件
+// Get 獲取文件
 func (handler Driver) Get(ctx context.Context, path string) (response.RSCloser, error) {
-	// 获取文件源地址
+	// 獲取文件源地址
 	downloadURL, err := handler.Source(
 		ctx,
 		path,
@@ -87,7 +87,7 @@ func (handler Driver) Get(ctx context.Context, path string) (response.RSCloser, 
 		return nil, err
 	}
 
-	// 获取文件数据流
+	// 獲取文件資料流
 	resp, err := handler.HTTPClient.Request(
 		"GET",
 		downloadURL,
@@ -101,7 +101,7 @@ func (handler Driver) Get(ctx context.Context, path string) (response.RSCloser, 
 
 	resp.SetFirstFakeChunk()
 
-	// 尝试自主获取文件大小
+	// 嘗試自主獲取檔案大小
 	if file, ok := ctx.Value(fsctx.FileModelCtx).(model.File); ok {
 		resp.SetContentLength(int64(file.Size))
 	}
@@ -109,31 +109,31 @@ func (handler Driver) Get(ctx context.Context, path string) (response.RSCloser, 
 	return resp, nil
 }
 
-// Put 将文件流保存到指定目录
+// Put 將文件流儲存到指定目錄
 func (handler Driver) Put(ctx context.Context, file io.ReadCloser, dst string, size uint64) error {
 	defer file.Close()
 	return handler.Client.Upload(ctx, dst, int(size), file)
 }
 
-// Delete 删除一个或多个文件，
-// 返回未删除的文件，及遇到的最后一个错误
+// Delete 刪除一個或多個文件，
+// 返回未刪除的文件，及遇到的最後一個錯誤
 func (handler Driver) Delete(ctx context.Context, files []string) ([]string, error) {
 	return handler.Client.BatchDelete(ctx, files)
 }
 
-// Thumb 获取文件缩略图
+// Thumb 獲取文件縮圖
 func (handler Driver) Thumb(ctx context.Context, path string) (*response.ContentResponse, error) {
 	var (
 		thumbSize = [2]uint{400, 300}
 		ok        = false
 	)
 	if thumbSize, ok = ctx.Value(fsctx.ThumbSizeCtx).([2]uint); !ok {
-		return nil, errors.New("无法获取缩略图尺寸设置")
+		return nil, errors.New("無法獲取縮圖尺寸設定")
 	}
 
 	res, err := handler.Client.GetThumbURL(ctx, path, thumbSize[0], thumbSize[1])
 	if err != nil {
-		// 如果出现异常，就清空文件的pic_info
+		// 如果出現異常，就清空文件的pic_info
 		if file, ok := ctx.Value(fsctx.FileModelCtx).(model.File); ok {
 			file.UpdatePicInfo("")
 		}
@@ -144,7 +144,7 @@ func (handler Driver) Thumb(ctx context.Context, path string) (*response.Content
 	}, err
 }
 
-// Source 获取外链URL
+// Source 獲取外鏈URL
 func (handler Driver) Source(
 	ctx context.Context,
 	path string,
@@ -156,7 +156,7 @@ func (handler Driver) Source(
 	cacheKey := fmt.Sprintf("onedrive_source_%d_%s", handler.Policy.ID, path)
 	if file, ok := ctx.Value(fsctx.FileModelCtx).(model.File); ok {
 		cacheKey = fmt.Sprintf("onedrive_source_file_%d_%d", file.UpdatedAt.Unix(), file.ID)
-		// 如果是永久链接，则返回签名后的中转外链
+		// 如果是永久連結，則返回簽名後的中轉外鏈
 		if ttl == 0 {
 			signedURI, err := auth.SignURI(
 				auth.General,
@@ -171,15 +171,15 @@ func (handler Driver) Source(
 
 	}
 
-	// 尝试从缓存中查找
+	// 嘗試從快取中尋找
 	if cachedURL, ok := cache.Get(cacheKey); ok {
 		return handler.replaceSourceHost(cachedURL.(string))
 	}
 
-	// 缓存不存在，重新获取
+	// 快取不存在，重新獲取
 	res, err := handler.Client.Meta(ctx, "", path)
 	if err == nil {
-		// 写入新的缓存
+		// 寫入新的快取
 		cache.Set(
 			cacheKey,
 			res.DownloadURL,
@@ -202,7 +202,7 @@ func (handler Driver) replaceSourceHost(origin string) (string, error) {
 			return "", err
 		}
 
-		// 替换反代地址
+		// 取代反代地址
 		source.Scheme = cdn.Scheme
 		source.Host = cdn.Host
 		return source.String(), nil
@@ -211,25 +211,25 @@ func (handler Driver) replaceSourceHost(origin string) (string, error) {
 	return origin, nil
 }
 
-// Token 获取上传会话URL
+// Token 獲取上傳工作階段URL
 func (handler Driver) Token(ctx context.Context, TTL int64, key string) (serializer.UploadCredential, error) {
 
-	// 读取上下文中生成的存储路径和文件大小
+	// 讀取上下文中生成的儲存路徑和檔案大小
 	savePath, ok := ctx.Value(fsctx.SavePathCtx).(string)
 	if !ok {
-		return serializer.UploadCredential{}, errors.New("无法获取存储路径")
+		return serializer.UploadCredential{}, errors.New("無法獲取儲存路徑")
 	}
 	fileSize, ok := ctx.Value(fsctx.FileSizeCtx).(uint64)
 	if !ok {
-		return serializer.UploadCredential{}, errors.New("无法获取文件大小")
+		return serializer.UploadCredential{}, errors.New("無法獲取檔案大小")
 	}
 
-	// 如果小于4MB，则由服务端中转
+	// 如果小於4MB，則由服務端中轉
 	if fileSize <= SmallFileSize {
 		return serializer.UploadCredential{}, nil
 	}
 
-	// 生成回调地址
+	// 生成回調地址
 	siteURL := model.GetSiteURL()
 	apiBaseURI, _ := url.Parse("/api/v3/callback/onedrive/finish/" + key)
 	apiURL := siteURL.ResolveReference(apiBaseURI)
@@ -239,7 +239,7 @@ func (handler Driver) Token(ctx context.Context, TTL int64, key string) (seriali
 		return serializer.UploadCredential{}, err
 	}
 
-	// 监控回调及上传
+	// 監控回調及上傳
 	go handler.Client.MonitorUpload(uploadURL, key, savePath, fileSize, TTL)
 
 	return serializer.UploadCredential{

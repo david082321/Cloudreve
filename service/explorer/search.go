@@ -11,15 +11,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// ItemSearchService 文件搜索服务
+// ItemSearchService 文件搜尋服務
 type ItemSearchService struct {
 	Type     string `uri:"type" binding:"required"`
 	Keywords string `uri:"keywords" binding:"required"`
 }
 
-// Search 执行搜索
+// Search 執行搜尋
 func (service *ItemSearchService) Search(c *gin.Context) serializer.Response {
-	// 创建文件系统
+	// 建立文件系統
 	fs, err := filesystem.NewFileSystemFromContext(c)
 	if err != nil {
 		return serializer.Err(serializer.CodePolicyNotAllowed, err.Error(), err)
@@ -50,19 +50,19 @@ func (service *ItemSearchService) Search(c *gin.Context) serializer.Response {
 				}
 			}
 		}
-		return serializer.Err(serializer.CodeNotFound, "标签不存在", nil)
+		return serializer.Err(serializer.CodeNotFound, "標籤不存在", nil)
 	default:
-		return serializer.ParamErr("未知搜索类型", nil)
+		return serializer.ParamErr("未知搜尋類型", nil)
 	}
 }
 
-// SearchKeywords 根据关键字搜索文件
+// SearchKeywords 根據關鍵字搜尋文件
 func (service *ItemSearchService) SearchKeywords(c *gin.Context, fs *filesystem.FileSystem, keywords ...interface{}) serializer.Response {
 	// 上下文
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	// 获取子项目
+	// 獲取子項目
 	objects, err := fs.Search(ctx, keywords...)
 	if err != nil {
 		return serializer.Err(serializer.CodeNotSet, err.Error(), err)

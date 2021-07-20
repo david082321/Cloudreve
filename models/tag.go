@@ -5,47 +5,47 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-// Tag 用户自定义标签
+// Tag 使用者自訂標籤
 type Tag struct {
 	gorm.Model
-	Name       string // 标签名
-	Icon       string // 图标标识
-	Color      string // 图标颜色
-	Type       int    // 标签类型（文件分类/目录直达）
-	Expression string `gorm:"type:text"` // 搜索表表达式/直达路径
-	UserID     uint   // 创建者ID
+	Name       string // 標籤名
+	Icon       string // 圖示標識
+	Color      string // 圖示顏色
+	Type       int    // 標籤類型（文件分類/目錄直達）
+	Expression string `gorm:"type:text"` // 搜尋表表達式/直達路徑
+	UserID     uint   // 建立者ID
 }
 
 const (
-	// FileTagType 文件分类标签
+	// FileTagType 文件分類標籤
 	FileTagType = iota
-	// DirectoryLinkType 目录快捷方式标签
+	// DirectoryLinkType 目錄捷徑標籤
 	DirectoryLinkType
 )
 
-// Create 创建标签记录
+// Create 建立標籤記錄
 func (tag *Tag) Create() (uint, error) {
 	if err := DB.Create(tag).Error; err != nil {
-		util.Log().Warning("无法插入离线下载记录, %s", err)
+		util.Log().Warning("無法插入離線下載記錄, %s", err)
 		return 0, err
 	}
 	return tag.ID, nil
 }
 
-// DeleteTagByID 根据给定ID和用户ID删除标签
+// DeleteTagByID 根據給定ID和使用者ID刪除標籤
 func DeleteTagByID(id, uid uint) error {
 	result := DB.Where("id = ? and user_id = ?", id, uid).Delete(&Tag{})
 	return result.Error
 }
 
-// GetTagsByUID 根据用户ID查找标签
+// GetTagsByUID 根據使用者ID尋找標籤
 func GetTagsByUID(uid uint) ([]Tag, error) {
 	var tag []Tag
 	result := DB.Where("user_id = ?", uid).Find(&tag)
 	return tag, result.Error
 }
 
-// GetTagsByID 根据ID查找标签
+// GetTagsByID 根據ID尋找標籤
 func GetTagsByID(id, uid uint) (*Tag, error) {
 	var tag Tag
 	result := DB.Where("user_id = ? and id = ?", uid, id).First(&tag)

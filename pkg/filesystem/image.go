@@ -14,16 +14,16 @@ import (
 )
 
 /* ================
-     图像处理相关
+     圖像處理相關
    ================
 */
 
-// HandledExtension 可以生成缩略图的文件扩展名
+// HandledExtension 可以生成縮圖的文件副檔名
 var HandledExtension = []string{"jpg", "jpeg", "png", "gif"}
 
-// GetThumb 获取文件的缩略图
+// GetThumb 獲取文件的縮圖
 func (fs *FileSystem) GetThumb(ctx context.Context, id uint) (*response.ContentResponse, error) {
-	// 根据 ID 查找文件
+	// 根據 ID 尋找文件
 	err := fs.resetFileIDIfNotExist(ctx, id)
 	if err != nil || fs.FileTarget[0].PicInfo == "" {
 		return &response.ContentResponse{
@@ -39,7 +39,7 @@ func (fs *FileSystem) GetThumb(ctx context.Context, id uint) (*response.ContentR
 		res.MaxAge = model.GetIntSetting("preview_timeout", 60)
 	}
 
-	// 本地存储策略出错时重新生成缩略图
+	// 本機儲存策略出錯時重新生成縮圖
 	if err != nil && fs.Policy.Type == "local" {
 		fs.GenerateThumbnail(ctx, &fs.FileTarget[0])
 	}
@@ -47,19 +47,19 @@ func (fs *FileSystem) GetThumb(ctx context.Context, id uint) (*response.ContentR
 	return res, err
 }
 
-// GenerateThumbnail 尝试为本地策略文件生成缩略图并获取图像原始大小
-// TODO 失败时，如果之前还有图像信息，则清除
+// GenerateThumbnail 嘗試為本機策略文件生成縮圖並獲取圖像原始大小
+// TODO 失敗時，如果之前還有圖像訊息，則清除
 func (fs *FileSystem) GenerateThumbnail(ctx context.Context, file *model.File) {
-	// 判断是否可以生成缩略图
+	// 判斷是否可以生成縮圖
 	if !IsInExtensionList(HandledExtension, file.Name) {
 		return
 	}
 
-	// 新建上下文
+	// 建立上下文
 	newCtx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	// 获取文件数据
+	// 獲取文件資料
 	source, err := fs.Handler.Get(newCtx, file.SourceName)
 	if err != nil {
 		return
@@ -68,36 +68,36 @@ func (fs *FileSystem) GenerateThumbnail(ctx context.Context, file *model.File) {
 
 	image, err := thumb.NewThumbFromFile(source, file.Name)
 	if err != nil {
-		util.Log().Warning("生成缩略图时无法解析 [%s] 图像数据：%s", file.SourceName, err)
+		util.Log().Warning("生成縮圖時無法解析 [%s] 圖像資料：%s", file.SourceName, err)
 		return
 	}
 
-	// 获取原始图像尺寸
+	// 獲取原始圖像尺寸
 	w, h := image.GetSize()
 
-	// 生成缩略图
+	// 生成縮圖
 	image.GetThumb(fs.GenerateThumbnailSize(w, h))
-	// 保存到文件
+	// 儲存到文件
 	err = image.Save(util.RelativePath(file.SourceName + conf.ThumbConfig.FileSuffix))
 	if err != nil {
-		util.Log().Warning("无法保存缩略图：%s", err)
+		util.Log().Warning("無法儲存縮圖：%s", err)
 		return
 	}
 
-	// 更新文件的图像信息
+	// 更新文件的圖像訊息
 	if file.Model.ID > 0 {
 		err = file.UpdatePicInfo(fmt.Sprintf("%d,%d", w, h))
 	} else {
 		file.PicInfo = fmt.Sprintf("%d,%d", w, h)
 	}
 
-	// 失败时删除缩略图文件
+	// 失敗時刪除縮圖文件
 	if err != nil {
 		_, _ = fs.Handler.Delete(newCtx, []string{file.SourceName + conf.ThumbConfig.FileSuffix})
 	}
 }
 
-// GenerateThumbnailSize 获取要生成的缩略图的尺寸
+// GenerateThumbnailSize 獲取要生成的縮圖的尺寸
 func (fs *FileSystem) GenerateThumbnailSize(w, h int) (uint, uint) {
 	if conf.SystemConfig.Mode == "master" {
 		options := model.GetSettingByNames("thumb_width", "thumb_height")

@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// UploadCredentialService 获取上传凭证服务
+// UploadCredentialService 獲取上傳憑證服務
 type UploadCredentialService struct {
 	Path string `form:"path" binding:"required"`
 	Size uint64 `form:"size" binding:"min=0"`
@@ -17,18 +17,18 @@ type UploadCredentialService struct {
 	Type string `form:"type"`
 }
 
-// Get 获取新的上传凭证
+// Get 獲取新的上傳憑證
 func (service *UploadCredentialService) Get(ctx context.Context, c *gin.Context) serializer.Response {
-	// 创建文件系统
+	// 建立文件系統
 	fs, err := filesystem.NewFileSystemFromContext(c)
 	if err != nil {
 		return serializer.Err(serializer.CodePolicyNotAllowed, err.Error(), err)
 	}
 
-	// 存储策略是否一致
+	// 儲存策略是否一致
 	if service.Type != "" {
 		if service.Type != fs.User.Policy.Type {
-			return serializer.Err(serializer.CodePolicyNotAllowed, "存储策略已变更，请刷新页面", nil)
+			return serializer.Err(serializer.CodePolicyNotAllowed, "儲存策略已變更，請重新整理頁面", nil)
 		}
 	}
 

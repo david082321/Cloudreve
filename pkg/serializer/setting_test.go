@@ -24,7 +24,7 @@ func TestBuildSiteConfig(t *testing.T) {
 	res = BuildSiteConfig(map[string]string{"siteName": "123"}, &model.User{})
 	asserts.Equal("123", res.Data.(SiteConfig).SiteName)
 
-	// 非空用户
+	// 非空使用者
 	res = BuildSiteConfig(map[string]string{"qq_login": "1"}, &model.User{
 		Model: gorm.Model{
 			ID: 5,

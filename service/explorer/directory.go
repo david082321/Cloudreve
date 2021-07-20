@@ -9,14 +9,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// DirectoryService 创建新目录服务
+// DirectoryService 建立新目錄服務
 type DirectoryService struct {
 	Path string `uri:"path" json:"path" binding:"required,min=1,max=65535"`
 }
 
-// ListDirectory 列出目录内容
+// ListDirectory 列出目錄內容
 func (service *DirectoryService) ListDirectory(c *gin.Context) serializer.Response {
-	// 创建文件系统
+	// 建立文件系統
 	fs, err := filesystem.NewFileSystemFromContext(c)
 	if err != nil {
 		return serializer.Err(serializer.CodePolicyNotAllowed, err.Error(), err)
@@ -27,7 +27,7 @@ func (service *DirectoryService) ListDirectory(c *gin.Context) serializer.Respon
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	// 获取子项目
+	// 獲取子項目
 	objects, err := fs.List(ctx, service.Path, nil)
 	if err != nil {
 		return serializer.Err(serializer.CodeNotSet, err.Error(), err)
@@ -47,9 +47,9 @@ func (service *DirectoryService) ListDirectory(c *gin.Context) serializer.Respon
 	}
 }
 
-// CreateDirectory 创建目录
+// CreateDirectory 建立目錄
 func (service *DirectoryService) CreateDirectory(c *gin.Context) serializer.Response {
-	// 创建文件系统
+	// 建立文件系統
 	fs, err := filesystem.NewFileSystemFromContext(c)
 	if err != nil {
 		return serializer.Err(serializer.CodePolicyNotAllowed, err.Error(), err)
@@ -60,7 +60,7 @@ func (service *DirectoryService) CreateDirectory(c *gin.Context) serializer.Resp
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	// 创建目录
+	// 建立目錄
 	_, err = fs.CreateDirectory(ctx, service.Path)
 	if err != nil {
 		return serializer.Err(serializer.CodeCreateFolderFailed, err.Error(), err)

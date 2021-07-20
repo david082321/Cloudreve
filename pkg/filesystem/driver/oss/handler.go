@@ -24,20 +24,20 @@ import (
 	"github.com/cloudreve/Cloudreve/v3/pkg/util"
 )
 
-// UploadPolicy 阿里云OSS上传策略
+// UploadPolicy 阿里雲OSS上傳策略
 type UploadPolicy struct {
 	Expiration string        `json:"expiration"`
 	Conditions []interface{} `json:"conditions"`
 }
 
-// CallbackPolicy 回调策略
+// CallbackPolicy 回調策略
 type CallbackPolicy struct {
 	CallbackURL      string `json:"callbackUrl"`
 	CallbackBody     string `json:"callbackBody"`
 	CallbackBodyType string `json:"callbackBodyType"`
 }
 
-// Driver 阿里云OSS策略适配器
+// Driver 阿里雲OSS策略適配器
 type Driver struct {
 	Policy     *model.Policy
 	client     *oss.Client
@@ -48,13 +48,13 @@ type Driver struct {
 type key int
 
 const (
-	// VersionID 文件版本标识
+	// VersionID 文件版本標識
 	VersionID key = iota
 )
 
-// CORS 创建跨域策略
+// CORS 建立跨域策略
 func (handler *Driver) CORS() error {
-	// 初始化客户端
+	// 初始化用戶端
 	if err := handler.InitOSSClient(false); err != nil {
 		return err
 	}
@@ -76,27 +76,27 @@ func (handler *Driver) CORS() error {
 	})
 }
 
-// InitOSSClient 初始化OSS鉴权客户端
+// InitOSSClient 初始化OSS鑒權用戶端
 func (handler *Driver) InitOSSClient(forceUsePublicEndpoint bool) error {
 	if handler.Policy == nil {
-		return errors.New("存储策略为空")
+		return errors.New("儲存策略為空")
 	}
 
 	if handler.client == nil {
-		// 决定是否使用内网 Endpoint
+		// 決定是否使用內網 Endpoint
 		endpoint := handler.Policy.Server
 		if handler.Policy.OptionsSerialized.ServerSideEndpoint != "" && !forceUsePublicEndpoint {
 			endpoint = handler.Policy.OptionsSerialized.ServerSideEndpoint
 		}
 
-		// 初始化客户端
+		// 初始化用戶端
 		client, err := oss.New(endpoint, handler.Policy.AccessKey, handler.Policy.SecretKey)
 		if err != nil {
 			return err
 		}
 		handler.client = client
 
-		// 初始化存储桶
+		// 初始化儲存桶
 		bucket, err := client.Bucket(handler.Policy.BucketName)
 		if err != nil {
 			return err
@@ -110,7 +110,7 @@ func (handler *Driver) InitOSSClient(forceUsePublicEndpoint bool) error {
 
 // List 列出OSS上的文件
 func (handler Driver) List(ctx context.Context, base string, recursive bool) ([]response.Object, error) {
-	// 初始化客户端
+	// 初始化用戶端
 	if err := handler.InitOSSClient(false); err != nil {
 		return nil, err
 	}
@@ -145,9 +145,9 @@ func (handler Driver) List(ctx context.Context, base string, recursive bool) ([]
 		}
 	}
 
-	// 处理列取结果
+	// 處理列取結果
 	res := make([]response.Object, 0, len(objects)+len(commons))
-	// 处理目录
+	// 處理目錄
 	for _, object := range commons {
 		rel, err := filepath.Rel(base, object)
 		if err != nil {
@@ -161,7 +161,7 @@ func (handler Driver) List(ctx context.Context, base string, recursive bool) ([]
 			LastModify:   time.Now(),
 		})
 	}
-	// 处理文件
+	// 處理文件
 	for _, object := range objects {
 		rel, err := filepath.Rel(base, object.Key)
 		if err != nil {
@@ -180,15 +180,15 @@ func (handler Driver) List(ctx context.Context, base string, recursive bool) ([]
 	return res, nil
 }
 
-// Get 获取文件
+// Get 獲取文件
 func (handler Driver) Get(ctx context.Context, path string) (response.RSCloser, error) {
-	// 通过VersionID禁止缓存
+	// 透過VersionID禁止快取
 	ctx = context.WithValue(ctx, VersionID, time.Now().UnixNano())
 
-	// 尽可能使用私有 Endpoint
+	// 儘可能使用私有 Endpoint
 	ctx = context.WithValue(ctx, fsctx.ForceUsePublicEndpointCtx, false)
 
-	// 获取文件源地址
+	// 獲取文件源地址
 	downloadURL, err := handler.Source(
 		ctx,
 		path,
@@ -201,7 +201,7 @@ func (handler Driver) Get(ctx context.Context, path string) (response.RSCloser, 
 		return nil, err
 	}
 
-	// 获取文件数据流
+	// 獲取文件資料流
 	resp, err := handler.HTTPClient.Request(
 		"GET",
 		downloadURL,
@@ -215,7 +215,7 @@ func (handler Driver) Get(ctx context.Context, path string) (response.RSCloser, 
 
 	resp.SetFirstFakeChunk()
 
-	// 尝试自主获取文件大小
+	// 嘗試自主獲取檔案大小
 	if file, ok := ctx.Value(fsctx.FileModelCtx).(model.File); ok {
 		resp.SetContentLength(int64(file.Size))
 	}
@@ -223,19 +223,19 @@ func (handler Driver) Get(ctx context.Context, path string) (response.RSCloser, 
 	return resp, nil
 }
 
-// Put 将文件流保存到指定目录
+// Put 將文件流儲存到指定目錄
 func (handler Driver) Put(ctx context.Context, file io.ReadCloser, dst string, size uint64) error {
 	defer file.Close()
 
-	// 初始化客户端
+	// 初始化用戶端
 	if err := handler.InitOSSClient(false); err != nil {
 		return err
 	}
 
-	// 凭证有效期
+	// 憑證有效期
 	credentialTTL := model.GetIntSetting("upload_credential_timeout", 3600)
 
-	// 是否允许覆盖
+	// 是否允許覆蓋
 	overwrite := true
 	if ctx.Value(fsctx.DisableOverwrite) != nil {
 		overwrite = false
@@ -246,7 +246,7 @@ func (handler Driver) Put(ctx context.Context, file io.ReadCloser, dst string, s
 		oss.ForbidOverWrite(!overwrite),
 	}
 
-	// 上传文件
+	// 上傳文件
 	err := handler.bucket.PutObject(dst, file, options...)
 	if err != nil {
 		return err
@@ -255,33 +255,33 @@ func (handler Driver) Put(ctx context.Context, file io.ReadCloser, dst string, s
 	return nil
 }
 
-// Delete 删除一个或多个文件，
-// 返回未删除的文件
+// Delete 刪除一個或多個文件，
+// 返回未刪除的文件
 func (handler Driver) Delete(ctx context.Context, files []string) ([]string, error) {
-	// 初始化客户端
+	// 初始化用戶端
 	if err := handler.InitOSSClient(false); err != nil {
 		return files, err
 	}
 
-	// 删除文件
+	// 刪除文件
 	delRes, err := handler.bucket.DeleteObjects(files)
 
 	if err != nil {
 		return files, err
 	}
 
-	// 统计未删除的文件
+	// 統計未刪除的文件
 	failed := util.SliceDifference(files, delRes.DeletedObjects)
 	if len(failed) > 0 {
-		return failed, errors.New("删除失败")
+		return failed, errors.New("刪除失敗")
 	}
 
 	return []string{}, nil
 }
 
-// Thumb 获取文件缩略图
+// Thumb 獲取文件縮圖
 func (handler Driver) Thumb(ctx context.Context, path string) (*response.ContentResponse, error) {
-	// 初始化客户端
+	// 初始化用戶端
 	if err := handler.InitOSSClient(true); err != nil {
 		return nil, err
 	}
@@ -291,7 +291,7 @@ func (handler Driver) Thumb(ctx context.Context, path string) (*response.Content
 		ok        = false
 	)
 	if thumbSize, ok = ctx.Value(fsctx.ThumbSizeCtx).([2]uint); !ok {
-		return nil, errors.New("无法获取缩略图尺寸设置")
+		return nil, errors.New("無法獲取縮圖尺寸設定")
 	}
 
 	thumbParam := fmt.Sprintf("image/resize,m_lfit,h_%d,w_%d", thumbSize[1], thumbSize[0])
@@ -313,7 +313,7 @@ func (handler Driver) Thumb(ctx context.Context, path string) (*response.Content
 	}, nil
 }
 
-// Source 获取外链URL
+// Source 獲取外鏈URL
 func (handler Driver) Source(
 	ctx context.Context,
 	path string,
@@ -322,7 +322,7 @@ func (handler Driver) Source(
 	isDownload bool,
 	speed int,
 ) (string, error) {
-	// 初始化客户端
+	// 初始化用戶端
 	usePublicEndpoint := true
 	if forceUsePublicEndpoint, ok := ctx.Value(fsctx.ForceUsePublicEndpointCtx).(bool); ok {
 		usePublicEndpoint = forceUsePublicEndpoint
@@ -331,22 +331,22 @@ func (handler Driver) Source(
 		return "", err
 	}
 
-	// 尝试从上下文获取文件名
+	// 嘗試從上下文獲取檔案名
 	fileName := ""
 	if file, ok := ctx.Value(fsctx.FileModelCtx).(model.File); ok {
 		fileName = file.Name
 	}
 
-	// 添加各项设置
+	// 添加各項設定
 	var signOptions = make([]oss.Option, 0, 2)
 	if isDownload {
 		signOptions = append(signOptions, oss.ResponseContentDisposition("attachment; filename=\""+url.PathEscape(fileName)+"\""))
 	}
 	if speed > 0 {
-		// Byte 转换为 bit
+		// Byte 轉換為 bit
 		speed *= 8
 
-		// OSS对速度值有范围限制
+		// OSS對速度值有範圍限制
 		if speed < 819200 {
 			speed = 819200
 		}
@@ -365,16 +365,16 @@ func (handler Driver) signSourceURL(ctx context.Context, path string, ttl int64,
 		return "", err
 	}
 
-	// 将最终生成的签名URL域名换成用户自定义的加速域名（如果有）
+	// 將最終生成的簽名URL域名換成使用者自訂的加速域名（如果有）
 	finalURL, err := url.Parse(signedURL)
 	if err != nil {
 		return "", err
 	}
 
-	// 优先使用https
+	// 優先使用https
 	finalURL.Scheme = "https"
 
-	// 公有空间替换掉Key及不支持的头
+	// 公有空間取代掉Key及不支援的頭
 	if !handler.Policy.IsPrivate {
 		query := finalURL.Query()
 		query.Del("OSSAccessKeyId")
@@ -396,27 +396,27 @@ func (handler Driver) signSourceURL(ctx context.Context, path string, ttl int64,
 	return finalURL.String(), nil
 }
 
-// Token 获取上传策略和认证Token
+// Token 獲取上傳策略和認證Token
 func (handler Driver) Token(ctx context.Context, TTL int64, key string) (serializer.UploadCredential, error) {
-	// 读取上下文中生成的存储路径
+	// 讀取上下文中生成的儲存路徑
 	savePath, ok := ctx.Value(fsctx.SavePathCtx).(string)
 	if !ok {
-		return serializer.UploadCredential{}, errors.New("无法获取存储路径")
+		return serializer.UploadCredential{}, errors.New("無法獲取儲存路徑")
 	}
 
-	// 生成回调地址
+	// 生成回調地址
 	siteURL := model.GetSiteURL()
 	apiBaseURI, _ := url.Parse("/api/v3/callback/oss/" + key)
 	apiURL := siteURL.ResolveReference(apiBaseURI)
 
-	// 回调策略
+	// 回調策略
 	callbackPolicy := CallbackPolicy{
 		CallbackURL:      apiURL.String(),
 		CallbackBody:     `{"name":${x:fname},"source_name":${object},"size":${size},"pic_info":"${imageInfo.width},${imageInfo.height}"}`,
 		CallbackBodyType: "application/json",
 	}
 
-	// 上传策略
+	// 上傳策略
 	postPolicy := UploadPolicy{
 		Expiration: time.Now().UTC().Add(time.Duration(TTL) * time.Second).Format(time.RFC3339),
 		Conditions: []interface{}{
@@ -434,13 +434,13 @@ func (handler Driver) Token(ctx context.Context, TTL int64, key string) (seriali
 }
 
 func (handler Driver) getUploadCredential(ctx context.Context, policy UploadPolicy, callback CallbackPolicy, TTL int64) (serializer.UploadCredential, error) {
-	// 读取上下文中生成的存储路径
+	// 讀取上下文中生成的儲存路徑
 	savePath, ok := ctx.Value(fsctx.SavePathCtx).(string)
 	if !ok {
-		return serializer.UploadCredential{}, errors.New("无法获取存储路径")
+		return serializer.UploadCredential{}, errors.New("無法獲取儲存路徑")
 	}
 
-	// 处理回调策略
+	// 處理回調策略
 	callbackPolicyEncoded := ""
 	if callback.CallbackURL != "" {
 		callbackPolicyJSON, err := json.Marshal(callback)
@@ -451,14 +451,14 @@ func (handler Driver) getUploadCredential(ctx context.Context, policy UploadPoli
 		policy.Conditions = append(policy.Conditions, map[string]string{"callback": callbackPolicyEncoded})
 	}
 
-	// 编码上传策略
+	// 編碼上傳策略
 	policyJSON, err := json.Marshal(policy)
 	if err != nil {
 		return serializer.UploadCredential{}, err
 	}
 	policyEncoded := base64.StdEncoding.EncodeToString(policyJSON)
 
-	// 签名上传策略
+	// 簽名上傳策略
 	hmacSign := hmac.New(sha1.New, []byte(handler.Policy.SecretKey))
 	_, err = io.WriteString(hmacSign, policyEncoded)
 	if err != nil {

@@ -93,7 +93,7 @@ func TestFileSystem_Upload(t *testing.T) {
 	err := fs.Upload(ctx, file)
 	asserts.NoError(err)
 
-	// 正常，上下文已指定源文件
+	// 正常，上下文已指定來源文件
 	testHandler = new(FileHeaderMock)
 	testHandler.On("Put", testMock.Anything, testMock.Anything, "123/123.txt").Return(nil)
 	fs = &FileSystem{
@@ -123,7 +123,7 @@ func TestFileSystem_Upload(t *testing.T) {
 	err = fs.Upload(ctx, file)
 	asserts.NoError(err)
 
-	// BeforeUpload 返回错误
+	// BeforeUpload 返回錯誤
 	fs.Use("BeforeUpload", func(ctx context.Context, fs *FileSystem) error {
 		return errors.New("error")
 	})
@@ -132,7 +132,7 @@ func TestFileSystem_Upload(t *testing.T) {
 	fs.Hooks["BeforeUpload"] = nil
 	testHandler.AssertExpectations(t)
 
-	// 上传文件失败
+	// 上傳文件失敗
 	testHandler2 := new(FileHeaderMock)
 	testHandler2.On("Put", testMock.Anything, testMock.Anything, testMock.Anything).Return(errors.New("error"))
 	fs.Handler = testHandler2
@@ -140,7 +140,7 @@ func TestFileSystem_Upload(t *testing.T) {
 	asserts.Error(err)
 	testHandler2.AssertExpectations(t)
 
-	// AfterUpload失败
+	// AfterUpload失敗
 	testHandler3 := new(FileHeaderMock)
 	testHandler3.On("Put", testMock.Anything, testMock.Anything, testMock.Anything).Return(nil)
 	fs.Handler = testHandler3
@@ -195,7 +195,7 @@ func TestFileSystem_GetUploadToken(t *testing.T) {
 		asserts.Equal("test", res.Token)
 	}
 
-	// 无法获取上传凭证
+	// 無法獲取上傳憑證
 	{
 		cache.SetSettings(map[string]string{
 			"upload_credential_timeout": "10",
@@ -230,7 +230,7 @@ func TestFileSystem_UploadFromPath(t *testing.T) {
 		asserts.Error(err)
 	}
 
-	// 文存在,上传失败
+	// 文存在,上傳失敗
 	{
 		err := fs.UploadFromPath(ctx, "tests/test.zip", "/")
 		asserts.Error(err)

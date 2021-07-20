@@ -11,78 +11,78 @@ import (
 	"github.com/cloudreve/Cloudreve/v3/pkg/util"
 )
 
-// Instance 默认使用的Aria2处理实例
+// Instance 預設使用的Aria2處理實例
 var Instance Aria2 = &DummyAria2{}
 
-// Lock Instance的读写锁
+// Lock Instance的讀寫鎖
 var Lock sync.RWMutex
 
-// EventNotifier 任务状态更新通知处理器
+// EventNotifier 任務狀態更新通知處理器
 var EventNotifier = &Notifier{}
 
-// Aria2 离线下载处理接口
+// Aria2 離線下載處理介面
 type Aria2 interface {
-	// CreateTask 创建新的任务
+	// CreateTask 建立新的任務
 	CreateTask(task *model.Download, options map[string]interface{}) error
-	// 返回状态信息
+	// 返回狀態訊息
 	Status(task *model.Download) (rpc.StatusInfo, error)
-	// 取消任务
+	// 取消任務
 	Cancel(task *model.Download) error
-	// 选择要下载的文件
+	// 選擇要下載的文件
 	Select(task *model.Download, files []int) error
 }
 
 const (
-	// URLTask 从URL添加的任务
+	// URLTask 從URL添加的任務
 	URLTask = iota
-	// TorrentTask 种子任务
+	// TorrentTask 種子任務
 	TorrentTask
 )
 
 const (
-	// Ready 准备就绪
+	// Ready 準備就緒
 	Ready = iota
-	// Downloading 下载中
+	// Downloading 下載中
 	Downloading
-	// Paused 暂停中
+	// Paused 暫停中
 	Paused
-	// Error 出错
+	// Error 出錯
 	Error
 	// Complete 完成
 	Complete
 	// Canceled 取消/停止
 	Canceled
-	// Unknown 未知状态
+	// Unknown 未知狀態
 	Unknown
 )
 
 var (
-	// ErrNotEnabled 功能未开启错误
-	ErrNotEnabled = serializer.NewError(serializer.CodeNoPermissionErr, "离线下载功能未开启", nil)
-	// ErrUserNotFound 未找到下载任务创建者
-	ErrUserNotFound = serializer.NewError(serializer.CodeNotFound, "无法找到任务创建者", nil)
+	// ErrNotEnabled 功能未開啟錯誤
+	ErrNotEnabled = serializer.NewError(serializer.CodeNoPermissionErr, "離線下載功能未開啟", nil)
+	// ErrUserNotFound 未找到下載任務建立者
+	ErrUserNotFound = serializer.NewError(serializer.CodeNotFound, "無法找到任務建立者", nil)
 )
 
-// DummyAria2 未开启Aria2功能时使用的默认处理器
+// DummyAria2 未開啟Aria2功能時使用的預設處理器
 type DummyAria2 struct {
 }
 
-// CreateTask 创建新任务，此处直接返回未开启错误
+// CreateTask 建立新任務，此處直接返回未開啟錯誤
 func (instance *DummyAria2) CreateTask(model *model.Download, options map[string]interface{}) error {
 	return ErrNotEnabled
 }
 
-// Status 返回未开启错误
+// Status 返回未開啟錯誤
 func (instance *DummyAria2) Status(task *model.Download) (rpc.StatusInfo, error) {
 	return rpc.StatusInfo{}, ErrNotEnabled
 }
 
-// Cancel 返回未开启错误
+// Cancel 返回未開啟錯誤
 func (instance *DummyAria2) Cancel(task *model.Download) error {
 	return ErrNotEnabled
 }
 
-// Select 返回未开启错误
+// Select 返回未開啟錯誤
 func (instance *DummyAria2) Select(task *model.Download, files []int) error {
 	return ErrNotEnabled
 }
@@ -92,10 +92,10 @@ func Init(isReload bool) {
 	Lock.Lock()
 	defer Lock.Unlock()
 
-	// 关闭上个初始连接
+	// 關閉上個初始連接
 	if previousClient, ok := Instance.(*RPCService); ok {
 		if previousClient.Caller != nil {
-			util.Log().Debug("关闭上个 aria2 连接")
+			util.Log().Debug("關閉上個 aria2 連接")
 			previousClient.Caller.Close()
 		}
 	}
@@ -107,29 +107,29 @@ func Init(isReload bool) {
 		return
 	}
 
-	util.Log().Info("初始化 aria2 RPC 服务[%s]", options["aria2_rpcurl"])
+	util.Log().Info("初始化 aria2 RPC 服務[%s]", options["aria2_rpcurl"])
 	client := &RPCService{}
 
-	// 解析RPC服务地址
+	// 解析RPC服務地址
 	server, err := url.Parse(options["aria2_rpcurl"])
 	if err != nil {
-		util.Log().Warning("无法解析 aria2 RPC 服务地址，%s", err)
+		util.Log().Warning("無法解析 aria2 RPC 服務地址，%s", err)
 		Instance = &DummyAria2{}
 		return
 	}
 	server.Path = "/jsonrpc"
 
-	// 加载自定义下载配置
+	// 載入自訂下載配置
 	var globalOptions map[string]interface{}
 	err = json.Unmarshal([]byte(options["aria2_options"]), &globalOptions)
 	if err != nil {
-		util.Log().Warning("无法解析 aria2 全局配置，%s", err)
+		util.Log().Warning("無法解析 aria2 全域配置，%s", err)
 		Instance = &DummyAria2{}
 		return
 	}
 
 	if err := client.Init(server.String(), options["aria2_token"], timeout, globalOptions); err != nil {
-		util.Log().Warning("初始化 aria2 RPC 服务失败，%s", err)
+		util.Log().Warning("初始化 aria2 RPC 服務失敗，%s", err)
 		Instance = &DummyAria2{}
 		return
 	}
@@ -137,18 +137,18 @@ func Init(isReload bool) {
 	Instance = client
 
 	if !isReload {
-		// 从数据库中读取未完成任务，创建监控
+		// 從資料庫中讀取未完成任務，建立監控
 		unfinished := model.GetDownloadsByStatus(Ready, Paused, Downloading)
 
 		for i := 0; i < len(unfinished); i++ {
-			// 创建任务监控
+			// 建立任務監控
 			NewMonitor(&unfinished[i])
 		}
 	}
 
 }
 
-// getStatus 将给定的状态字符串转换为状态标识数字
+// getStatus 將給定的狀態字串轉換為狀態標識數字
 func getStatus(status string) int {
 	switch status {
 	case "complete":

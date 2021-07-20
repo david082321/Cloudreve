@@ -6,7 +6,7 @@ import (
 	"gopkg.in/go-playground/validator.v9"
 )
 
-// database 数据库
+// database 資料庫
 type database struct {
 	Type        string
 	User        string
@@ -19,7 +19,7 @@ type database struct {
 	Charset     string
 }
 
-// system 系统通用配置
+// system 系統通用配置
 type system struct {
 	Mode          string `validate:"eq=master|eq=slave"`
 	Listen        string `validate:"required"`
@@ -38,14 +38,14 @@ type unix struct {
 	Listen string
 }
 
-// slave 作为slave存储端配置
+// slave 作為slave儲存端配置
 type slave struct {
 	Secret          string `validate:"omitempty,gte=64"`
 	CallbackTimeout int    `validate:"omitempty,gte=1"`
 	SignatureTTL    int    `validate:"omitempty,gte=1"`
 }
 
-// captcha 验证码配置
+// captcha 驗證碼配置
 type captcha struct {
 	Height             int `validate:"gte=0"`
 	Width              int `validate:"gte=0"`
@@ -68,7 +68,7 @@ type redis struct {
 	DB       string
 }
 
-// 缩略图 配置
+// 縮圖 配置
 type thumb struct {
 	MaxWidth   uint
 	MaxHeight  uint
@@ -93,25 +93,25 @@ SessionSecret = {SessionSecret}
 HashIDSalt = {HashIDSalt}
 `
 
-// Init 初始化配置文件
+// Init 初始化配置檔案
 func Init(path string) {
 	var err error
 
 	if path == "" || !util.Exists(path) {
-		// 创建初始配置文件
+		// 建立初始配置檔案
 		confContent := util.Replace(map[string]string{
 			"{SessionSecret}": util.RandStringRunes(64),
 			"{HashIDSalt}":    util.RandStringRunes(64),
 		}, defaultConf)
 		f, err := util.CreatNestedFile(path)
 		if err != nil {
-			util.Log().Panic("无法创建配置文件, %s", err)
+			util.Log().Panic("無法建立配置檔案, %s", err)
 		}
 
-		// 写入配置文件
+		// 寫入配置檔案
 		_, err = f.WriteString(confContent)
 		if err != nil {
-			util.Log().Panic("无法写入配置文件, %s", err)
+			util.Log().Panic("無法寫入配置檔案, %s", err)
 		}
 
 		f.Close()
@@ -119,7 +119,7 @@ func Init(path string) {
 
 	cfg, err = ini.Load(path)
 	if err != nil {
-		util.Log().Panic("无法解析配置文件 '%s': %s", path, err)
+		util.Log().Panic("無法解析配置檔案 '%s': %s", path, err)
 	}
 
 	sections := map[string]interface{}{
@@ -136,11 +136,11 @@ func Init(path string) {
 	for sectionName, sectionStruct := range sections {
 		err = mapSection(sectionName, sectionStruct)
 		if err != nil {
-			util.Log().Panic("配置文件 %s 分区解析失败: %s", sectionName, err)
+			util.Log().Panic("配置檔案 %s 分區解析失敗: %s", sectionName, err)
 		}
 	}
 
-	// 重设log等级
+	// 重設log等級
 	if !SystemConfig.Debug {
 		util.Level = util.LevelInformational
 		util.GloablLogger = nil
@@ -149,14 +149,14 @@ func Init(path string) {
 
 }
 
-// mapSection 将配置文件的 Section 映射到结构体上
+// mapSection 將配置檔案的 Section 映射到結構體上
 func mapSection(section string, confStruct interface{}) error {
 	err := cfg.Section(section).MapTo(confStruct)
 	if err != nil {
 		return err
 	}
 
-	// 验证合法性
+	// 驗證合法性
 	validate := validator.New()
 	err = validate.Struct(confStruct)
 	if err != nil {

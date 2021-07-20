@@ -28,11 +28,11 @@ func TestFileSystem_Compress(t *testing.T) {
 
 	// 成功
 	{
-		// 查找压缩父目录
+		// 尋找壓縮父目錄
 		mock.ExpectQuery("SELECT(.+)folders(.+)").
 			WithArgs(1, 1).
 			WillReturnRows(sqlmock.NewRows([]string{"id", "name"}).AddRow(1, "parent"))
-		// 查找顶级待压缩文件
+		// 尋找頂級待壓縮文件
 		mock.ExpectQuery("SELECT(.+)files(.+)").
 			WithArgs(1, 1).
 			WillReturnRows(
@@ -41,22 +41,22 @@ func TestFileSystem_Compress(t *testing.T) {
 					AddRow(1, "1.txt", "tests/file1.txt", 1),
 			)
 		asserts.NoError(cache.Set("setting_temp_path", "tests", -1))
-		// 查找父目录子文件
+		// 尋找父目錄子文件
 		mock.ExpectQuery("SELECT(.+)files(.+)").
 			WithArgs(1).
 			WillReturnRows(sqlmock.NewRows([]string{"id", "name", "source_name", "policy_id"}))
-		// 查找子目录
+		// 尋找子目錄
 		mock.ExpectQuery("SELECT(.+)folders(.+)").
 			WithArgs(1).
 			WillReturnRows(sqlmock.NewRows([]string{"id", "name"}).AddRow(2, "sub"))
-		// 查找子目录子文件
+		// 尋找子目錄子文件
 		mock.ExpectQuery("SELECT(.+)files(.+)").
 			WithArgs(2).
 			WillReturnRows(
 				sqlmock.NewRows([]string{"id", "name", "source_name", "policy_id"}).
 					AddRow(2, "2.txt", "tests/file2.txt", 1),
 			)
-		// 查找上传策略
+		// 尋找上傳策略
 		asserts.NoError(cache.Set("policy_1", model.Policy{Type: "local"}, -1))
 
 		zipFile, err := fs.Compress(ctx, []uint{1}, []uint{1}, true)
@@ -70,11 +70,11 @@ func TestFileSystem_Compress(t *testing.T) {
 	{
 		ctx, cancel := context.WithCancel(context.Background())
 		cancel()
-		// 查找压缩父目录
+		// 尋找壓縮父目錄
 		mock.ExpectQuery("SELECT(.+)folders(.+)").
 			WithArgs(1, 1).
 			WillReturnRows(sqlmock.NewRows([]string{"id", "name"}).AddRow(1, "parent"))
-		// 查找顶级待压缩文件
+		// 尋找頂級待壓縮文件
 		mock.ExpectQuery("SELECT(.+)files(.+)").
 			WithArgs(1, 1).
 			WillReturnRows(
@@ -89,16 +89,16 @@ func TestFileSystem_Compress(t *testing.T) {
 		asserts.Empty(zipFile)
 	}
 
-	// 限制父目录
+	// 限制父目錄
 	{
 		ctx := context.WithValue(context.Background(), fsctx.LimitParentCtx, &model.Folder{
 			Model: gorm.Model{ID: 3},
 		})
-		// 查找压缩父目录
+		// 尋找壓縮父目錄
 		mock.ExpectQuery("SELECT(.+)folders(.+)").
 			WithArgs(1, 1).
 			WillReturnRows(sqlmock.NewRows([]string{"id", "name", "parent_id"}).AddRow(1, "parent", 3))
-		// 查找顶级待压缩文件
+		// 尋找頂級待壓縮文件
 		mock.ExpectQuery("SELECT(.+)files(.+)").
 			WithArgs(1, 1).
 			WillReturnRows(
@@ -153,12 +153,12 @@ func TestFileSystem_Decompress(t *testing.T) {
 		User: &model.User{Model: gorm.Model{ID: 1}},
 	}
 
-	// 压缩文件不存在
+	// 壓縮文件不存在
 	{
-		// 查找根目录
+		// 尋找根目錄
 		mock.ExpectQuery("SELECT(.+)folders(.+)").
 			WillReturnRows(sqlmock.NewRows([]string{"id", "name"}).AddRow(1, "/"))
-		// 查找压缩文件，未找到
+		// 尋找壓縮文件，未找到
 		mock.ExpectQuery("SELECT(.+)files(.+)").
 			WillReturnRows(sqlmock.NewRows([]string{"id", "name"}))
 		err := fs.Decompress(ctx, "/1.zip", "/")
@@ -166,7 +166,7 @@ func TestFileSystem_Decompress(t *testing.T) {
 		asserts.Error(err)
 	}
 
-	// 无法下载压缩文件
+	// 無法下載壓縮文件
 	{
 		fs.FileTarget = []model.File{{SourceName: "1.zip", Policy: model.Policy{Type: "mock"}}}
 		fs.FileTarget[0].Policy.ID = 1
@@ -179,7 +179,7 @@ func TestFileSystem_Decompress(t *testing.T) {
 		asserts.EqualError(err, "error")
 	}
 
-	// 无法创建临时压缩文件
+	// 無法建立臨時壓縮文件
 	{
 		cache.Set("setting_temp_path", "/tests:", 0)
 		fs.FileTarget = []model.File{{SourceName: "1.zip", Policy: model.Policy{Type: "mock"}}}
@@ -192,7 +192,7 @@ func TestFileSystem_Decompress(t *testing.T) {
 		asserts.Error(err)
 	}
 
-	// 无法写入压缩文件
+	// 無法寫入壓縮文件
 	{
 		cache.Set("setting_temp_path", "tests", 0)
 		fs.FileTarget = []model.File{{SourceName: "1.zip", Policy: model.Policy{Type: "mock"}}}
@@ -206,7 +206,7 @@ func TestFileSystem_Decompress(t *testing.T) {
 		asserts.EqualError(err, "read error")
 	}
 
-	// 无效zip文件
+	// 無效zip文件
 	{
 		cache.Set("setting_temp_path", "tests", 0)
 		fs.FileTarget = []model.File{{SourceName: "1.zip", Policy: model.Policy{Type: "mock"}}}
@@ -220,7 +220,7 @@ func TestFileSystem_Decompress(t *testing.T) {
 		asserts.EqualError(err, "zip: not a valid zip file")
 	}
 
-	// 无法重设上传策略
+	// 無法重設上傳策略
 	{
 		zipFile, _ := os.Open(util.RelativePath("filesystem/tests/test.zip"))
 		fs.FileTarget = []model.File{{SourceName: "1.zip", Policy: model.Policy{Type: "mock"}}}
@@ -235,7 +235,7 @@ func TestFileSystem_Decompress(t *testing.T) {
 		asserts.True(util.IsEmpty(util.RelativePath("tests/decompress")))
 	}
 
-	// 无法上传，容量不足
+	// 無法上傳，容量不足
 	{
 		cache.Set("setting_max_parallel_transfer", "1", 0)
 		zipFile, _ := os.Open(util.RelativePath("filesystem/tests/test.zip"))

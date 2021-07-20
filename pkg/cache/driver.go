@@ -5,10 +5,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Store 缓存存储器
+// Store 快取儲存器
 var Store Driver = NewMemoStore()
 
-// Init 初始化缓存
+// Init 初始化快取
 func Init() {
 	//Store = NewRedisStore(10, "tcp", "127.0.0.1:6379", "", "0")
 	//return
@@ -23,40 +23,40 @@ func Init() {
 	}
 }
 
-// Driver 键值缓存存储容器
+// Driver 鍵值快取儲存容器
 type Driver interface {
-	// 设置值，ttl为过期时间，单位为秒
+	// 設定值，ttl為過期時間，單位為秒
 	Set(key string, value interface{}, ttl int) error
 
-	// 取值，并返回是否成功
+	// 取值，並返回是否成功
 	Get(key string) (interface{}, bool)
 
-	// 批量取值，返回成功取值的map即不存在的值
+	// 批次取值，返回成功取值的map即不存在的值
 	Gets(keys []string, prefix string) (map[string]interface{}, []string)
 
-	// 批量设置值，所有的key都会加上prefix前缀
+	// 批次設定值，所有的key都會加上prefix前綴
 	Sets(values map[string]interface{}, prefix string) error
 
-	// 删除值
+	// 刪除值
 	Delete(keys []string, prefix string) error
 }
 
-// Set 设置缓存值
+// Set 設定快取值
 func Set(key string, value interface{}, ttl int) error {
 	return Store.Set(key, value, ttl)
 }
 
-// Get 获取缓存值
+// Get 獲取快取值
 func Get(key string) (interface{}, bool) {
 	return Store.Get(key)
 }
 
-// Deletes 删除值
+// Deletes 刪除值
 func Deletes(keys []string, prefix string) error {
 	return Store.Delete(keys, prefix)
 }
 
-// GetSettings 根据名称批量获取设置项缓存
+// GetSettings 根據名稱批次獲取設定項快取
 func GetSettings(keys []string, prefix string) (map[string]string, []string) {
 	raw, miss := Store.Gets(keys, prefix)
 
@@ -68,7 +68,7 @@ func GetSettings(keys []string, prefix string) (map[string]string, []string) {
 	return res, miss
 }
 
-// SetSettings 批量设置站点设置缓存
+// SetSettings 批次設定站點設定快取
 func SetSettings(values map[string]string, prefix string) error {
 	var toBeSet = make(map[string]interface{}, len(values))
 	for key, value := range values {

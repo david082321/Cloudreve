@@ -11,9 +11,9 @@ import (
 func TestGetGroupByID(t *testing.T) {
 	asserts := assert.New(t)
 
-	//找到用户组时
+	//找到使用者群組時
 	groupRows := sqlmock.NewRows([]string{"id", "name", "policies"}).
-		AddRow(1, "管理员", "[1]")
+		AddRow(1, "管理員", "[1]")
 	mock.ExpectQuery("^SELECT (.+)").WillReturnRows(groupRows)
 
 	group, err := GetGroupByID(1)
@@ -22,12 +22,12 @@ func TestGetGroupByID(t *testing.T) {
 		Model: gorm.Model{
 			ID: 1,
 		},
-		Name:       "管理员",
+		Name:       "管理員",
 		Policies:   "[1]",
 		PolicyList: []uint{1},
 	}, group)
 
-	//未找到用户时
+	//未找到使用者時
 	mock.ExpectQuery("^SELECT (.+)").WillReturnError(errors.New("not found"))
 	group, err = GetGroupByID(1)
 	asserts.Error(err)
@@ -41,7 +41,7 @@ func TestGroup_AfterFind(t *testing.T) {
 		Model: gorm.Model{
 			ID: 1,
 		},
-		Name:     "管理员",
+		Name:     "管理員",
 		Policies: "[1]",
 	}
 	err := testCase.AfterFind()

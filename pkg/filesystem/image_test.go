@@ -15,7 +15,7 @@ func TestFileSystem_GetThumb(t *testing.T) {
 	asserts := assert.New(t)
 	fs := &FileSystem{User: &model.User{}}
 
-	// 非图像文件
+	// 非圖像文件
 	{
 		fs.SetTargetFile(&[]model.File{{}})
 		_, err := fs.GetThumb(context.Background(), 1)

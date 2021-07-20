@@ -19,22 +19,22 @@ import (
 // GeneralClient 通用 HTTP Client
 var GeneralClient Client = HTTPClient{}
 
-// Response 请求的响应或错误信息
+// Response 請求的響應或錯誤訊息
 type Response struct {
 	Err      error
 	Response *http.Response
 }
 
-// Client 请求客户端
+// Client 請求用戶端
 type Client interface {
 	Request(method, target string, body io.Reader, opts ...Option) *Response
 }
 
-// HTTPClient 实现 Client 接口
+// HTTPClient 實現 Client 介面
 type HTTPClient struct {
 }
 
-// Option 发送请求的额外设置
+// Option 發送請求的額外設定
 type Option interface {
 	apply(*options)
 }
@@ -62,21 +62,21 @@ func newDefaultOption() *options {
 	}
 }
 
-// WithTimeout 设置请求超时
+// WithTimeout 設定請求超時
 func WithTimeout(t time.Duration) Option {
 	return optionFunc(func(o *options) {
 		o.timeout = t
 	})
 }
 
-// WithContext 设置请求上下文
+// WithContext 設定請求上下文
 func WithContext(c context.Context) Option {
 	return optionFunc(func(o *options) {
 		o.ctx = c
 	})
 }
 
-// WithCredential 对请求进行签名
+// WithCredential 對請求進行簽名
 func WithCredential(instance auth.Auth, ttl int64) Option {
 	return optionFunc(func(o *options) {
 		o.sign = instance
@@ -84,7 +84,7 @@ func WithCredential(instance auth.Auth, ttl int64) Option {
 	})
 }
 
-// WithHeader 设置请求Header
+// WithHeader 設定請求Header
 func WithHeader(header http.Header) Option {
 	return optionFunc(func(o *options) {
 		for k, v := range header {
@@ -93,7 +93,7 @@ func WithHeader(header http.Header) Option {
 	})
 }
 
-// WithoutHeader 设置清除请求Header
+// WithoutHeader 設定清除請求Header
 func WithoutHeader(header []string) Option {
 	return optionFunc(func(o *options) {
 		for _, v := range header {
@@ -103,30 +103,30 @@ func WithoutHeader(header []string) Option {
 	})
 }
 
-// WithContentLength 设置请求大小
+// WithContentLength 設定請求大小
 func WithContentLength(s int64) Option {
 	return optionFunc(func(o *options) {
 		o.contentLength = s
 	})
 }
 
-// Request 发送HTTP请求
+// Request 發送HTTP請求
 func (c HTTPClient) Request(method, target string, body io.Reader, opts ...Option) *Response {
-	// 应用额外设置
+	// 應用額外設定
 	options := newDefaultOption()
 	for _, o := range opts {
 		o.apply(options)
 	}
 
-	// 创建请求客户端
+	// 建立請求用戶端
 	client := &http.Client{Timeout: options.timeout}
 
-	// size为0时将body设为nil
+	// size為0時將body設為nil
 	if options.contentLength == 0 {
 		body = nil
 	}
 
-	// 创建请求
+	// 建立請求
 	var (
 		req *http.Request
 		err error
@@ -140,18 +140,18 @@ func (c HTTPClient) Request(method, target string, body io.Reader, opts ...Optio
 		return &Response{Err: err}
 	}
 
-	// 添加请求相关设置
+	// 添加請求相關設定
 	req.Header = options.header
 	if options.contentLength != -1 {
 		req.ContentLength = options.contentLength
 	}
 
-	// 签名请求
+	// 簽名請求
 	if options.sign != nil {
 		auth.SignRequest(options.sign, req, options.signTTL)
 	}
 
-	// 发送请求
+	// 發送請求
 	resp, err := client.Do(req)
 	if err != nil {
 		return &Response{Err: err}
@@ -160,7 +160,7 @@ func (c HTTPClient) Request(method, target string, body io.Reader, opts ...Optio
 	return &Response{Err: nil, Response: resp}
 }
 
-// GetResponse 检查响应并获取响应正文
+// GetResponse 檢查響應並獲取響應正文
 func (resp *Response) GetResponse() (string, error) {
 	if resp.Err != nil {
 		return "", resp.Err
@@ -171,20 +171,20 @@ func (resp *Response) GetResponse() (string, error) {
 	return string(respBody), err
 }
 
-// CheckHTTPResponse 检查请求响应HTTP状态码
+// CheckHTTPResponse 檢查請求響應HTTP狀態碼
 func (resp *Response) CheckHTTPResponse(status int) *Response {
 	if resp.Err != nil {
 		return resp
 	}
 
-	// 检查HTTP状态码
+	// 檢查HTTP狀態碼
 	if resp.Response.StatusCode != status {
-		resp.Err = fmt.Errorf("服务器返回非正常HTTP状态%d", resp.Response.StatusCode)
+		resp.Err = fmt.Errorf("伺服器返回非正常HTTP狀態%d", resp.Response.StatusCode)
 	}
 	return resp
 }
 
-// DecodeResponse 尝试解析为serializer.Response，并对状态码进行检查
+// DecodeResponse 嘗試解析為serializer.Response，並對狀態碼進行檢查
 func (resp *Response) DecodeResponse() (*serializer.Response, error) {
 	if resp.Err != nil {
 		return nil, resp.Err
@@ -198,27 +198,27 @@ func (resp *Response) DecodeResponse() (*serializer.Response, error) {
 	var res serializer.Response
 	err = json.Unmarshal([]byte(respString), &res)
 	if err != nil {
-		util.Log().Debug("无法解析回调服务端响应：%s", string(respString))
+		util.Log().Debug("無法解析回調服務端響應：%s", string(respString))
 		return nil, err
 	}
 	return &res, nil
 }
 
-// NopRSCloser 实现不完整seeker
+// NopRSCloser 實現不完整seeker
 type NopRSCloser struct {
 	body   io.ReadCloser
 	status *rscStatus
 }
 
 type rscStatus struct {
-	// http.ServeContent 会读取一小块以决定内容类型，
-	// 但是响应body无法实现seek，所以此项为真时第一个read会返回假数据
+	// http.ServeContent 會讀取一小塊以決定內容類型，
+	// 但是響應body無法實現seek，所以此項為真時第一個read會返回假資料
 	IgnoreFirst bool
 
 	Size int64
 }
 
-// GetRSCloser 返回带有空seeker的RSCloser，供http.ServeContent使用
+// GetRSCloser 返回帶有空seeker的RSCloser，供http.ServeContent使用
 func (resp *Response) GetRSCloser() (*NopRSCloser, error) {
 	if resp.Err != nil {
 		return nil, resp.Err
@@ -232,18 +232,18 @@ func (resp *Response) GetRSCloser() (*NopRSCloser, error) {
 	}, resp.Err
 }
 
-// SetFirstFakeChunk 开启第一次read返回空数据
-// TODO 测试
+// SetFirstFakeChunk 開啟第一次read返回空資料
+// TODO 測試
 func (instance NopRSCloser) SetFirstFakeChunk() {
 	instance.status.IgnoreFirst = true
 }
 
-// SetContentLength 设置数据流大小
+// SetContentLength 設定資料流大小
 func (instance NopRSCloser) SetContentLength(size int64) {
 	instance.status.Size = size
 }
 
-// Read 实现 NopRSCloser reader
+// Read 實現 NopRSCloser reader
 func (instance NopRSCloser) Read(p []byte) (n int, err error) {
 	if instance.status.IgnoreFirst && len(p) == 512 {
 		return 0, io.EOF
@@ -251,14 +251,14 @@ func (instance NopRSCloser) Read(p []byte) (n int, err error) {
 	return instance.body.Read(p)
 }
 
-// Close 实现 NopRSCloser closer
+// Close 實現 NopRSCloser closer
 func (instance NopRSCloser) Close() error {
 	return instance.body.Close()
 }
 
-// Seek 实现 NopRSCloser seeker, 只实现seek开头/结尾以便http.ServeContent用于确定正文大小
+// Seek 實現 NopRSCloser seeker, 只實現seek開頭/結尾以便http.ServeContent用於確定正文大小
 func (instance NopRSCloser) Seek(offset int64, whence int) (int64, error) {
-	// 进行第一次Seek操作后，取消忽略选项
+	// 進行第一次Seek操作後，取消忽略選項
 	if instance.status.IgnoreFirst {
 		instance.status.IgnoreFirst = false
 	}
@@ -270,16 +270,16 @@ func (instance NopRSCloser) Seek(offset int64, whence int) (int64, error) {
 			return instance.status.Size, nil
 		}
 	}
-	return 0, errors.New("未实现")
+	return 0, errors.New("未實現")
 
 }
 
-// BlackHole 将客户端发来的数据放入黑洞
+// BlackHole 將用戶端發來的資料放入黑洞
 func BlackHole(r io.Reader) {
 	if !model.IsTrueVal(model.GetSettingByName("reset_after_upload_failed")) {
 		_, err := io.Copy(ioutil.Discard, r)
 		if err != nil {
-			util.Log().Debug("黑洞数据出错，%s", err)
+			util.Log().Debug("黑洞資料出錯，%s", err)
 		}
 	}
 }

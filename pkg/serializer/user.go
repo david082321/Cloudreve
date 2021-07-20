@@ -9,15 +9,15 @@ import (
 	"time"
 )
 
-// CheckLogin 检查登录
+// CheckLogin 檢查登入
 func CheckLogin() Response {
 	return Response{
 		Code: CodeCheckLogin,
-		Msg:  "未登录",
+		Msg:  "未登入",
 	}
 }
 
-// User 用户序列化器
+// User 使用者序列化器
 type User struct {
 	ID             string    `json:"id"`
 	Email          string    `json:"user_name"`
@@ -66,13 +66,13 @@ type storage struct {
 	Total uint64 `json:"total"`
 }
 
-// WebAuthnCredentials 外部验证器凭证
+// WebAuthnCredentials 外部驗證器憑證
 type WebAuthnCredentials struct {
 	ID          []byte `json:"id"`
 	FingerPrint string `json:"fingerprint"`
 }
 
-// BuildWebAuthnList 构建设置页面凭证列表
+// BuildWebAuthnList 構建設定頁面憑證列表
 func BuildWebAuthnList(credentials []webauthn.Credential) []WebAuthnCredentials {
 	res := make([]WebAuthnCredentials, 0, len(credentials))
 	for _, v := range credentials {
@@ -86,7 +86,7 @@ func BuildWebAuthnList(credentials []webauthn.Credential) []WebAuthnCredentials 
 	return res
 }
 
-// BuildUser 序列化用户
+// BuildUser 序列化使用者
 func BuildUser(user model.User) User {
 	tags, _ := model.GetTagsByUID(user.ID)
 	return User{
@@ -119,14 +119,14 @@ func BuildUser(user model.User) User {
 	}
 }
 
-// BuildUserResponse 序列化用户响应
+// BuildUserResponse 序列化使用者響應
 func BuildUserResponse(user model.User) Response {
 	return Response{
 		Data: BuildUser(user),
 	}
 }
 
-// BuildUserStorageResponse 序列化用户存储概况响应
+// BuildUserStorageResponse 序列化使用者儲存概況響應
 func BuildUserStorageResponse(user model.User) Response {
 	total := user.Group.MaxStorage
 	storageResp := storage{
@@ -144,7 +144,7 @@ func BuildUserStorageResponse(user model.User) Response {
 	}
 }
 
-// buildTagRes 构建标签列表
+// buildTagRes 構建標籤列表
 func buildTagRes(tags []model.Tag) []tag {
 	res := make([]tag, 0, len(tags))
 	for i := 0; i < len(tags); i++ {

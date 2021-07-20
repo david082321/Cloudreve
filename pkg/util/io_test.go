@@ -14,7 +14,7 @@ func TestExists(t *testing.T) {
 func TestCreatNestedFile(t *testing.T) {
 	asserts := assert.New(t)
 
-	// 父目录不存在
+	// 父目錄不存在
 	{
 		file, err := CreatNestedFile("test/nest.txt")
 		asserts.NoError(err)
@@ -22,7 +22,7 @@ func TestCreatNestedFile(t *testing.T) {
 		asserts.FileExists("test/nest.txt")
 	}
 
-	// 父目录存在
+	// 父目錄存在
 	{
 		file, err := CreatNestedFile("test/direct.txt")
 		asserts.NoError(err)

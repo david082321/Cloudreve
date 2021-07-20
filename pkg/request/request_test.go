@@ -69,7 +69,7 @@ func TestHTTPClient_Request(t *testing.T) {
 		asserts.Nil(resp.Response)
 	}
 
-	// 正常 带有ctx
+	// 正常 帶有ctx
 	{
 		resp := client.Request(
 			"GET",
@@ -88,7 +88,7 @@ func TestHTTPClient_Request(t *testing.T) {
 func TestResponse_GetResponse(t *testing.T) {
 	asserts := assert.New(t)
 
-	// 直接返回错误
+	// 直接返回錯誤
 	{
 		resp := Response{
 			Err: errors.New("error"),
@@ -112,7 +112,7 @@ func TestResponse_GetResponse(t *testing.T) {
 func TestResponse_CheckHTTPResponse(t *testing.T) {
 	asserts := assert.New(t)
 
-	// 直接返回错误
+	// 直接返回錯誤
 	{
 		resp := Response{
 			Err: errors.New("error"),
@@ -121,7 +121,7 @@ func TestResponse_CheckHTTPResponse(t *testing.T) {
 		asserts.Error(res.Err)
 	}
 
-	// 404错误
+	// 404錯誤
 	{
 		resp := Response{
 			Response: &http.Response{StatusCode: 404},
@@ -130,7 +130,7 @@ func TestResponse_CheckHTTPResponse(t *testing.T) {
 		asserts.Error(res.Err)
 	}
 
-	// 通过
+	// 通過
 	{
 		resp := Response{
 			Response: &http.Response{StatusCode: 200},
@@ -143,7 +143,7 @@ func TestResponse_CheckHTTPResponse(t *testing.T) {
 func TestResponse_GetRSCloser(t *testing.T) {
 	asserts := assert.New(t)
 
-	// 直接返回错误
+	// 直接返回錯誤
 	{
 		resp := Response{
 			Err: errors.New("error"),
@@ -179,7 +179,7 @@ func TestResponse_GetRSCloser(t *testing.T) {
 func TestResponse_DecodeResponse(t *testing.T) {
 	asserts := assert.New(t)
 
-	// 直接返回错误
+	// 直接返回錯誤
 	{
 		resp := Response{Err: errors.New("error")}
 		response, err := resp.DecodeResponse()
@@ -187,7 +187,7 @@ func TestResponse_DecodeResponse(t *testing.T) {
 		asserts.Nil(response)
 	}
 
-	// 无法解析响应
+	// 無法解析響應
 	{
 		resp := Response{
 			Response: &http.Response{

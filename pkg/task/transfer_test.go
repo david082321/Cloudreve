@@ -62,7 +62,7 @@ func TestTransferTask_Do(t *testing.T) {
 		},
 	}
 
-	// 无法创建文件系统
+	// 無法建立文件系統
 	{
 		task.TaskProps.Parent = "test/not_exist"
 		task.User = &model.User{
@@ -79,7 +79,7 @@ func TestTransferTask_Do(t *testing.T) {
 		asserts.NotEmpty(task.GetError().Msg)
 	}
 
-	// 上传出错
+	// 上傳出錯
 	{
 		task.User = &model.User{
 			Policy: model.Policy{
@@ -88,12 +88,12 @@ func TestTransferTask_Do(t *testing.T) {
 		}
 		task.TaskProps.Src = []string{"test/not_exist"}
 		task.TaskProps.Parent = "test/not_exist"
-		// 更新进度
+		// 更新進度
 		mock.ExpectBegin()
 		mock.ExpectExec("UPDATE(.+)").WillReturnResult(sqlmock.NewResult(1,
 			1))
 		mock.ExpectCommit()
-		// 更新错误
+		// 更新錯誤
 		mock.ExpectBegin()
 		mock.ExpectExec("UPDATE(.+)").WillReturnResult(sqlmock.NewResult(1,
 			1))
@@ -103,7 +103,7 @@ func TestTransferTask_Do(t *testing.T) {
 		asserts.NotEmpty(task.GetError().Msg)
 	}
 
-	// 替换目录前缀
+	// 取代目錄前綴
 	{
 		task.User = &model.User{
 			Policy: model.Policy{
@@ -113,12 +113,12 @@ func TestTransferTask_Do(t *testing.T) {
 		task.TaskProps.Src = []string{"test/not_exist"}
 		task.TaskProps.Parent = "test/not_exist"
 		task.TaskProps.TrimPath = true
-		// 更新进度
+		// 更新進度
 		mock.ExpectBegin()
 		mock.ExpectExec("UPDATE(.+)").WillReturnResult(sqlmock.NewResult(1,
 			1))
 		mock.ExpectCommit()
-		// 更新错误
+		// 更新錯誤
 		mock.ExpectBegin()
 		mock.ExpectExec("UPDATE(.+)").WillReturnResult(sqlmock.NewResult(1,
 			1))
@@ -144,7 +144,7 @@ func TestNewTransferTask(t *testing.T) {
 		asserts.NoError(err)
 	}
 
-	// 失败
+	// 失敗
 	{
 		mock.ExpectQuery("SELECT(.+)").WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 		mock.ExpectBegin()
@@ -169,7 +169,7 @@ func TestNewTransferTaskFromModel(t *testing.T) {
 		asserts.NotNil(job)
 	}
 
-	// JSON解析失败
+	// JSON解析失敗
 	{
 		mock.ExpectQuery("SELECT(.+)").WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 		job, err := NewTransferTaskFromModel(&model.Task{Props: "?"})

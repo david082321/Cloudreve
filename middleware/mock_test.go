@@ -17,7 +17,7 @@ func TestMockHelper(t *testing.T) {
 	c, _ := gin.CreateTestContext(rec)
 	c.Request, _ = http.NewRequest("GET", "/test", nil)
 
-	// 写入session
+	// 寫入session
 	{
 		SessionMock["test"] = "pass"
 		Session("test")(c)
@@ -25,7 +25,7 @@ func TestMockHelper(t *testing.T) {
 		asserts.Equal("pass", util.GetSession(c, "test").(string))
 	}
 
-	// 写入context
+	// 寫入context
 	{
 		ContextMock["test"] = "pass"
 		MockHelperFunc(c)

@@ -21,12 +21,12 @@ import (
 	"github.com/qiniu/api.v7/v7/storage"
 )
 
-// Driver 本地策略适配器
+// Driver 本機策略適配器
 type Driver struct {
 	Policy *model.Policy
 }
 
-// List 列出给定路径下的文件
+// List 列出給定路徑下的文件
 func (handler Driver) List(ctx context.Context, base string, recursive bool) ([]response.Object, error) {
 	base = strings.TrimPrefix(base, "/")
 	if base != "" {
@@ -64,9 +64,9 @@ func (handler Driver) List(ctx context.Context, base string, recursive bool) ([]
 		marker = nextMarker
 	}
 
-	// 处理列取结果
+	// 處理列取結果
 	res := make([]response.Object, 0, len(objects)+len(commons))
-	// 处理目录
+	// 處理目錄
 	for _, object := range commons {
 		rel, err := filepath.Rel(base, object)
 		if err != nil {
@@ -80,7 +80,7 @@ func (handler Driver) List(ctx context.Context, base string, recursive bool) ([]
 			LastModify:   time.Now(),
 		})
 	}
-	// 处理文件
+	// 處理文件
 	for _, object := range objects {
 		rel, err := filepath.Rel(base, object.Key)
 		if err != nil {
@@ -99,12 +99,12 @@ func (handler Driver) List(ctx context.Context, base string, recursive bool) ([]
 	return res, nil
 }
 
-// Get 获取文件
+// Get 獲取文件
 func (handler Driver) Get(ctx context.Context, path string) (response.RSCloser, error) {
-	// 给文件名加上随机参数以强制拉取
+	// 給檔案名加上隨機參數以強制拉取
 	path = fmt.Sprintf("%s?v=%d", path, time.Now().UnixNano())
 
-	// 获取文件源地址
+	// 獲取文件源地址
 	downloadURL, err := handler.Source(
 		ctx,
 		path,
@@ -117,7 +117,7 @@ func (handler Driver) Get(ctx context.Context, path string) (response.RSCloser, 
 		return nil, err
 	}
 
-	// 获取文件数据流
+	// 獲取文件資料流
 	client := request.HTTPClient{}
 	resp, err := client.Request(
 		"GET",
@@ -135,7 +135,7 @@ func (handler Driver) Get(ctx context.Context, path string) (response.RSCloser, 
 
 	resp.SetFirstFakeChunk()
 
-	// 尝试自主获取文件大小
+	// 嘗試自主獲取檔案大小
 	if file, ok := ctx.Value(fsctx.FileModelCtx).(model.File); ok {
 		resp.SetContentLength(int64(file.Size))
 	}
@@ -143,33 +143,33 @@ func (handler Driver) Get(ctx context.Context, path string) (response.RSCloser, 
 	return resp, nil
 }
 
-// Put 将文件流保存到指定目录
+// Put 將文件流儲存到指定目錄
 func (handler Driver) Put(ctx context.Context, file io.ReadCloser, dst string, size uint64) error {
 	defer file.Close()
 
-	// 凭证有效期
+	// 憑證有效期
 	credentialTTL := model.GetIntSetting("upload_credential_timeout", 3600)
 
-	// 生成上传策略
+	// 生成上傳策略
 	putPolicy := storage.PutPolicy{
-		// 指定为覆盖策略
+		// 指定為覆蓋策略
 		Scope:        fmt.Sprintf("%s:%s", handler.Policy.BucketName, dst),
 		SaveKey:      dst,
 		ForceSaveKey: true,
 		FsizeLimit:   int64(size),
 	}
-	// 是否开启了MIMEType限制
+	// 是否開啟了MIMEType限制
 	if handler.Policy.OptionsSerialized.MimeType != "" {
 		putPolicy.MimeLimit = handler.Policy.OptionsSerialized.MimeType
 	}
 
-	// 生成上传凭证
+	// 生成上傳憑證
 	token, err := handler.getUploadCredential(ctx, putPolicy, int64(credentialTTL))
 	if err != nil {
 		return err
 	}
 
-	// 创建上传表单
+	// 建立上傳表單
 	cfg := storage.Config{}
 	formUploader := storage.NewFormUploader(&cfg)
 	ret := storage.PutRet{}
@@ -177,7 +177,7 @@ func (handler Driver) Put(ctx context.Context, file io.ReadCloser, dst string, s
 		Params: map[string]string{},
 	}
 
-	// 开始上传
+	// 開始上傳
 	err = formUploader.Put(ctx, &ret, token.Token, dst, file, int64(size), &putExtra)
 	if err != nil {
 		return err
@@ -186,10 +186,10 @@ func (handler Driver) Put(ctx context.Context, file io.ReadCloser, dst string, s
 	return nil
 }
 
-// Delete 删除一个或多个文件，
-// 返回未删除的文件
+// Delete 刪除一個或多個文件，
+// 返回未刪除的文件
 func (handler Driver) Delete(ctx context.Context, files []string) ([]string, error) {
-	// TODO 大于一千个文件需要分批发送
+	// TODO 大於一千個文件需要分批發送
 	deleteOps := make([]string, 0, len(files))
 	for _, key := range files {
 		deleteOps = append(deleteOps, storage.URIDelete(handler.Policy.BucketName, key))
@@ -202,7 +202,7 @@ func (handler Driver) Delete(ctx context.Context, files []string) ([]string, err
 	bucketManager := storage.NewBucketManager(mac, &cfg)
 	rets, err := bucketManager.Batch(deleteOps)
 
-	// 处理删除结果
+	// 處理刪除結果
 	if err != nil {
 		failed := make([]string, 0, len(rets))
 		for k, ret := range rets {
@@ -210,20 +210,20 @@ func (handler Driver) Delete(ctx context.Context, files []string) ([]string, err
 				failed = append(failed, files[k])
 			}
 		}
-		return failed, errors.New("删除失败")
+		return failed, errors.New("刪除失敗")
 	}
 
 	return []string{}, nil
 }
 
-// Thumb 获取文件缩略图
+// Thumb 獲取文件縮圖
 func (handler Driver) Thumb(ctx context.Context, path string) (*response.ContentResponse, error) {
 	var (
 		thumbSize = [2]uint{400, 300}
 		ok        = false
 	)
 	if thumbSize, ok = ctx.Value(fsctx.ThumbSizeCtx).([2]uint); !ok {
-		return nil, errors.New("无法获取缩略图尺寸设置")
+		return nil, errors.New("無法獲取縮圖尺寸設定")
 	}
 
 	path = fmt.Sprintf("%s?imageView2/1/w/%d/h/%d", path, thumbSize[0], thumbSize[1])
@@ -237,7 +237,7 @@ func (handler Driver) Thumb(ctx context.Context, path string) (*response.Content
 	}, nil
 }
 
-// Source 获取外链URL
+// Source 獲取外鏈URL
 func (handler Driver) Source(
 	ctx context.Context,
 	path string,
@@ -246,13 +246,13 @@ func (handler Driver) Source(
 	isDownload bool,
 	speed int,
 ) (string, error) {
-	// 尝试从上下文获取文件名
+	// 嘗試從上下文獲取檔案名
 	fileName := ""
 	if file, ok := ctx.Value(fsctx.FileModelCtx).(model.File); ok {
 		fileName = file.Name
 	}
 
-	// 加入下载相关设置
+	// 加入下載相關設定
 	if isDownload {
 		path = path + "?attname=" + url.PathEscape(fileName)
 	}
@@ -273,20 +273,20 @@ func (handler Driver) signSourceURL(ctx context.Context, path string, ttl int64)
 	return sourceURL
 }
 
-// Token 获取上传策略和认证Token
+// Token 獲取上傳策略和認證Token
 func (handler Driver) Token(ctx context.Context, TTL int64, key string) (serializer.UploadCredential, error) {
-	// 生成回调地址
+	// 生成回調地址
 	siteURL := model.GetSiteURL()
 	apiBaseURI, _ := url.Parse("/api/v3/callback/qiniu/" + key)
 	apiURL := siteURL.ResolveReference(apiBaseURI)
 
-	// 读取上下文中生成的存储路径
+	// 讀取上下文中生成的儲存路徑
 	savePath, ok := ctx.Value(fsctx.SavePathCtx).(string)
 	if !ok {
-		return serializer.UploadCredential{}, errors.New("无法获取存储路径")
+		return serializer.UploadCredential{}, errors.New("無法獲取儲存路徑")
 	}
 
-	// 创建上传策略
+	// 建立上傳策略
 	putPolicy := storage.PutPolicy{
 		Scope:            handler.Policy.BucketName,
 		CallbackURL:      apiURL.String(),
@@ -296,7 +296,7 @@ func (handler Driver) Token(ctx context.Context, TTL int64, key string) (seriali
 		ForceSaveKey:     true,
 		FsizeLimit:       int64(handler.Policy.MaxSize),
 	}
-	// 是否开启了MIMEType限制
+	// 是否開啟了MIMEType限制
 	if handler.Policy.OptionsSerialized.MimeType != "" {
 		putPolicy.MimeLimit = handler.Policy.OptionsSerialized.MimeType
 	}
@@ -304,7 +304,7 @@ func (handler Driver) Token(ctx context.Context, TTL int64, key string) (seriali
 	return handler.getUploadCredential(ctx, putPolicy, TTL)
 }
 
-// getUploadCredential 签名上传策略
+// getUploadCredential 簽名上傳策略
 func (handler Driver) getUploadCredential(ctx context.Context, policy storage.PutPolicy, TTL int64) (serializer.UploadCredential, error) {
 	policy.Expires = uint64(TTL)
 	mac := qbox.NewMac(handler.Policy.AccessKey, handler.Policy.SecretKey)

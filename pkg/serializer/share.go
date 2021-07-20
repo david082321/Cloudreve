@@ -7,7 +7,7 @@ import (
 	"github.com/cloudreve/Cloudreve/v3/pkg/hashid"
 )
 
-// Share 分享信息序列化
+// Share 分享訊息序列化
 type Share struct {
 	Key        string        `json:"key"`
 	Locked     bool          `json:"locked"`
@@ -32,7 +32,7 @@ type shareSource struct {
 	Size uint64 `json:"size"`
 }
 
-// myShareItem 我的分享列表条目
+// myShareItem 我的分享列表條目
 type myShareItem struct {
 	Key             string       `json:"key"`
 	IsDir           bool         `json:"is_dir"`
@@ -46,7 +46,7 @@ type myShareItem struct {
 	Source          *shareSource `json:"source,omitempty"`
 }
 
-// BuildShareList 构建我的分享列表响应
+// BuildShareList 構建我的分享列表響應
 func BuildShareList(shares []model.Share, total int) Response {
 	res := make([]myShareItem, 0, total)
 	now := time.Now().Unix()
@@ -88,7 +88,7 @@ func BuildShareList(shares []model.Share, total int) Response {
 	}}
 }
 
-// BuildShareResponse 构建获取分享信息响应
+// BuildShareResponse 構建獲取分享訊息響應
 func BuildShareResponse(share *model.Share, unlocked bool) Share {
 	creator := share.Creator()
 	resp := Share{
@@ -102,7 +102,7 @@ func BuildShareResponse(share *model.Share, unlocked bool) Share {
 		CreateDate: share.CreatedAt,
 	}
 
-	// 未解锁时只返回基本信息
+	// 未解鎖時只返回基本訊息
 	if !unlocked {
 		return resp
 	}

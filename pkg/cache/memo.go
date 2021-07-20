@@ -7,12 +7,12 @@ import (
 	"github.com/cloudreve/Cloudreve/v3/pkg/util"
 )
 
-// MemoStore 内存存储驱动
+// MemoStore 記憶體儲存驅動
 type MemoStore struct {
 	Store *sync.Map
 }
 
-// item 存储的对象
+// item 儲存的物件
 type itemWithTTL struct {
 	expires int64
 	value   interface{}
@@ -29,7 +29,7 @@ func newItem(value interface{}, expires int) itemWithTTL {
 	}
 }
 
-// getValue 从itemWithTTL中取值
+// getValue 從itemWithTTL中取值
 func getValue(item interface{}, ok bool) (interface{}, bool) {
 	if !ok {
 		return nil, ok
@@ -48,7 +48,7 @@ func getValue(item interface{}, ok bool) (interface{}, bool) {
 
 }
 
-// GarbageCollect 回收已过期的缓存
+// GarbageCollect 回收已過期的快取
 func (store *MemoStore) GarbageCollect() {
 	store.Store.Range(func(key, value interface{}) bool {
 		if item, ok := value.(itemWithTTL); ok {
@@ -61,14 +61,14 @@ func (store *MemoStore) GarbageCollect() {
 	})
 }
 
-// NewMemoStore 新建内存存储
+// NewMemoStore 建立記憶體儲存
 func NewMemoStore() *MemoStore {
 	return &MemoStore{
 		Store: &sync.Map{},
 	}
 }
 
-// Set 存储值
+// Set 儲存值
 func (store *MemoStore) Set(key string, value interface{}, ttl int) error {
 	store.Store.Store(key, newItem(value, ttl))
 	return nil
@@ -79,7 +79,7 @@ func (store *MemoStore) Get(key string) (interface{}, bool) {
 	return getValue(store.Store.Load(key))
 }
 
-// Gets 批量取值
+// Gets 批次取值
 func (store *MemoStore) Gets(keys []string, prefix string) (map[string]interface{}, []string) {
 	var res = make(map[string]interface{})
 	var notFound = make([]string, 0, len(keys))
@@ -95,7 +95,7 @@ func (store *MemoStore) Gets(keys []string, prefix string) (map[string]interface
 	return res, notFound
 }
 
-// Sets 批量设置值
+// Sets 批次設定值
 func (store *MemoStore) Sets(values map[string]interface{}, prefix string) error {
 	for key, value := range values {
 		store.Store.Store(prefix+key, value)
@@ -103,7 +103,7 @@ func (store *MemoStore) Sets(values map[string]interface{}, prefix string) error
 	return nil
 }
 
-// Delete 批量删除值
+// Delete 批次刪除值
 func (store *MemoStore) Delete(keys []string, prefix string) error {
 	for _, key := range keys {
 		store.Store.Delete(prefix + key)

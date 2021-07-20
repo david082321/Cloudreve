@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 )
 
-// UploadPolicy slave模式下传递的上传策略
+// UploadPolicy slave模式下傳遞的上傳策略
 type UploadPolicy struct {
 	SavePath         string   `json:"save_path"`
 	FileName         string   `json:"file_name"`
@@ -16,18 +16,18 @@ type UploadPolicy struct {
 	CallbackURL      string   `json:"callback_url"`
 }
 
-// UploadCredential 返回给客户端的上传凭证
+// UploadCredential 返回給用戶端的上傳憑證
 type UploadCredential struct {
 	Token     string `json:"token"`
 	Policy    string `json:"policy"`
-	Path      string `json:"path"` // 存储路径
+	Path      string `json:"path"` // 儲存路徑
 	AccessKey string `json:"ak"`
 	KeyTime   string `json:"key_time,omitempty"` // COS用有效期
-	Callback  string `json:"callback,omitempty"` // 回调地址
-	Key       string `json:"key,omitempty"`      // 文件标识符，通常为回调key
+	Callback  string `json:"callback,omitempty"` // 回調地址
+	Key       string `json:"key,omitempty"`      // 文件標識符，通常為回調key
 }
 
-// UploadSession 上传会话
+// UploadSession 上傳工作階段
 type UploadSession struct {
 	Key         string
 	UID         uint
@@ -38,7 +38,7 @@ type UploadSession struct {
 	SavePath    string
 }
 
-// UploadCallback 上传回调正文
+// UploadCallback 上傳回調正文
 type UploadCallback struct {
 	Name       string `json:"name"`
 	SourceName string `json:"source_name"`
@@ -46,7 +46,7 @@ type UploadCallback struct {
 	Size       uint64 `json:"size"`
 }
 
-// GeneralUploadCallbackFailed 存储策略上传回调失败响应
+// GeneralUploadCallbackFailed 儲存策略上傳回調失敗響應
 type GeneralUploadCallbackFailed struct {
 	Error string `json:"error"`
 }
@@ -55,7 +55,7 @@ func init() {
 	gob.Register(UploadSession{})
 }
 
-// DecodeUploadPolicy 反序列化Header中携带的上传策略
+// DecodeUploadPolicy 反序列化Header中攜帶的上傳策略
 func DecodeUploadPolicy(raw string) (*UploadPolicy, error) {
 	var res UploadPolicy
 
@@ -72,7 +72,7 @@ func DecodeUploadPolicy(raw string) (*UploadPolicy, error) {
 	return &res, err
 }
 
-// EncodeUploadPolicy 序列化Header中携带的上传策略
+// EncodeUploadPolicy 序列化Header中攜帶的上傳策略
 func (policy *UploadPolicy) EncodeUploadPolicy() (string, error) {
 	jsonRes, err := json.Marshal(policy)
 	if err != nil {

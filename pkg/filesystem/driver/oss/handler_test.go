@@ -33,13 +33,13 @@ func TestDriver_InitOSSClient(t *testing.T) {
 		asserts.NoError(handler.InitOSSClient(false))
 	}
 
-	// 使用内网Endpoint
+	// 使用內網Endpoint
 	{
 		handler.Policy.OptionsSerialized.ServerSideEndpoint = "endpoint2"
 		asserts.NoError(handler.InitOSSClient(false))
 	}
 
-	// 未指定存储策略
+	// 未指定儲存策略
 	{
 		handler := Driver{}
 		asserts.Error(handler.InitOSSClient(false))
@@ -57,7 +57,7 @@ func TestDriver_CORS(t *testing.T) {
 		},
 	}
 
-	// 失败
+	// 失敗
 	{
 		asserts.NotPanics(func() {
 			handler.CORS()
@@ -88,7 +88,7 @@ func TestDriver_Token(t *testing.T) {
 		asserts.Equal("/123", res.Path)
 	}
 
-	// 上下文错误
+	// 上下文錯誤
 	{
 		ctx := context.Background()
 		_, err := handler.Token(ctx, 10, "key")
@@ -109,7 +109,7 @@ func TestDriver_Source(t *testing.T) {
 		},
 	}
 
-	// 正常 非下载 无限速
+	// 正常 非下載 無限速
 	{
 		res, err := handler.Source(context.Background(), "/123", url.URL{}, 10, false, 0)
 		asserts.NoError(err)
@@ -121,7 +121,7 @@ func TestDriver_Source(t *testing.T) {
 		asserts.Equal("ak", query.Get("OSSAccessKeyId"))
 	}
 
-	// 限速 + 下载
+	// 限速 + 下載
 	{
 		ctx := context.WithValue(context.Background(), fsctx.FileModelCtx, model.File{Name: "123.txt"})
 		res, err := handler.Source(ctx, "/123", url.URL{}, 10, true, 102401)
@@ -136,7 +136,7 @@ func TestDriver_Source(t *testing.T) {
 		asserts.NotEmpty(query.Get("response-content-disposition"))
 	}
 
-	// 限速超出范围 + 下载
+	// 限速超出範圍 + 下載
 	{
 		ctx := context.WithValue(context.Background(), fsctx.FileModelCtx, model.File{Name: "123.txt"})
 		res, err := handler.Source(ctx, "/123", url.URL{}, 10, true, 10)
@@ -151,7 +151,7 @@ func TestDriver_Source(t *testing.T) {
 		asserts.NotEmpty(query.Get("response-content-disposition"))
 	}
 
-	// 限速超出范围 + 下载
+	// 限速超出範圍 + 下載
 	{
 		ctx := context.WithValue(context.Background(), fsctx.FileModelCtx, model.File{Name: "123.txt"})
 		res, err := handler.Source(ctx, "/123", url.URL{}, 10, true, 838860801)
@@ -166,7 +166,7 @@ func TestDriver_Source(t *testing.T) {
 		asserts.NotEmpty(query.Get("response-content-disposition"))
 	}
 
-	// 公共空间
+	// 公共空間
 	{
 		handler.Policy.IsPrivate = false
 		res, err := handler.Source(context.Background(), "/123", url.URL{}, 10, false, 0)
@@ -189,7 +189,7 @@ func TestDriver_Source(t *testing.T) {
 		asserts.Contains(resURL.String(), handler.Policy.BaseURL)
 	}
 
-	// 强制使用公网 Endpoint
+	// 強制使用公網 Endpoint
 	{
 		handler.Policy.BaseURL = ""
 		handler.Policy.OptionsSerialized.ServerSideEndpoint = "endpoint.com"
@@ -246,7 +246,7 @@ func TestDriver_Delete(t *testing.T) {
 		},
 	}
 
-	// 失败
+	// 失敗
 	{
 		res, err := handler.Delete(context.Background(), []string{"1", "2", "3"})
 		asserts.Error(err)
@@ -267,7 +267,7 @@ func TestDriver_Put(t *testing.T) {
 	cache.Set("setting_upload_credential_timeout", "3600", 0)
 	ctx := context.WithValue(context.Background(), fsctx.DisableOverwrite, true)
 
-	// 失败
+	// 失敗
 	{
 		err := handler.Put(ctx, ioutil.NopCloser(strings.NewReader("123")), "/123.txt", 3)
 		asserts.Error(err)
@@ -296,14 +296,14 @@ func TestDriver_Get(t *testing.T) {
 	}
 	cache.Set("setting_preview_timeout", "3600", 0)
 
-	// 响应失败
+	// 響應失敗
 	{
 		res, err := handler.Get(context.Background(), "123.txt")
 		asserts.Error(err)
 		asserts.Nil(res)
 	}
 
-	// 响应成功
+	// 響應成功
 	{
 		ctx := context.WithValue(context.Background(), fsctx.FileModelCtx, model.File{Size: 3})
 		clientMock := ClientMock{}
@@ -345,7 +345,7 @@ func TestDriver_List(t *testing.T) {
 		},
 	}
 
-	// 连接失败
+	// 連線失敗
 	{
 		res, err := handler.List(context.Background(), "/", true)
 		asserts.Error(err)

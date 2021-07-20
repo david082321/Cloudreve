@@ -7,36 +7,36 @@ import (
 	"github.com/cloudreve/Cloudreve/v3/pkg/serializer"
 )
 
-// Aria2TestService aria2连接测试服务
+// Aria2TestService aria2連接測試服務
 type Aria2TestService struct {
 	Server string `json:"server" binding:"required"`
 	Token  string `json:"token"`
 }
 
-// Test 测试aria2连接
+// Test 測試aria2連接
 func (service *Aria2TestService) Test() serializer.Response {
 	testRPC := aria2.RPCService{}
 
-	// 解析RPC服务地址
+	// 解析RPC服務地址
 	server, err := url.Parse(service.Server)
 	if err != nil {
-		return serializer.ParamErr("无法解析 aria2 RPC 服务地址, "+err.Error(), nil)
+		return serializer.ParamErr("無法解析 aria2 RPC 服務地址, "+err.Error(), nil)
 	}
 	server.Path = "/jsonrpc"
 
 	if err := testRPC.Init(server.String(), service.Token, 5, map[string]interface{}{}); err != nil {
-		return serializer.ParamErr("无法初始化连接, "+err.Error(), nil)
+		return serializer.ParamErr("無法初始化連接, "+err.Error(), nil)
 	}
 
 	defer testRPC.Caller.Close()
 
 	info, err := testRPC.Caller.GetVersion()
 	if err != nil {
-		return serializer.ParamErr("无法请求 RPC 服务, "+err.Error(), nil)
+		return serializer.ParamErr("無法請求 RPC 服務, "+err.Error(), nil)
 	}
 
 	if info.Version == "" {
-		return serializer.ParamErr("RPC 服务返回非预期响应", nil)
+		return serializer.ParamErr("RPC 服務返回非預期響應", nil)
 	}
 
 	return serializer.Response{Data: info.Version}

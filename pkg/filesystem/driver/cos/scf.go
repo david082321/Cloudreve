@@ -19,7 +19,7 @@ import (
 )
 
 const scfFunc = `# -*- coding: utf8 -*-
-# SCF配置COS触发，向 Cloudreve 发送回调
+# SCF配置COS觸發，向 Cloudreve 發送回調
 from qcloud_cos_v5 import CosConfig
 from qcloud_cos_v5 import CosS3Client
 from qcloud_cos_v5 import CosServiceError
@@ -57,9 +57,9 @@ def main_handler(event, context):
     return "Success"
 `
 
-// CreateSCF 创建回调云函数
+// CreateSCF 建立回調雲函數
 func CreateSCF(policy *model.Policy, region string) error {
-	// 初始化客户端
+	// 初始化用戶端
 	credential := common.NewCredential(
 		policy.AccessKey,
 		policy.SecretKey,
@@ -70,7 +70,7 @@ func CreateSCF(policy *model.Policy, region string) error {
 		return err
 	}
 
-	// 创建回调代码数据
+	// 建立回調程式碼資料
 	buff := &bytes.Buffer{}
 	bs64 := base64.NewEncoder(base64.StdEncoding, buff)
 	zipWriter := zip.NewWriter(bs64)
@@ -85,14 +85,14 @@ func CreateSCF(policy *model.Policy, region string) error {
 	_, err = io.Copy(writer, strings.NewReader(scfFunc))
 	zipWriter.Close()
 
-	// 创建云函数
+	// 建立雲函數
 	req := scf.NewCreateFunctionRequest()
 	funcName := "cloudreve_" + hashid.HashID(policy.ID, hashid.PolicyID) + strconv.FormatInt(time.Now().Unix(), 10)
 	zipFileBytes, _ := ioutil.ReadAll(buff)
 	zipFileStr := string(zipFileBytes)
 	codeSource := "ZipFile"
 	handler := "callback.main_handler"
-	desc := "Cloudreve 用回调函数"
+	desc := "Cloudreve 用回調函數"
 	timeout := int64(60)
 	runtime := "Python3.6"
 	req.FunctionName = &funcName
@@ -112,7 +112,7 @@ func CreateSCF(policy *model.Policy, region string) error {
 
 	time.Sleep(time.Duration(5) * time.Second)
 
-	// 创建触发器
+	// 建立觸發器
 	server, _ := url.Parse(policy.Server)
 	triggerType := "cos"
 	triggerDesc := `{"event":"cos:ObjectCreated:Post","filter":{"Prefix":"","Suffix":""}}`

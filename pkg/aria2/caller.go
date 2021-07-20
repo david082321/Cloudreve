@@ -12,19 +12,19 @@ import (
 	"github.com/cloudreve/Cloudreve/v3/pkg/util"
 )
 
-// RPCService 通过RPC服务的Aria2任务管理器
+// RPCService 透過RPC服務的Aria2任務管理器
 type RPCService struct {
 	options *clientOptions
 	Caller  rpc.Client
 }
 
 type clientOptions struct {
-	Options map[string]interface{} // 创建下载时额外添加的设置
+	Options map[string]interface{} // 建立下載時額外添加的設定
 }
 
 // Init 初始化
 func (client *RPCService) Init(server, secret string, timeout int, options map[string]interface{}) error {
-	// 客户端已存在，则关闭先前连接
+	// 用戶端已存在，則關閉先前連接
 	if client.Caller != nil {
 		client.Caller.Close()
 	}
@@ -38,12 +38,12 @@ func (client *RPCService) Init(server, secret string, timeout int, options map[s
 	return err
 }
 
-// Status 查询下载状态
+// Status 查詢下載狀態
 func (client *RPCService) Status(task *model.Download) (rpc.StatusInfo, error) {
 	res, err := client.Caller.TellStatus(task.GID)
 	if err != nil {
-		// 失败后重试
-		util.Log().Debug("无法获取离线下载状态，%s，10秒钟后重试", err)
+		// 失敗後重試
+		util.Log().Debug("無法獲取離線下載狀態，%s，10秒鐘後重試", err)
 		time.Sleep(time.Duration(10) * time.Second)
 		res, err = client.Caller.TellStatus(task.GID)
 	}
@@ -51,22 +51,22 @@ func (client *RPCService) Status(task *model.Download) (rpc.StatusInfo, error) {
 	return res, err
 }
 
-// Cancel 取消下载
+// Cancel 取消下載
 func (client *RPCService) Cancel(task *model.Download) error {
-	// 取消下载任务
+	// 取消下載任務
 	_, err := client.Caller.Remove(task.GID)
 	if err != nil {
-		util.Log().Warning("无法取消离线下载任务[%s], %s", task.GID, err)
+		util.Log().Warning("無法取消離線下載任務[%s], %s", task.GID, err)
 	}
 
-	//// 删除临时文件
-	//util.Log().Debug("离线下载任务[%s]已取消，1 分钟后删除临时文件", task.GID)
+	//// 刪除暫存檔
+	//util.Log().Debug("離線下載任務[%s]已取消，1 分鐘後刪除暫存檔", task.GID)
 	//go func(task *model.Download) {
 	//	select {
 	//	case <-time.After(time.Duration(60) * time.Second):
 	//		err := os.RemoveAll(task.Parent)
 	//		if err != nil {
-	//			util.Log().Warning("无法删除离线下载临时目录[%s], %s", task.Parent, err)
+	//			util.Log().Warning("無法刪除離線下載暫存資料夾[%s], %s", task.Parent, err)
 	//		}
 	//	}
 	//}(task)
@@ -74,7 +74,7 @@ func (client *RPCService) Cancel(task *model.Download) error {
 	return err
 }
 
-// Select 选取要下载的文件
+// Select 選取要下載的文件
 func (client *RPCService) Select(task *model.Download, files []int) error {
 	var selected = make([]string, len(files))
 	for i := 0; i < len(files); i++ {
@@ -84,16 +84,16 @@ func (client *RPCService) Select(task *model.Download, files []int) error {
 	return err
 }
 
-// CreateTask 创建新任务
+// CreateTask 建立新任務
 func (client *RPCService) CreateTask(task *model.Download, groupOptions map[string]interface{}) error {
-	// 生成存储路径
+	// 生成儲存路徑
 	path := filepath.Join(
 		model.GetSettingByName("aria2_temp_path"),
 		"aria2",
 		strconv.FormatInt(time.Now().UnixNano(), 10),
 	)
 
-	// 创建下载任务
+	// 建立下載任務
 	options := map[string]interface{}{
 		"dir": path,
 	}
@@ -109,14 +109,14 @@ func (client *RPCService) CreateTask(task *model.Download, groupOptions map[stri
 		return err
 	}
 
-	// 保存到数据库
+	// 儲存到資料庫
 	task.GID = gid
 	_, err = task.Create()
 	if err != nil {
 		return err
 	}
 
-	// 创建任务监控
+	// 建立任務監控
 	NewMonitor(task)
 
 	return nil

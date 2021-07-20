@@ -57,7 +57,7 @@ func TestGeneralWorker_Do(t *testing.T) {
 		asserts.Equal(Complete, job.Status)
 	}
 
-	// 有错误
+	// 有錯誤
 	{
 		job.DoFunc = func() {
 		}
@@ -67,7 +67,7 @@ func TestGeneralWorker_Do(t *testing.T) {
 		asserts.Equal(Error, job.Status)
 	}
 
-	// 有致命错误
+	// 有致命錯誤
 	{
 		job.DoFunc = func() {
 			panic("mock fatal error")

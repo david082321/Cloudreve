@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// ShareCreateService 创建新分享服务
+// ShareCreateService 建立新分享服務
 type ShareCreateService struct {
 	SourceID        string `json:"id" binding:"required"`
 	IsDir           bool   `json:"is_dir"`
@@ -20,13 +20,13 @@ type ShareCreateService struct {
 	Preview         bool   `json:"preview"`
 }
 
-// ShareUpdateService 分享更新服务
+// ShareUpdateService 分享更新服務
 type ShareUpdateService struct {
 	Prop  string `json:"prop" binding:"required,eq=password|eq=preview_enabled"`
 	Value string `json:"value" binding:"max=255"`
 }
 
-// Delete 删除分享
+// Delete 刪除分享
 func (service *Service) Delete(c *gin.Context, user *model.User) serializer.Response {
 	share := model.GetShareByHashID(c.Param("id"))
 	if share == nil || share.Creator().ID != user.ID {
@@ -34,13 +34,13 @@ func (service *Service) Delete(c *gin.Context, user *model.User) serializer.Resp
 	}
 
 	if err := share.Delete(); err != nil {
-		return serializer.Err(serializer.CodeDBError, "分享删除失败", err)
+		return serializer.Err(serializer.CodeDBError, "分享刪除失敗", err)
 	}
 
 	return serializer.Response{}
 }
 
-// Update 更新分享属性
+// Update 更新分享屬性
 func (service *ShareUpdateService) Update(c *gin.Context) serializer.Response {
 	shareCtx, _ := c.Get("share")
 	share := shareCtx.(*model.Share)
@@ -49,13 +49,13 @@ func (service *ShareUpdateService) Update(c *gin.Context) serializer.Response {
 	case "password":
 		err := share.Update(map[string]interface{}{"password": service.Value})
 		if err != nil {
-			return serializer.Err(serializer.CodeDBError, "无法更新分享密码", err)
+			return serializer.Err(serializer.CodeDBError, "無法更新分享密碼", err)
 		}
 	case "preview_enabled":
 		value := service.Value == "true"
 		err := share.Update(map[string]interface{}{"preview_enabled": value})
 		if err != nil {
-			return serializer.Err(serializer.CodeDBError, "无法更新分享属性", err)
+			return serializer.Err(serializer.CodeDBError, "無法更新分享屬性", err)
 		}
 		return serializer.Response{
 			Data: value,
@@ -66,17 +66,17 @@ func (service *ShareUpdateService) Update(c *gin.Context) serializer.Response {
 	}
 }
 
-// Create 创建新分享
+// Create 建立新分享
 func (service *ShareCreateService) Create(c *gin.Context) serializer.Response {
 	userCtx, _ := c.Get("user")
 	user := userCtx.(*model.User)
 
-	// 是否拥有权限
+	// 是否擁有權限
 	if !user.Group.ShareEnabled {
-		return serializer.Err(serializer.CodeNoPermissionErr, "您无权创建分享链接", nil)
+		return serializer.Err(serializer.CodeNoPermissionErr, "您無權建立分享連結", nil)
 	}
 
-	// 源对象真实ID
+	// 源物件真實ID
 	var (
 		sourceID   uint
 		sourceName string
@@ -88,10 +88,10 @@ func (service *ShareCreateService) Create(c *gin.Context) serializer.Response {
 		sourceID, err = hashid.DecodeHashID(service.SourceID, hashid.FileID)
 	}
 	if err != nil {
-		return serializer.Err(serializer.CodeNotFound, "原始资源不存在", nil)
+		return serializer.Err(serializer.CodeNotFound, "原始資源不存在", nil)
 	}
 
-	// 对象是否存在
+	// 物件是否存在
 	exist := true
 	if service.IsDir {
 		folder, err := model.GetFoldersByIDs([]uint{sourceID}, user.ID)
@@ -109,7 +109,7 @@ func (service *ShareCreateService) Create(c *gin.Context) serializer.Response {
 		}
 	}
 	if !exist {
-		return serializer.Err(serializer.CodeNotFound, "原始资源不存在", nil)
+		return serializer.Err(serializer.CodeNotFound, "原始資源不存在", nil)
 	}
 
 	newShare := model.Share{
@@ -122,22 +122,22 @@ func (service *ShareCreateService) Create(c *gin.Context) serializer.Response {
 		SourceName:      sourceName,
 	}
 
-	// 如果开启了自动过期
+	// 如果開啟了自動過期
 	if service.RemainDownloads > 0 {
 		expires := time.Now().Add(time.Duration(service.Expire) * time.Second)
 		newShare.RemainDownloads = service.RemainDownloads
 		newShare.Expires = &expires
 	}
 
-	// 创建分享
+	// 建立分享
 	id, err := newShare.Create()
 	if err != nil {
-		return serializer.Err(serializer.CodeDBError, "分享链接创建失败", err)
+		return serializer.Err(serializer.CodeDBError, "分享連結建立失敗", err)
 	}
 
-	// 获取分享的唯一id
+	// 獲取分享的唯一id
 	uid := hashid.HashID(id, hashid.ShareID)
-	// 最终得到分享链接
+	// 最終得到分享連結
 	siteURL := model.GetSiteURL()
 	sharePath, _ := url.Parse("/s/" + uid)
 	shareURL := siteURL.ResolveReference(sharePath)

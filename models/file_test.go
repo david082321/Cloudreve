@@ -89,7 +89,7 @@ func TestFolder_GetChildFiles(t *testing.T) {
 func TestGetFilesByIDs(t *testing.T) {
 	asserts := assert.New(t)
 
-	// 出错
+	// 出錯
 	{
 		mock.ExpectQuery("SELECT(.+)").
 			WithArgs(1, 2, 3, 1).
@@ -111,7 +111,7 @@ func TestGetFilesByIDs(t *testing.T) {
 		asserts.Len(folders, 1)
 	}
 
-	// 忽略UID查找
+	// 忽略UID尋找
 	{
 		mock.ExpectQuery("SELECT(.+)").
 			WithArgs(1, 2, 3).
@@ -136,7 +136,7 @@ func TestGetChildFilesOfFolders(t *testing.T) {
 		},
 	}
 
-	// 出错
+	// 出錯
 	{
 		mock.ExpectQuery("SELECT(.+)folder_id").WithArgs(3, 4, 5).WillReturnError(errors.New("not found"))
 		files, err := GetChildFilesOfFolders(&testFolder)
@@ -145,7 +145,7 @@ func TestGetChildFilesOfFolders(t *testing.T) {
 		asserts.NoError(mock.ExpectationsWereMet())
 	}
 
-	// 找到2个
+	// 找到2個
 	{
 		mock.ExpectQuery("SELECT(.+)folder_id").
 			WithArgs(3, 4, 5).
@@ -220,7 +220,7 @@ func TestRemoveFilesWithSoftLinks(t *testing.T) {
 		},
 	}
 
-	// 全都没有
+	// 全都沒有
 	{
 		mock.ExpectQuery("SELECT(.+)files(.+)").
 			WithArgs("1.txt", 23, 1, "2.txt", 24, 2).
@@ -230,7 +230,7 @@ func TestRemoveFilesWithSoftLinks(t *testing.T) {
 		asserts.NoError(err)
 		asserts.Equal(files, file)
 	}
-	// 查询出错
+	// 查詢出錯
 	{
 		mock.ExpectQuery("SELECT(.+)files(.+)").
 			WithArgs("1.txt", 23, 1, "2.txt", 24, 2).
@@ -240,7 +240,7 @@ func TestRemoveFilesWithSoftLinks(t *testing.T) {
 		asserts.Error(err)
 		asserts.Nil(file)
 	}
-	// 第二个是软链
+	// 第二個是軟鏈
 	{
 		mock.ExpectQuery("SELECT(.+)files(.+)").
 			WithArgs("1.txt", 23, 1, "2.txt", 24, 2).
@@ -253,7 +253,7 @@ func TestRemoveFilesWithSoftLinks(t *testing.T) {
 		asserts.NoError(err)
 		asserts.Equal(files[:1], file)
 	}
-	// 第一个是软链
+	// 第一個是軟鏈
 	{
 		mock.ExpectQuery("SELECT(.+)files(.+)").
 			WithArgs("1.txt", 23, 1, "2.txt", 24, 2).
@@ -266,7 +266,7 @@ func TestRemoveFilesWithSoftLinks(t *testing.T) {
 		asserts.NoError(err)
 		asserts.Equal(files[1:], file)
 	}
-	// 全部是软链
+	// 全部是軟鏈
 	{
 		mock.ExpectQuery("SELECT(.+)files(.+)").
 			WithArgs("1.txt", 23, 1, "2.txt", 24, 2).
@@ -285,7 +285,7 @@ func TestRemoveFilesWithSoftLinks(t *testing.T) {
 func TestDeleteFileByIDs(t *testing.T) {
 	asserts := assert.New(t)
 
-	// 出错
+	// 出錯
 	{
 		mock.ExpectBegin()
 		mock.ExpectExec("DELETE(.+)").
@@ -389,7 +389,7 @@ func TestFile_FileInfoInterface(t *testing.T) {
 func TestGetFilesByKeywords(t *testing.T) {
 	asserts := assert.New(t)
 
-	// 未指定用户
+	// 未指定使用者
 	{
 		mock.ExpectQuery("SELECT(.+)").WithArgs("k1", "k2").WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 		res, err := GetFilesByKeywords(0, "k1", "k2")
@@ -398,7 +398,7 @@ func TestGetFilesByKeywords(t *testing.T) {
 		asserts.Len(res, 1)
 	}
 
-	// 指定用户
+	// 指定使用者
 	{
 		mock.ExpectQuery("SELECT(.+)").WithArgs(1, "k1", "k2").WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 		res, err := GetFilesByKeywords(1, "k1", "k2")

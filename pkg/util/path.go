@@ -7,12 +7,12 @@ import (
 	"strings"
 )
 
-// DotPathToStandardPath 将","分割的路径转换为标准路径
+// DotPathToStandardPath 將","分割的路徑轉換為標準路徑
 func DotPathToStandardPath(path string) string {
 	return "/" + strings.Replace(path, ",", "/", -1)
 }
 
-// FillSlash 给路径补全`/`
+// FillSlash 給路徑補全`/`
 func FillSlash(path string) string {
 	if path == "/" {
 		return path
@@ -20,7 +20,7 @@ func FillSlash(path string) string {
 	return path + "/"
 }
 
-// RemoveSlash 移除路径最后的`/`
+// RemoveSlash 移除路徑最後的`/`
 func RemoveSlash(path string) string {
 	if len(path) > 1 {
 		return strings.TrimSuffix(path, "/")
@@ -28,7 +28,7 @@ func RemoveSlash(path string) string {
 	return path
 }
 
-// SplitPath 分割路径为列表
+// SplitPath 分割路徑為列表
 func SplitPath(path string) []string {
 	if len(path) == 0 || path[0] != '/' {
 		return []string{}
@@ -43,12 +43,12 @@ func SplitPath(path string) []string {
 	return pathSplit
 }
 
-// FormSlash 将path中的反斜杠'\'替换为'/'
+// FormSlash 將path中的反斜線'\'取代為'/'
 func FormSlash(old string) string {
 	return path.Clean(strings.ReplaceAll(old, "\\", "/"))
 }
 
-// RelativePath 获取相对可执行文件的路径
+// RelativePath 獲取相對可執行文件的路徑
 func RelativePath(name string) string {
 	if filepath.IsAbs(name) {
 		return name

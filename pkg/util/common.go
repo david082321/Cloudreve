@@ -11,7 +11,7 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-// RandStringRunes 返回随机字符串
+// RandStringRunes 返回隨機字串
 func RandStringRunes(n int) string {
 	var letterRunes = []rune("1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
@@ -42,7 +42,7 @@ func ContainsString(s []string, e string) bool {
 	return false
 }
 
-// Replace 根据替换表执行批量替换
+// Replace 根據取代表執行批次取代
 func Replace(table map[string]string, s string) string {
 	for key, value := range table {
 		s = strings.Replace(s, key, value, -1)
@@ -50,7 +50,7 @@ func Replace(table map[string]string, s string) string {
 	return s
 }
 
-// BuildRegexp 构建用于SQL查询用的多条件正则
+// BuildRegexp 構建用於SQL查詢用的多條件正則
 func BuildRegexp(search []string, prefix, suffix, condition string) string {
 	var res string
 	for key, value := range search {
@@ -62,7 +62,7 @@ func BuildRegexp(search []string, prefix, suffix, condition string) string {
 	return res
 }
 
-// BuildConcat 根据数据库类型构建字符串连接表达式
+// BuildConcat 根據資料庫類型構建字串連接表達式
 func BuildConcat(str1, str2 string, DBType string) string {
 	switch DBType {
 	case "mysql":
@@ -72,7 +72,7 @@ func BuildConcat(str1, str2 string, DBType string) string {
 	}
 }
 
-// SliceIntersect 求两个切片交集
+// SliceIntersect 求兩個切片交集
 func SliceIntersect(slice1, slice2 []string) []string {
 	m := make(map[string]int)
 	nn := make([]string, 0)
@@ -89,7 +89,7 @@ func SliceIntersect(slice1, slice2 []string) []string {
 	return nn
 }
 
-// SliceDifference 求两个切片差集
+// SliceDifference 求兩個切片差集
 func SliceDifference(slice1, slice2 []string) []string {
 	m := make(map[string]int)
 	nn := make([]string, 0)

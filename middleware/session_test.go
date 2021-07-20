@@ -52,7 +52,7 @@ func TestCSRFCheck(t *testing.T) {
 	rec := httptest.NewRecorder()
 	sessionFunc := Session("233")
 
-	// 通过检查
+	// 通過檢查
 	{
 		c, _ := gin.CreateTestContext(rec)
 		c.Request, _ = http.NewRequest("GET", "/test", nil)
@@ -62,7 +62,7 @@ func TestCSRFCheck(t *testing.T) {
 		asserts.False(c.IsAborted())
 	}
 
-	// 未通过检查
+	// 未通過檢查
 	{
 		c, _ := gin.CreateTestContext(rec)
 		c.Request, _ = http.NewRequest("GET", "/test", nil)

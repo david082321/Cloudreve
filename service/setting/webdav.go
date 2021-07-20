@@ -7,28 +7,28 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// WebDAVListService WebDAV 列表服务
+// WebDAVListService WebDAV 列表服務
 type WebDAVListService struct {
 }
 
-// WebDAVAccountService WebDAV 账号管理服务
+// WebDAVAccountService WebDAV 帳號管理服務
 type WebDAVAccountService struct {
 	ID uint `uri:"id" binding:"required,min=1"`
 }
 
-// WebDAVAccountCreateService WebDAV 账号创建服务
+// WebDAVAccountCreateService WebDAV 帳號建立服務
 type WebDAVAccountCreateService struct {
 	Path string `json:"path" binding:"required,min=1,max=65535"`
 	Name string `json:"name" binding:"required,min=1,max=255"`
 }
 
-// WebDAVMountCreateService WebDAV 挂载创建服务
+// WebDAVMountCreateService WebDAV 掛載建立服務
 type WebDAVMountCreateService struct {
 	Path   string `json:"path" binding:"required,min=1,max=65535"`
 	Policy string `json:"policy" binding:"required,min=1"`
 }
 
-// Create 创建WebDAV账户
+// Create 建立WebDAV帳戶
 func (service *WebDAVAccountCreateService) Create(c *gin.Context, user *model.User) serializer.Response {
 	account := model.Webdav{
 		Name:     service.Name,
@@ -38,7 +38,7 @@ func (service *WebDAVAccountCreateService) Create(c *gin.Context, user *model.Us
 	}
 
 	if _, err := account.Create(); err != nil {
-		return serializer.Err(serializer.CodeDBError, "创建失败", err)
+		return serializer.Err(serializer.CodeDBError, "建立失敗", err)
 	}
 
 	return serializer.Response{
@@ -50,13 +50,13 @@ func (service *WebDAVAccountCreateService) Create(c *gin.Context, user *model.Us
 	}
 }
 
-// Delete 删除WebDAV账户
+// Delete 刪除WebDAV帳戶
 func (service *WebDAVAccountService) Delete(c *gin.Context, user *model.User) serializer.Response {
 	model.DeleteWebDAVAccountByID(service.ID, user.ID)
 	return serializer.Response{}
 }
 
-// Accounts 列出WebDAV账号
+// Accounts 列出WebDAV帳號
 func (service *WebDAVListService) Accounts(c *gin.Context, user *model.User) serializer.Response {
 	accounts := model.ListWebDAVAccounts(user.ID)
 

@@ -82,7 +82,7 @@ func TestFileSystem_GetContent(t *testing.T) {
 	asserts.Nil(rs)
 	fs.CleanTargets()
 
-	// 未知存储策略
+	// 未知儲存策略
 	file, err := os.Create(util.RelativePath("TestFileSystem_GetContent.txt"))
 	asserts.NoError(err)
 	_ = file.Close()
@@ -96,7 +96,7 @@ func TestFileSystem_GetContent(t *testing.T) {
 	asserts.NoError(mock.ExpectationsWereMet())
 	fs.CleanTargets()
 
-	// 打开文件失败
+	// 打開文件失敗
 	cache.Deletes([]string{"1"}, "policy_")
 	mock.ExpectQuery("SELECT(.+)").WillReturnRows(sqlmock.NewRows([]string{"id", "source_name", "policy_id"}).AddRow(1, "TestFileSystem_GetContent2.txt", 1))
 	mock.ExpectQuery("SELECT(.+)poli(.+)").WillReturnRows(sqlmock.NewRows([]string{"id", "type", "source_name"}).AddRow(1, "local", "not exist"))
@@ -106,7 +106,7 @@ func TestFileSystem_GetContent(t *testing.T) {
 	asserts.NoError(mock.ExpectationsWereMet())
 	fs.CleanTargets()
 
-	// 打开成功
+	// 打開成功
 	cache.Deletes([]string{"1"}, "policy_")
 	mock.ExpectQuery("SELECT(.+)").WillReturnRows(sqlmock.NewRows([]string{"id", "source_name", "policy_id", "source_name"}).AddRow(1, "TestFileSystem_GetContent.txt", 1, "TestFileSystem_GetContent.txt"))
 	mock.ExpectQuery("SELECT(.+)poli(.+)").WillReturnRows(sqlmock.NewRows([]string{"id", "type"}).AddRow(1, "local"))
@@ -139,7 +139,7 @@ func TestFileSystem_GetDownloadContent(t *testing.T) {
 	mock.ExpectQuery("SELECT(.+)").WillReturnRows(sqlmock.NewRows([]string{"id", "name", "policy_id", "source_name"}).AddRow(1, "TestFileSystem_GetDownloadContent.txt", 599, "TestFileSystem_GetDownloadContent.txt"))
 	mock.ExpectQuery("SELECT(.+)poli(.+)").WillReturnRows(sqlmock.NewRows([]string{"id", "type"}).AddRow(1, "local"))
 
-	// 无限速
+	// 無限速
 	cache.Deletes([]string{"599"}, "policy_")
 	_, err = fs.GetDownloadContent(ctx, 1)
 	asserts.NoError(err)
@@ -228,7 +228,7 @@ func TestFileSystem_deleteGroupedFile(t *testing.T) {
 		},
 	}
 
-	// 全部失败
+	// 全部失敗
 	{
 		failed := fs.deleteGroupedFile(ctx, fs.GroupFileByPolicy(ctx, files))
 		asserts.Equal(map[uint][]string{
@@ -237,7 +237,7 @@ func TestFileSystem_deleteGroupedFile(t *testing.T) {
 			3: {"3_1.txt"},
 		}, failed)
 	}
-	// 部分失败
+	// 部分失敗
 	{
 		file, err := os.Create(util.RelativePath("1_1.txt"))
 		asserts.NoError(err)
@@ -249,7 +249,7 @@ func TestFileSystem_deleteGroupedFile(t *testing.T) {
 			3: {"3_1.txt"},
 		}, failed)
 	}
-	// 部分失败,包含整组未知存储策略导致的失败
+	// 部分失敗,包含整組未知儲存策略導致的失敗
 	{
 		file, err := os.Create(util.RelativePath("1_1.txt"))
 		asserts.NoError(err)
@@ -276,23 +276,23 @@ func TestFileSystem_GetSource(t *testing.T) {
 		fs := FileSystem{
 			User: &model.User{Model: gorm.Model{ID: 1}},
 		}
-		// 清空缓存
+		// 清空快取
 		err := cache.Deletes([]string{"siteURL"}, "setting_")
 		asserts.NoError(err)
-		// 查找文件
+		// 尋找文件
 		mock.ExpectQuery("SELECT(.+)").
 			WithArgs(2, 1).
 			WillReturnRows(
 				sqlmock.NewRows([]string{"id", "policy_id", "source_name"}).
 					AddRow(2, 35, "1.txt"),
 			)
-		// 查找上传策略
+		// 尋找上傳策略
 		mock.ExpectQuery("SELECT(.+)").
 			WillReturnRows(
 				sqlmock.NewRows([]string{"id", "type", "is_origin_link_enable"}).
 					AddRow(35, "local", true),
 			)
-		// 查找站点URL
+		// 尋找站點URL
 		mock.ExpectQuery("SELECT(.+)").WithArgs("siteURL").WillReturnRows(sqlmock.NewRows([]string{"id", "value"}).AddRow(1, "https://cloudreve.org"))
 
 		sourceURL, err := fs.GetSource(ctx, 2)
@@ -307,10 +307,10 @@ func TestFileSystem_GetSource(t *testing.T) {
 		fs := FileSystem{
 			User: &model.User{Model: gorm.Model{ID: 1}},
 		}
-		// 清空缓存
+		// 清空快取
 		err := cache.Deletes([]string{"siteURL"}, "setting_")
 		asserts.NoError(err)
-		// 查找文件
+		// 尋找文件
 		mock.ExpectQuery("SELECT(.+)").
 			WithArgs(2, 1).
 			WillReturnRows(
@@ -325,22 +325,22 @@ func TestFileSystem_GetSource(t *testing.T) {
 		fs.CleanTargets()
 	}
 
-	// 未知上传策略
+	// 未知上傳策略
 	{
 		fs := FileSystem{
 			User: &model.User{Model: gorm.Model{ID: 1}},
 		}
-		// 清空缓存
+		// 清空快取
 		err := cache.Deletes([]string{"siteURL"}, "setting_")
 		asserts.NoError(err)
-		// 查找文件
+		// 尋找文件
 		mock.ExpectQuery("SELECT(.+)").
 			WithArgs(2, 1).
 			WillReturnRows(
 				sqlmock.NewRows([]string{"id", "policy_id", "source_name"}).
 					AddRow(2, 36, "1.txt"),
 			)
-		// 查找上传策略
+		// 尋找上傳策略
 		mock.ExpectQuery("SELECT(.+)").
 			WillReturnRows(
 				sqlmock.NewRows([]string{"id", "type", "is_origin_link_enable"}).
@@ -354,22 +354,22 @@ func TestFileSystem_GetSource(t *testing.T) {
 		fs.CleanTargets()
 	}
 
-	// 不允许获取外链
+	// 不允許獲取外鏈
 	{
 		fs := FileSystem{
 			User: &model.User{Model: gorm.Model{ID: 1}},
 		}
-		// 清空缓存
+		// 清空快取
 		err := cache.Deletes([]string{"siteURL"}, "setting_")
 		asserts.NoError(err)
-		// 查找文件
+		// 尋找文件
 		mock.ExpectQuery("SELECT(.+)").
 			WithArgs(2, 1).
 			WillReturnRows(
 				sqlmock.NewRows([]string{"id", "policy_id", "source_name"}).
 					AddRow(2, 37, "1.txt"),
 			)
-		// 查找上传策略
+		// 尋找上傳策略
 		mock.ExpectQuery("SELECT(.+)").
 			WillReturnRows(
 				sqlmock.NewRows([]string{"id", "type", "is_origin_link_enable"}).
@@ -399,15 +399,15 @@ func TestFileSystem_GetDownloadURL(t *testing.T) {
 		cache.Set("setting_download_timeout", "20", 0)
 		cache.Set("setting_siteURL", "https://cloudreve.org", 0)
 		asserts.NoError(err)
-		// 查找文件
+		// 尋找文件
 		mock.ExpectQuery("SELECT(.+)").WillReturnRows(sqlmock.NewRows([]string{"id", "name", "policy_id"}).AddRow(1, "1.txt", 35))
-		// 查找上传策略
+		// 尋找上傳策略
 		mock.ExpectQuery("SELECT(.+)").
 			WillReturnRows(
 				sqlmock.NewRows([]string{"id", "type", "is_origin_link_enable"}).
 					AddRow(35, "local", true),
 			)
-		// 相关设置
+		// 相關設定
 		downloadURL, err := fs.GetDownloadURL(ctx, 1, "download_timeout")
 		asserts.NoError(mock.ExpectationsWereMet())
 		asserts.NoError(err)
@@ -421,7 +421,7 @@ func TestFileSystem_GetDownloadURL(t *testing.T) {
 		err = cache.Deletes([]string{"35"}, "policy_")
 		err = cache.Deletes([]string{"download_timeout"}, "setting_")
 		asserts.NoError(err)
-		// 查找文件
+		// 尋找文件
 		mock.ExpectQuery("SELECT(.+)").WillReturnRows(sqlmock.NewRows([]string{"id", "name", "policy_id"}))
 
 		downloadURL, err := fs.GetDownloadURL(ctx, 1, "download_timeout")
@@ -431,15 +431,15 @@ func TestFileSystem_GetDownloadURL(t *testing.T) {
 		fs.CleanTargets()
 	}
 
-	// 未知存储策略
+	// 未知儲存策略
 	{
 		err := cache.Deletes([]string{"siteURL"}, "setting_")
 		err = cache.Deletes([]string{"35"}, "policy_")
 		err = cache.Deletes([]string{"download_timeout"}, "setting_")
 		asserts.NoError(err)
-		// 查找文件
+		// 尋找文件
 		mock.ExpectQuery("SELECT(.+)").WillReturnRows(sqlmock.NewRows([]string{"id", "name", "policy_id"}).AddRow(1, "1.txt", 35))
-		// 查找上传策略
+		// 尋找上傳策略
 		mock.ExpectQuery("SELECT(.+)").
 			WillReturnRows(
 				sqlmock.NewRows([]string{"id", "type", "is_origin_link_enable"}).
@@ -497,7 +497,7 @@ func TestFileSystem_Preview(t *testing.T) {
 		asserts.Nil(resp)
 	}
 
-	// 直接返回文件内容,找不到文件
+	// 直接返回文件內容,找不到文件
 	{
 		fs := FileSystem{
 			User: &model.User{},
@@ -517,7 +517,7 @@ func TestFileSystem_Preview(t *testing.T) {
 		asserts.Nil(resp)
 	}
 
-	// 直接返回文件内容
+	// 直接返回文件內容
 	{
 		fs := FileSystem{
 			User: &model.User{},
@@ -559,7 +559,7 @@ func TestFileSystem_Preview(t *testing.T) {
 		asserts.True(resp.Redirect)
 	}
 
-	// 文本文件，大小超出限制
+	// 文字文件，大小超出限制
 	{
 		fs := FileSystem{
 			User: &model.User{},

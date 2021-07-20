@@ -42,7 +42,7 @@ func TestHashDecode(t *testing.T) {
 		asserts.Equal([]int{1, 2, 3}, decodeRes)
 	}
 
-	// 出错
+	// 出錯
 	{
 		decodeRes, err := HashDecode("233")
 		asserts.Error(err)
@@ -60,7 +60,7 @@ func TestDecodeHashID(t *testing.T) {
 		asserts.EqualValues(1, uid)
 	}
 
-	// 类型不匹配
+	// 類型不匹配
 	{
 		uid, err := DecodeHashID(HashID(1, ShareID), UserID)
 		asserts.Error(err)

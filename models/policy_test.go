@@ -16,15 +16,15 @@ func TestGetPolicyByID(t *testing.T) {
 	asserts := assert.New(t)
 
 	cache.Deletes([]string{"22", "23"}, "policy_")
-	// 缓存未命中
+	// 快取未命中
 	{
 		rows := sqlmock.NewRows([]string{"name", "type", "options"}).
-			AddRow("默认存储策略", "local", "{\"od_redirect\":\"123\"}")
+			AddRow("預設儲存策略", "local", "{\"od_redirect\":\"123\"}")
 		mock.ExpectQuery("^SELECT(.+)").WillReturnRows(rows)
 		policy, err := GetPolicyByID(uint(22))
 		asserts.NoError(err)
 		asserts.NoError(mock.ExpectationsWereMet())
-		asserts.Equal("默认存储策略", policy.Name)
+		asserts.Equal("預設儲存策略", policy.Name)
 		asserts.Equal("123", policy.OptionsSerialized.OdRedirect)
 
 		rows = sqlmock.NewRows([]string{"name", "type", "options"})
@@ -38,7 +38,7 @@ func TestGetPolicyByID(t *testing.T) {
 	{
 		policy, err := GetPolicyByID(uint(22))
 		asserts.NoError(err)
-		asserts.Equal("默认存储策略", policy.Name)
+		asserts.Equal("預設儲存策略", policy.Name)
 		asserts.Equal("123", policy.OptionsSerialized.OdRedirect)
 
 	}
@@ -95,7 +95,7 @@ func TestPolicy_GeneratePath(t *testing.T) {
 
 func TestPolicy_GenerateFileName(t *testing.T) {
 	asserts := assert.New(t)
-	// 重命名关闭
+	// 重新命名關閉
 	{
 		testPolicy := Policy{
 			AutoRename: false,
@@ -107,7 +107,7 @@ func TestPolicy_GenerateFileName(t *testing.T) {
 		asserts.Equal("${filename}", testPolicy.GenerateFileName(1, ""))
 	}
 
-	// 重命名开启
+	// 重新命名開啟
 	{
 		testPolicy := Policy{
 			AutoRename: true,
@@ -134,7 +134,7 @@ func TestPolicy_GenerateFileName(t *testing.T) {
 		testPolicy.FileNameRule = "123{date}ss{datetime}"
 		asserts.Len(testPolicy.GenerateFileName(1, "123.txt"), 27)
 
-		// 支持{originname}的策略
+		// 支援{originname}的策略
 		testPolicy.Type = "local"
 		testPolicy.FileNameRule = "123{originname}"
 		asserts.Equal("123123.txt", testPolicy.GenerateFileName(1, "123.txt"))
@@ -173,14 +173,14 @@ func TestPolicy_IsDirectlyPreview(t *testing.T) {
 func TestPolicy_GetUploadURL(t *testing.T) {
 	asserts := assert.New(t)
 
-	// 本地
+	// 本機
 	{
 		cache.Set("setting_siteURL", "http://127.0.0.1", 0)
 		policy := Policy{Type: "local", Server: "http://127.0.0.1"}
 		asserts.Equal("/api/v3/file/upload", policy.GetUploadURL())
 	}
 
-	// 远程
+	// 遠端
 	{
 		policy := Policy{Type: "remote", Server: "http://127.0.0.1"}
 		asserts.Equal("http://127.0.0.1/api/v3/slave/upload", policy.GetUploadURL())
@@ -210,7 +210,7 @@ func TestPolicy_GetUploadURL(t *testing.T) {
 		asserts.Equal("http://127.0.0.1", policy.GetUploadURL())
 	}
 
-	// S3 未填写自动生成
+	// S3 未填寫自動生成
 	{
 		policy := Policy{
 			Type:              "s3",

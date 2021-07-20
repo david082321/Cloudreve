@@ -9,7 +9,7 @@ import (
 
 func TestNewClient(t *testing.T) {
 	asserts := assert.New(t)
-	// getOAuthEndpoint失败
+	// getOAuthEndpoint失敗
 	{
 		policy := model.Policy{
 			BaseURL: string([]byte{0x7f}),
