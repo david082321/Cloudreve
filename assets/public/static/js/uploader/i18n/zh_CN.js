@@ -1,0 +1,40 @@
+// Chinese (China) (zh_CN)
+plupload.addI18n({
+    "Stop Upload": "停止上傳",
+    "Upload URL might be wrong or doesn't exist.":
+        "上傳的URL可能是錯誤的或不存在。",
+    tb: "tb",
+    Size: "大小",
+    Close: "關閉",
+    "Init error.": "初始化錯誤。",
+    "Add files to the upload queue and click the start button.":
+        "將文件添加到上傳佇列，然後點擊」開始上傳「按鈕。",
+    Filename: "檔案名",
+    "Image format either wrong or not supported.": "圖片格式錯誤或者不支援。",
+    Status: "狀態",
+    "HTTP Error.": "HTTP 錯誤。",
+    "Start Upload": "開始上傳",
+    mb: "mb",
+    kb: "kb",
+    "Duplicate file error.": "重複文件錯誤。",
+    "File size error.": "檔案大小錯誤。",
+    "N/A": "N/A",
+    gb: "gb",
+    "Error: Invalid file extension:": "錯誤：無效的文件副檔名:",
+    "Select files": "選擇文件",
+    "%s already present in the queue.": "%s 已經在目前佇列裡。",
+    "File: %s": "文件: %s",
+    b: "b",
+    "Uploaded %d/%d files": "已上傳 %d/%d 個文件",
+    "Upload element accepts only %d file(s) at a time. Extra files were stripped.":
+        "每次只接受同時上傳 %d 個文件，多餘的文件將會被刪除。",
+    "%d files queued": "%d 個文件加入到佇列",
+    "File: %s, size: %d, max file size: %d":
+        "文件: %s, 大小: %d, 最大檔案大小: %d",
+    "Drag files here.": "把文件拖到這裡。",
+    "Runtime ran out of available memory.": "執行時已消耗所有可用記憶體。",
+    "File count error.": "文件數量錯誤。",
+    "File extension error.": "文件副檔名錯誤。",
+    "Error: File too large:": "錯誤: 文件太大:",
+    "Add Files": "增加文件",
+});
